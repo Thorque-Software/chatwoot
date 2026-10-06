@@ -9,6 +9,8 @@ import { frontendURL } from '../../helper/URLHelper';
 import helpcenterRoutes from './helpcenter/helpcenter.routes';
 import campaignsRoutes from './campaigns/campaigns.routes';
 import { routes as captainRoutes } from './captain/captain.routes';
+// ARROYO: panel de vendedores
+import arroyoPanelRoutes from './arroyo/panel/panel.routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -30,6 +32,8 @@ export default {
         ...notificationRoutes,
         ...helpcenterRoutes.routes,
         ...campaignsRoutes.routes,
+        // ARROYO: panel de vendedores
+        ...arroyoPanelRoutes.routes,
       ],
     },
     {

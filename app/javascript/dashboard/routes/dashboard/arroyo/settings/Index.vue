@@ -6,6 +6,7 @@ import { useAlert } from 'dashboard/composables';
 import SettingsLayout from 'dashboard/routes/dashboard/settings/SettingsLayout.vue';
 import BaseSettingsHeader from 'dashboard/routes/dashboard/settings/components/BaseSettingsHeader.vue';
 import ArroyoSettingsAPI from '../api/settings';
+import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import GeneralSection from './components/GeneralSection.vue';
 import WindowKeeperSection from './components/WindowKeeperSection.vue';
 import PostSaleSection from './components/PostSaleSection.vue';
@@ -14,6 +15,7 @@ import EmailMarketingSection from './components/EmailMarketingSection.vue';
 
 const { t } = useI18n();
 const store = useStore();
+const { fetchFeatures } = useArroyoFeatures();
 const config = ref(null);
 const isLoading = ref(true);
 const savingSection = ref('');
@@ -34,6 +36,7 @@ const saveSection = async (section, changes) => {
   try {
     const { data } = await ArroyoSettingsAPI.updateConfig(changes);
     config.value = data.config;
+    fetchFeatures();
     useAlert(t('ARROYO.SETTINGS.API.SUCCESS'));
   } catch (error) {
     const errors = error?.response?.data?.errors;

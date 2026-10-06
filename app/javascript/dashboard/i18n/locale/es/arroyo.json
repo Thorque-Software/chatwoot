@@ -1,7 +1,8 @@
 {
   "ARROYO": {
     "SIDEBAR": {
-      "SETTINGS": "Arroyo"
+      "SETTINGS": "Arroyo",
+      "PANEL": "Panel de vendedores"
     },
     "SETTINGS": {
       "HEADER": {
@@ -121,6 +122,69 @@
           "LABEL": "Pie (HTML)",
           "HELP": "Razón social y dirección que se muestran al final de cada email de campaña. El link de baja se agrega solo."
         }
+      }
+    },
+    "PANEL": {
+      "TITLE": "Panel de vendedores",
+      "DESCRIPTION": "Actividad diaria por vendedor. Hacé clic en cualquier número para ver las conversaciones.",
+      "EXPORT": "Exportar CSV",
+      "CONVERSATION_ID": "#{id}",
+      "UNASSIGNED": "Sin asignar",
+      "NO_DATA": "—",
+      "AGENT": "Vendedor",
+      "WEEK_OF": "Semana del {date}",
+      "CHART_TITLE": "Consultas atendidas por vendedor",
+      "SUMMARY_TITLE": "Resumen por vendedor",
+      "DAILY_TITLE": "Consultas atendidas por período",
+      "TABS": {
+        "ACTIVITY": "Actividad",
+        "WINDOWS": "Ventanas de 24 hs"
+      },
+      "FILTERS": {
+        "PERIOD": "Período",
+        "SINCE": "Desde",
+        "UNTIL": "Hasta",
+        "AGENTS": "Vendedores",
+        "INBOXES": "Inboxes",
+        "PRESETS": {
+          "TODAY": "Hoy",
+          "YESTERDAY": "Ayer",
+          "LAST_7_DAYS": "Últimos 7 días",
+          "THIS_MONTH": "Este mes",
+          "LAST_MONTH": "Mes pasado",
+          "CUSTOM": "Personalizado"
+        },
+        "GROUP_BY": {
+          "LABEL": "Agrupar por",
+          "DAY": "Día",
+          "WEEK": "Semana"
+        }
+      },
+      "METRICS": {
+        "CONVERSATIONS_ATTENDED": "Consultas atendidas",
+        "MESSAGES_SENT": "Mensajes enviados",
+        "ASSIGNMENTS": "Conversaciones nuevas asignadas",
+        "FIRST_RESPONSE_MEDIAN": "Mediana de primera respuesta",
+        "WINDOWS_CLOSED": "Ventanas cerradas sin respuesta",
+        "SALES": "Ventas registradas"
+      },
+      "DRAWER": {
+        "CLOSE": "Cerrar",
+        "EMPTY": "No hay conversaciones para esta métrica",
+        "TRUNCATED": "Mostrando {shown} de {count} conversaciones",
+        "ALL_AGENTS": "Todos los vendedores",
+        "SUBTITLE": "{agent} · {since} a {until}"
+      },
+      "WINDOWS": {
+        "CLOSING_SOON": "Por cerrar",
+        "CLOSING_SOON_HELP": "Conversaciones de WhatsApp cuya ventana de 24 hs cierra en las próximas 6 horas.",
+        "CLOSED_TODAY": "Cerradas hoy",
+        "CLOSED_TODAY_HELP": "Conversaciones de WhatsApp cuya ventana de 24 hs cerró hoy. Ahora solo se les puede escribir con una plantilla aprobada.",
+        "EMPTY": "No hay conversaciones",
+        "CLOSES_AT": "La ventana cierra a las {time}"
+      },
+      "API": {
+        "ERROR": "No se pudo cargar el panel de vendedores"
       }
     }
   }

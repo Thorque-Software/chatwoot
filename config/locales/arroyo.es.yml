@@ -4,3 +4,19 @@ es:
       models:
         arroyo/setting:
           invalid_field: 'Valor inválido para %{field}'
+  arroyo:
+    agent_panel:
+      disabled: 'El panel de vendedores está desactivado para esta cuenta'
+      csv:
+        period: 'Período: %{since} a %{until}'
+        agent: 'Vendedor'
+        date: 'Fecha'
+        total: 'Total'
+        all_agents: 'Todos los vendedores'
+      metrics:
+        conversations_attended: 'Consultas atendidas'
+        messages_sent: 'Mensajes enviados'
+        assignments: 'Conversaciones nuevas asignadas'
+        first_response_median: 'Mediana de primera respuesta (segundos)'
+        windows_closed: 'Ventanas cerradas sin respuesta'
+        sales: 'Ventas registradas'

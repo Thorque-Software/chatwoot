@@ -332,3 +332,32 @@ Las rutas son relativas a la raíz del repo y los números de línea corresponde
 5. ~~D19~~: reabrir y que conteste el vendedor.
 
 Sin pendientes abiertos.
+
+---
+
+## Fase 4 — Panel de vendedores (implementado 2026-10-06)
+
+- Endpoints (`config/routes/arroyo.rb`):
+  - `GET arroyo/agent_panel` (reporte)
+  - `GET arroyo/agent_panel/conversations` (drill-down)
+  - `GET arroyo/agent_panel/windows` (pestaña Ventanas)
+  - `GET arroyo/agent_panel/export` (CSV)
+  - `GET arroyo/features` (flags para el menú, lo puede leer cualquier usuario de la cuenta)
+- Con el panel apagado, todos los endpoints del panel devuelven 403. Un agente con `agents_see_only_own` solo ve lo suyo aunque pida otros `user_ids`.
+- Métricas (`app/services/arroyo/agent_panel/`): una consulta por métrica con `GROUP BY GROUPING SETS`, que devuelve juntos los valores por vendedor y día/semana, el total por vendedor y el total general. Los días se agrupan con `AT TIME ZONE` de la zona del negocio.
+  - "Consultas atendidas" y "Mensajes enviados": salientes no privados con `sender_type = 'User'` (D9).
+  - "Conversaciones nuevas asignadas": tabla nueva `arroyo_assignment_events`, que llena `Arroyo::AssignmentListener` (registrado en `AsyncDispatcher`). **Hay datos desde el deploy, no antes.** El listener registra aunque el panel esté apagado, para que haya historia cuando se active.
+  - "Mediana de primera respuesta": `reporting_events.first_response` (el `user_id` es quien respondió).
+  - "Ventanas cerradas" y "Ventas registradas": `taggings.created_at` de las labels `ventana-cerrada` y `vendido` (o el `trigger_label` configurado), atribuidas al **asignado actual** (D8).
+- Respecto del plan:
+  - Sin "Resueltas" (decisión del cliente).
+  - **"Alertas post-venta" y la pestaña "Post-venta" se agregan en la Fase 3**, porque dependen de `arroyo_follow_ups`.
+  - El drill-down devuelve hasta 500 conversaciones (las de actividad más reciente) y el total.
+- Performance (dev, 50k mensajes, 5k conversaciones, 8 vendedores):
+  - Reporte de 7, 30 y 60 días: 14–19 ms.
+  - Drill-down de 30 días de todos los vendedores: 132 ms.
+  - Usa los índices existentes (`index_messages_on_sender_type_and_sender_id`, `(account_id, name, created_at)` de reporting_events). No hizo falta migración de índices.
+- Frontend:
+  - Ruta `/app/accounts/:id/arroyo/panel`. Los filtros viven en la URL (`preset`, `since`, `until`, `group_by`, `user_ids`, `inbox_ids`, `tab`).
+  - "Panel de vendedores" aparece en el menú cuando el panel está activo. Si `hide_native_reports` está activo, se oculta "Reportes" del menú; la ruta nativa sigue funcionando.
+- Archivos core tocados en esta fase: `app/dispatchers/async_dispatcher.rb`, `app/javascript/dashboard/routes/dashboard/dashboard.routes.js`, `app/javascript/dashboard/components-next/sidebar/Sidebar.vue` (todos con `ARROYO:`).

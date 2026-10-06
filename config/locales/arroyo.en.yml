@@ -4,3 +4,19 @@ en:
       models:
         arroyo/setting:
           invalid_field: 'Invalid value for %{field}'
+  arroyo:
+    agent_panel:
+      disabled: 'The agent panel is disabled for this account'
+      csv:
+        period: 'Period: %{since} to %{until}'
+        agent: 'Agent'
+        date: 'Date'
+        total: 'Total'
+        all_agents: 'All agents'
+      metrics:
+        conversations_attended: 'Conversations attended'
+        messages_sent: 'Messages sent'
+        assignments: 'New assigned conversations'
+        first_response_median: 'Median first response time (seconds)'
+        windows_closed: 'Windows closed without reply'
+        sales: 'Sales registered'

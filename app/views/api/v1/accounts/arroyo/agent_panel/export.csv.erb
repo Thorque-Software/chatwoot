@@ -1,0 +1,9 @@
+<%= CSVSafe.generate_line [I18n.t('arroyo.agent_panel.csv.period', since: @report[:since], until: @report[:until])] -%>
+<%= CSVSafe.generate_line [I18n.t('arroyo.agent_panel.csv.agent'), I18n.t('arroyo.agent_panel.csv.date')] + Arroyo::AgentPanel::ReportBuilder::METRICS.map { |metric| I18n.t("arroyo.agent_panel.metrics.#{metric}") } -%>
+<% @report[:agents].each do |agent| -%>
+<% agent[:periods].each do |period, metrics| -%>
+<%= CSVSafe.generate_line [agent[:name], period] + metrics.values -%>
+<% end -%>
+<%= CSVSafe.generate_line [agent[:name], I18n.t('arroyo.agent_panel.csv.total')] + agent[:totals].values -%>
+<% end -%>
+<%= CSVSafe.generate_line [I18n.t('arroyo.agent_panel.csv.all_agents'), I18n.t('arroyo.agent_panel.csv.total')] + @report[:totals].values -%>

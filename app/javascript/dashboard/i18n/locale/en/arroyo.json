@@ -1,7 +1,8 @@
 {
   "ARROYO": {
     "SIDEBAR": {
-      "SETTINGS": "Arroyo"
+      "SETTINGS": "Arroyo",
+      "PANEL": "Agent panel"
     },
     "SETTINGS": {
       "HEADER": {
@@ -121,6 +122,69 @@
           "LABEL": "Footer (HTML)",
           "HELP": "Company name and address shown at the bottom of every campaign email. The unsubscribe link is added automatically."
         }
+      }
+    },
+    "PANEL": {
+      "TITLE": "Agent panel",
+      "DESCRIPTION": "Daily activity per agent. Click any number to see the conversations behind it.",
+      "EXPORT": "Export CSV",
+      "CONVERSATION_ID": "#{id}",
+      "UNASSIGNED": "Unassigned",
+      "NO_DATA": "—",
+      "AGENT": "Agent",
+      "WEEK_OF": "Week of {date}",
+      "CHART_TITLE": "Conversations attended per agent",
+      "SUMMARY_TITLE": "Summary per agent",
+      "DAILY_TITLE": "Conversations attended per period",
+      "TABS": {
+        "ACTIVITY": "Activity",
+        "WINDOWS": "24-hour windows"
+      },
+      "FILTERS": {
+        "PERIOD": "Period",
+        "SINCE": "From",
+        "UNTIL": "To",
+        "AGENTS": "Agents",
+        "INBOXES": "Inboxes",
+        "PRESETS": {
+          "TODAY": "Today",
+          "YESTERDAY": "Yesterday",
+          "LAST_7_DAYS": "Last 7 days",
+          "THIS_MONTH": "This month",
+          "LAST_MONTH": "Last month",
+          "CUSTOM": "Custom"
+        },
+        "GROUP_BY": {
+          "LABEL": "Group by",
+          "DAY": "Day",
+          "WEEK": "Week"
+        }
+      },
+      "METRICS": {
+        "CONVERSATIONS_ATTENDED": "Conversations attended",
+        "MESSAGES_SENT": "Messages sent",
+        "ASSIGNMENTS": "New assigned conversations",
+        "FIRST_RESPONSE_MEDIAN": "Median first response",
+        "WINDOWS_CLOSED": "Windows closed without reply",
+        "SALES": "Sales registered"
+      },
+      "DRAWER": {
+        "CLOSE": "Close",
+        "EMPTY": "No conversations for this metric",
+        "TRUNCATED": "Showing {shown} of {count} conversations",
+        "ALL_AGENTS": "All agents",
+        "SUBTITLE": "{agent} · {since} to {until}"
+      },
+      "WINDOWS": {
+        "CLOSING_SOON": "Closing soon",
+        "CLOSING_SOON_HELP": "WhatsApp conversations whose 24-hour window closes in the next 6 hours.",
+        "CLOSED_TODAY": "Closed today",
+        "CLOSED_TODAY_HELP": "WhatsApp conversations whose 24-hour window closed today. Only an approved template can reach them now.",
+        "EMPTY": "No conversations",
+        "CLOSES_AT": "Window closes at {time}"
+      },
+      "API": {
+        "ERROR": "Could not load the agent panel"
       }
     }
   }

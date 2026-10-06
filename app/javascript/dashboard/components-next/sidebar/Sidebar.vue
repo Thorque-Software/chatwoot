@@ -21,6 +21,8 @@ import ChannelIcon from 'next/icon/ChannelIcon.vue';
 import SidebarAccountSwitcher from './SidebarAccountSwitcher.vue';
 import Logo from 'next/icon/Logo.vue';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
+// ARROYO: flags del panel de vendedores
+import { useArroyoFeatures } from 'dashboard/routes/dashboard/arroyo/composables/useArroyoFeatures';
 
 const props = defineProps({
   isMobileSidebarOpen: {
@@ -40,6 +42,12 @@ const { accountScopedRoute, isOnChatwootCloud } = useAccount();
 const store = useStore();
 const searchShortcut = useKbd([`$mod`, 'k']);
 const { t } = useI18n();
+// ARROYO: flags del panel de vendedores
+const {
+  fetchFeatures: fetchArroyoFeatures,
+  isAgentPanelEnabled,
+  hideNativeReports,
+} = useArroyoFeatures();
 
 const isACustomBrandedInstance = useMapGetter(
   'globalConfig/isACustomBrandedInstance'
@@ -50,6 +58,8 @@ const { width: windowWidth } = useWindowSize();
 const isMobile = computed(() => windowWidth.value < 768);
 
 const accountId = useMapGetter('getCurrentAccountId');
+// ARROYO: recargar flags al cambiar de cuenta
+watch(accountId, fetchArroyoFeatures, { immediate: true });
 const isFeatureEnabledonAccount = useMapGetter(
   'accounts/isFeatureEnabledonAccount'
 );
@@ -532,6 +542,17 @@ const menuItems = computed(() => {
         },
       ],
     },
+    // ARROYO: panel de vendedores
+    ...(isAgentPanelEnabled.value
+      ? [
+          {
+            name: 'Arroyo Panel',
+            label: t('ARROYO.SIDEBAR.PANEL'),
+            icon: 'i-lucide-users-round',
+            to: accountScopedRoute('arroyo_agent_panel'),
+          },
+        ]
+      : []),
     {
       name: 'Reports',
       label: t('SIDEBAR.REPORTS'),
@@ -793,7 +814,8 @@ const menuItems = computed(() => {
         },
       ],
     },
-  ];
+    // ARROYO: el panel puede reemplazar a los reportes nativos (la ruta sigue existiendo)
+  ].filter(item => !(hideNativeReports.value && item.name === 'Reports'));
 });
 </script>
 
