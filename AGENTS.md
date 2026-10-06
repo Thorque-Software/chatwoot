@@ -111,3 +111,30 @@ Practical checklist for any change impacting core logic or public APIs
 ## Branding / White-labeling note
 
 - For user-facing strings that currently contain "Chatwoot" but should adapt to branded/self-hosted installs, prefer applying `replaceInstallationName` from `shared/composables/useBranding` in the UI layer (for example tooltip and suggestion labels) instead of adding hardcoded brand-specific copy.
+
+# Fork Chatwoot Arroyo — reglas
+
+- Este repo es un fork de chatwoot/chatwoot para el cliente Arroyo Fitness.
+  Prod: https://chatarroyo.thorque.com.ar. NO romper funcionalidad nativa.
+- Base: branch `arroyo/main`, creada desde el tag `v4.14.2` (la versión que corre en prod).
+  No mergear `upstream/develop`; los upgrades de Chatwoot se hacen a propósito, tag por tag.
+- Plan de trabajo: `docs/arroyo/PLAN.md`. Relevamiento del código: `docs/arroyo/ARCHITECTURE_NOTES.md`.
+- Para código Arroyo estas reglas tienen prioridad sobre las generales de arriba
+  (ej.: sí se escriben specs, y los textos de UI van en es y en).
+- Todo código nuevo vive en el namespace Arroyo:
+  app/models/arroyo/, app/services/arroyo/, app/jobs/arroyo/, app/listeners/arroyo/,
+  app/controllers/api/v1/accounts/arroyo/, app/policies/arroyo/,
+  app/javascript/dashboard/routes/dashboard/arroyo/, spec/**/arroyo/
+  Tablas con prefijo arroyo_.
+- Archivos core de Chatwoot: tocarlos SOLO cuando el plan lo indica (hooks puntuales).
+  Cada cambio en un archivo core lleva el comentario `ARROYO:` (en Ruby `# ARROYO:`,
+  en Vue/JS `// ARROYO:`) para poder listarlos con `git grep "ARROYO:"`.
+- Nunca editar migraciones existentes ni nada dentro de enterprise/.
+- No borrar features nativas: si algo se "reemplaza", se oculta del sidebar, no se elimina.
+- Cada feature tiene un flag por cuenta en Arroyo::Setting y viene APAGADA por defecto.
+- Antes de commitear: bundle exec rspec (specs nuevos + specs core afectados),
+  bundle exec rubocop en archivos tocados, pnpm eslint en archivos tocados.
+- Si una suposición del plan no coincide con el código real, PARAR, anotarlo en
+  docs/arroyo/ARCHITECTURE_NOTES.md y proponer alternativa antes de seguir.
+- Zona horaria del negocio: America/Argentina/Buenos_Aires.
+- Textos de UI en i18n (es y en), nunca hardcodeados.
