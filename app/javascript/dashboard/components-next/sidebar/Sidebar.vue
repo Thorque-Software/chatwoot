@@ -778,6 +778,13 @@ const menuItems = computed(() => {
           icon: 'i-lucide-shield',
           to: accountScopedRoute('security_settings_index'),
         },
+        // ARROYO: configuración del fork Arroyo
+        {
+          name: 'Settings Arroyo',
+          label: t('ARROYO.SIDEBAR.SETTINGS'),
+          icon: 'i-lucide-sliders-horizontal',
+          to: accountScopedRoute('arroyo_settings_index'),
+        },
         {
           name: 'Settings Billing',
           label: t('SIDEBAR.BILLING'),

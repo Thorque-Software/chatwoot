@@ -38,6 +38,8 @@ import signup from './signup.json';
 import sla from './sla.json';
 import teamsSettings from './teamsSettings.json';
 import whatsappTemplates from './whatsappTemplates.json';
+// ARROYO: textos del fork Arroyo
+import arroyo from './arroyo.json';
 
 export default {
   ...advancedFilters,
@@ -80,4 +82,6 @@ export default {
   ...sla,
   ...teamsSettings,
   ...whatsappTemplates,
+  // ARROYO: textos del fork Arroyo
+  ...arroyo,
 };

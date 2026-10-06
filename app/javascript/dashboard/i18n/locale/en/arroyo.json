@@ -1,0 +1,127 @@
+{
+  "ARROYO": {
+    "SIDEBAR": {
+      "SETTINGS": "Arroyo"
+    },
+    "SETTINGS": {
+      "HEADER": {
+        "TITLE": "Arroyo",
+        "DESCRIPTION": "Configure the Arroyo features for this account. Every feature starts disabled."
+      },
+      "SAVE": "Save",
+      "API": {
+        "FETCH_ERROR": "Could not load the Arroyo settings",
+        "SUCCESS": "Settings saved",
+        "ERROR": "Could not save the settings"
+      },
+      "STATUSES": {
+        "OPEN": "Open",
+        "SNOOZED": "Snoozed"
+      },
+      "GENERAL": {
+        "TITLE": "General",
+        "DESCRIPTION": "Business settings shared by every feature.",
+        "TIMEZONE": {
+          "LABEL": "Time zone",
+          "HELP": "IANA identifier, for example America/Argentina/Buenos_Aires. Used for send hours and to group the panel by day."
+        }
+      },
+      "WINDOW_KEEPER": {
+        "TITLE": "24-hour window",
+        "DESCRIPTION": "Before a WhatsApp conversation's 24-hour window closes, send a single message with buttons inviting the customer to reply. Only the customer's reply reopens the window.",
+        "NUDGE_AFTER_HOURS": {
+          "LABEL": "Send after (hours)",
+          "HELP": "Hours since the customer's last message. The message is sent before 23 h 45 min."
+        },
+        "ONLY_STATUSES": {
+          "LABEL": "Conversation statuses"
+        },
+        "ONLY_ASSIGNED": {
+          "LABEL": "Only assigned conversations"
+        },
+        "NUDGE_TEXT": {
+          "LABEL": "Message",
+          "HELP": "You can use variables such as {variable}."
+        },
+        "NUDGE_BUTTONS": {
+          "LABEL": "Buttons",
+          "HELP": "Up to 3 buttons of up to 20 characters. Press Enter to add each one.",
+          "PLACEHOLDER": "Add a button"
+        },
+        "SKIP_LABELS": {
+          "LABEL": "Skip conversations with these labels",
+          "HELP": "Press Enter to add each label.",
+          "PLACEHOLDER": "Add a label"
+        },
+        "REENGAGEMENT_TEMPLATE": {
+          "LABEL": "Re-engagement template",
+          "HELP": "Optional. Approved WhatsApp template sent when the window closes without a reply. Leave empty to disable it (templates are paid)."
+        }
+      },
+      "POST_SALE": {
+        "TITLE": "Post-sale",
+        "DESCRIPTION": "When a conversation gets the sale label, schedule follow-ups and alert the managers if a message is not delivered.",
+        "TRIGGER_LABEL": {
+          "LABEL": "Sale label",
+          "HELP": "Applying this label to a conversation schedules the follow-ups."
+        },
+        "SEND_HOUR_LOCAL": {
+          "LABEL": "Send hour",
+          "HELP": "Hour of the day (0 to 23) in the business time zone."
+        },
+        "SKIP_SUNDAYS": {
+          "LABEL": "Move Sunday sends to Monday"
+        },
+        "STAGE": {
+          "TITLE": "Follow-up {stage}",
+          "DAYS": {
+            "LABEL": "Days after the sale"
+          },
+          "FREE_TEXT": {
+            "LABEL": "Message when the window is open",
+            "HELP": "You can use variables such as {variable}."
+          },
+          "TEMPLATE": {
+            "LABEL": "Template when the window is closed",
+            "HELP": "Name of the approved WhatsApp template. Leave empty to alert the managers instead of sending."
+          }
+        },
+        "DELIVERY_TIMEOUT_HOURS": {
+          "LABEL": "Delivery timeout (hours)",
+          "HELP": "A sent follow-up without delivery confirmation after this time raises an alert."
+        },
+        "ALERT_USERS": {
+          "LABEL": "Alert managers",
+          "HELP": "They are mentioned in a private note when a follow-up fails."
+        },
+        "ALERT_EMAIL": {
+          "LABEL": "Also send alerts by email"
+        }
+      },
+      "AGENT_PANEL": {
+        "TITLE": "Agent panel",
+        "DESCRIPTION": "Daily activity panel per agent.",
+        "AGENTS_SEE_ONLY_OWN": {
+          "LABEL": "Agents only see their own activity"
+        },
+        "HIDE_NATIVE_REPORTS": {
+          "LABEL": "Hide native reports from the sidebar"
+        }
+      },
+      "EMAIL_MARKETING": {
+        "TITLE": "Email marketing",
+        "DESCRIPTION": "Email campaigns sent through an email inbox with its own SMTP.",
+        "MAX_PER_HOUR": {
+          "LABEL": "Max emails per hour"
+        },
+        "MAX_PER_DAY": {
+          "LABEL": "Max emails per day"
+        },
+        "FOOTER_HTML": {
+          "LABEL": "Footer (HTML)",
+          "HELP": "Company name and address shown at the bottom of every campaign email. The unsubscribe link is added automatically."
+        }
+      }
+    }
+  }
+}

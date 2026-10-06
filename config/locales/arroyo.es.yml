@@ -1,0 +1,6 @@
+es:
+  activerecord:
+    errors:
+      models:
+        arroyo/setting:
+          invalid_field: 'Valor inválido para %{field}'

@@ -51,6 +51,8 @@ Rails.application.routes.draw do
         end
 
         scope module: :accounts do
+          draw :arroyo # ARROYO: rutas del fork en config/routes/arroyo.rb
+
           namespace :actions do
             resource :contact_merge, only: [:create]
           end
