@@ -61,14 +61,14 @@
       },
       "POST_SALE": {
         "TITLE": "Post-venta",
-        "DESCRIPTION": "Cuando una conversación recibe la etiqueta de venta, programa seguimientos y avisa a los responsables si un mensaje no se entrega.",
+        "DESCRIPTION": "Chatwoot registra la compra al aplicar la etiqueta de venta. n8n consulta esta configuración, programa y envía los seguimientos; Chatwoot verifica la entrega y crea tareas manuales. Las alertas usan menciones nativas y las preferencias de notificación de cada responsable.",
         "TRIGGER_LABEL": {
           "LABEL": "Etiqueta de venta",
-          "HELP": "Al poner esta etiqueta en una conversación se programan los seguimientos."
+          "HELP": "Al poner esta etiqueta se registra la fecha de compra y el vendedor. n8n programa las etapas desde esa fecha."
         },
         "SEND_HOUR_LOCAL": {
           "LABEL": "Hora de envío",
-          "HELP": "Hora del día (0 a 23) en la zona horaria del negocio."
+          "HELP": "Hora del día (0 a 23) que usa n8n en la zona horaria del negocio. Por defecto, 10:00 todos los días."
         },
         "SKIP_SUNDAYS": {
           "LABEL": "Pasar los envíos del domingo al lunes"
@@ -80,23 +80,20 @@
           },
           "FREE_TEXT": {
             "LABEL": "Mensaje con la ventana abierta",
-            "HELP": "Podés usar variables como {variable}."
+            "HELP": "n8n usa este texto cuando la ventana permite responder. Podés usar variables como {variable}."
           },
           "TEMPLATE": {
             "LABEL": "Plantilla con la ventana cerrada",
-            "HELP": "Nombre de la plantilla de WhatsApp aprobada. Dejala vacía para avisar a los responsables en lugar de enviar."
+            "HELP": "Nombre de la plantilla de WhatsApp aprobada que usa n8n. Verificá su aprobación y sus variables antes de activar los envíos."
           }
         },
         "DELIVERY_TIMEOUT_HOURS": {
           "LABEL": "Plazo de entrega (horas)",
-          "HELP": "Un seguimiento enviado que pasado este plazo no figura como entregado genera una alerta."
+          "HELP": "Chatwoot genera una tarea si no confirma entrega tras el intento, o si n8n no programa o ejecuta a tiempo. Por defecto, 6 horas."
         },
         "ALERT_USERS": {
           "LABEL": "Responsables de alertas",
-          "HELP": "Se los menciona en una nota privada cuando falla un seguimiento."
-        },
-        "ALERT_EMAIL": {
-          "LABEL": "Enviar también las alertas por email"
+          "HELP": "Se los menciona en una nota privada cuando hace falta contacto manual. Configurá responsables con acceso a los inboxes antes de activar."
         }
       },
       "AGENT_PANEL": {
@@ -138,7 +135,91 @@
       "DAILY_TITLE": "Consultas atendidas por período",
       "TABS": {
         "ACTIVITY": "Actividad",
-        "WINDOWS": "Ventanas de 24 hs"
+        "WINDOWS": "Ventanas de 24 hs",
+        "POST_SALE": "Postventa"
+      },
+      "POST_SALE": {
+        "DESCRIPTION": "n8n programa y envía los seguimientos. Acá verificás su entrega y registrás el contacto manual cuando hace falta.",
+        "DISABLED_HISTORY": "La integración está desactivada; el historial sigue disponible y podés resolver las tareas manuales pendientes.",
+        "STATUS_FILTER": "Estado del seguimiento",
+        "ALL_STATUSES": "Todos los estados",
+        "RETRY": "Reintentar",
+        "LOAD_ERROR": "No se pudieron cargar los seguimientos",
+        "SAVE_ERROR": "No se pudo guardar el cambio",
+        "EMPTY": "No hay seguimientos para estos filtros",
+        "LIMIT": "Mostrando {shown} de {total} seguimientos.",
+        "PREVIOUS_PAGE": "Página anterior",
+        "NEXT_PAGE": "Página siguiente",
+        "TEMPLATE": "Plantilla:",
+        "DETAIL": "Detalle de postventa",
+        "OPEN_CONVERSATION": "Abrir conversación",
+        "PURCHASE_DATE": "Fecha de compra",
+        "DATE_HELP": "Hora de {timezone}. La corrección cambia solo etapas todavía no intentadas; n8n vuelve a programarlas.",
+        "SAVE_DATE": "Guardar fecha",
+        "PURCHASE_STAGES": "Etapas de esta compra",
+        "MESSAGE": "Mensaje de la etapa",
+        "PROVIDER_ID": "ID del proveedor: {id}",
+        "OPEN_MESSAGE": "Ver mensaje en la conversación",
+        "NO_MESSAGE": "Todavía no se creó un mensaje para esta etapa.",
+        "RESOLVE": "Registrar seguimiento manual",
+        "RESOLVE_HELP": "Registrá el contacto que ya hiciste. Esto no envía mensajes ni cambia el estado de entrega automática.",
+        "METHOD": "Medio de contacto",
+        "NOTE": "Resultado y nota",
+        "RESOLUTION": "Seguimiento manual registrado",
+        "STATUSES": {
+          "AWAITING_PLAN": "Por programar",
+          "SCHEDULED": "Programado",
+          "QUEUED": "En proceso",
+          "SENT": "Enviado",
+          "DELIVERED": "Entregado",
+          "READ": "Leído",
+          "FAILED": "Fallido",
+          "UNCONFIRMED": "Entrega no confirmada",
+          "NOT_EXECUTED": "No ejecutado",
+          "CANCELLED": "Cancelado"
+        },
+        "MANUAL_STATUSES": {
+          "PENDING": "Pendiente",
+          "RESOLVED": "Resuelto manualmente",
+          "CLOSED_AUTOMATICALLY": "Cerrado por entrega comprobada"
+        },
+        "SUMMARY": {
+          "SCHEDULED": "Por programar / programados",
+          "PROCESSING": "En proceso / enviados",
+          "DELIVERED": "Entregados / leídos",
+          "FAILED": "Fallidos / no ejecutados",
+          "UNCONFIRMED": "Sin confirmación",
+          "MANUAL_PENDING": "Tareas manuales pendientes"
+        },
+        "COLUMNS": {
+          "CUSTOMER": "Cliente",
+          "PRODUCT": "Producto",
+          "SELLER": "Vendedor original",
+          "STAGE": "Etapa",
+          "SCHEDULED_AT": "Fecha prevista",
+          "ATTEMPTED_AT": "Intento",
+          "STATUS": "Estado automático",
+          "REASON": "Motivo",
+          "ASSIGNEE": "Responsable",
+          "MANUAL": "Tarea manual"
+        },
+        "DATES": {
+          "SCHEDULED_AT": "Fecha prevista",
+          "ATTEMPTED_AT": "Intento",
+          "DELIVERED_AT": "Entrega",
+          "READ_AT": "Lectura",
+          "RESOLVED_AT": "Resolución manual"
+        },
+        "METHODS": {
+          "CALL": "Llamada",
+          "PERSONAL_WHATSAPP": "WhatsApp personal",
+          "OTHER": "Otro"
+        },
+        "STAGES": {
+          "D1": "D+1",
+          "D7": "D+7",
+          "D30": "D+30"
+        }
       },
       "FILTERS": {
         "PERIOD": "Período",

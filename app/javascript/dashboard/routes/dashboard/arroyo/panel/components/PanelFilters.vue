@@ -12,6 +12,7 @@ const props = defineProps({
   inboxOptions: { type: Array, default: () => [] },
   showAgentFilter: { type: Boolean, default: true },
   showDateFilters: { type: Boolean, default: true },
+  showGroupBy: { type: Boolean, default: true },
 });
 
 const emit = defineEmits(['change']);
@@ -100,7 +101,10 @@ const onPresetChange = preset => {
           />
         </label>
       </template>
-      <label class="flex flex-col gap-1 text-label-small text-n-slate-11">
+      <label
+        v-if="showGroupBy"
+        class="flex flex-col gap-1 text-label-small text-n-slate-11"
+      >
         {{ t('ARROYO.PANEL.FILTERS.GROUP_BY.LABEL') }}
         <Select
           :model-value="filters.groupBy"

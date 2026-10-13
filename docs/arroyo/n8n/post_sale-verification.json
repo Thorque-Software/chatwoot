@@ -1,0 +1,82 @@
+{
+  "workflowId": "fF0LK453uWJdBHsR",
+  "url": "https://n8narroyo.thorque.com.ar/workflow/fF0LK453uWJdBHsR",
+  "initialSavedVersionId": "9121f3ce-34c3-4258-ade7-6443a9975f56",
+  "savedVersionId": "329fddf0-da51-4850-9ec5-7216fdc4bf56",
+  "activeVersionId": "f334bc60-3ddc-41a5-8b2e-4d69d6c321d2",
+  "activeVersionUnchanged": true,
+  "activeGraphUnchanged": true,
+  "codeMatchesRepository": true,
+  "activeFlagUnchanged": true,
+  "nodeCount": 29,
+  "validationWarnings": [],
+  "credentialNamesVerifiedInUi": [
+    {
+      "nodeName": "Leer Compras Postventa",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    },
+    {
+      "nodeName": "Registrar Plan Postventa",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    },
+    {
+      "nodeName": "Crear Mensaje Postventa",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    },
+    {
+      "nodeName": "Compras para Coordinacion Comercial",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    },
+    {
+      "nodeName": "Marcar Envio Del Dia",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    },
+    {
+      "nodeName": "Resetear Contador",
+      "credential": "Chatwoot - admin",
+      "credentialType": "httpHeaderAuth",
+      "verifiedAfterReload": true
+    }
+  ],
+  "tests": {
+    "command": "node --test spec/javascript/arroyo/post_sale_n8n.test.cjs",
+    "passed": 12
+  },
+  "lint": {
+    "command": "node node_modules/eslint/bin/eslint.js docs/arroyo/n8n/post_sale-transform.cjs docs/arroyo/n8n/post_sale-build.cjs spec/javascript/arroyo/post_sale_n8n.test.cjs",
+    "passed": true
+  },
+  "mcpTests": [
+    {
+      "executionId": "606523",
+      "status": "success",
+      "case": "plan_without_contact_name",
+      "httpSimulated": true
+    },
+    {
+      "executionId": "606547",
+      "status": "success",
+      "case": "already_planned_closed_window_approved_named_template",
+      "httpSimulated": true
+    },
+    {
+      "executionId": "606550",
+      "status": "success",
+      "case": "disabled_flag_no_dispatch",
+      "httpSimulated": true
+    }
+  ],
+  "executedAgainstClients": false,
+  "published": false,
+  "metaModified": false
+}

@@ -35,28 +35,28 @@ class Arroyo::Setting < ApplicationRecord
     'post_sale' => {
       'enabled' => false,
       'trigger_label' => 'vendido',
-      'send_hour_local' => 11,
-      'skip_sundays' => true,
+      'send_hour_local' => 10,
+      'skip_sundays' => false,
       'stages' => {
         'd1' => {
           'days' => 1,
-          'free_text' => 'Hola {{contact.first_name}}, ¿te llegó bien tu compra? Si necesitás ayuda con algo, escribinos por acá.',
+          'free_text' => 'Hola {{contact.first_name}}, ¿cómo va {{producto}}? Podemos ayudarte y recomendarte accesorios.',
           'template' => 'postventa_d1'
         },
         'd7' => {
           'days' => 7,
-          'free_text' => 'Hola {{contact.first_name}}, ¿cómo venís con tu compra? Si tenés dudas de uso o armado, escribinos por acá.',
+          'free_text' => 'Hola {{contact.first_name}}, ya pasó una semana. ¿Cómo va {{producto}}? ¿Necesitás ayuda o accesorios?',
           'template' => 'postventa_d7'
         },
         'd30' => {
           'days' => 30,
-          'free_text' => 'Hola {{contact.first_name}}, ya pasó un mes de tu compra. ¿Cómo te está yendo? Tenemos accesorios que la complementan.',
+          'free_text' => 'Hola {{contact.first_name}}, ya pasó un mes. ¿Cómo va {{producto}}? Si querés, vemos accesorios.',
           'template' => 'postventa_d30'
         }
       },
       'delivery_timeout_hours' => 6,
       'alert_user_ids' => [],
-      'alert_email' => true
+      'alert_email' => false
     },
     'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false },
     'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' }
@@ -147,6 +147,7 @@ class Arroyo::Setting < ApplicationRecord
     end
     validate_email_limits(current['email_marketing'])
     validate_alert_users(current['post_sale']['alert_user_ids'])
+    validate_post_sale_recipients(current['post_sale'])
   end
 
   def validate_email_limits(email_marketing)
@@ -160,6 +161,18 @@ class Arroyo::Setting < ApplicationRecord
     return unless account && VALIDATORS[:integer_list].call(user_ids)
 
     add_invalid_field('post_sale.alert_user_ids') if (user_ids - account.account_users.pluck(:user_id)).any?
+  end
+
+  def validate_post_sale_recipients(post_sale)
+    return unless account && post_sale['enabled'] == true
+
+    ids = post_sale['alert_user_ids']
+    return unless VALIDATORS[:integer_list].call(ids)
+
+    invalid = ids.empty? || account.inboxes.where(channel_type: 'Channel::Whatsapp').any? do |inbox|
+      (ids - (account.administrators.pluck(:id) + inbox.members.pluck(:id))).any?
+    end
+    add_invalid_field('post_sale.alert_user_ids') if invalid
   end
 
   def value_at(hash, path)

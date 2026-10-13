@@ -3,6 +3,12 @@
 # validations for this file exist in /spec/configs/schedule_spec.rb
 
 # executed daily at 0000 UTC
+# ARROYO: supervisa entrega y programación; no envía postventa
+arroyo_post_sale_watchdog_job:
+  cron: '*/30 * * * *'
+  class: 'Arroyo::PostSale::WatchdogJob'
+  queue: scheduled_jobs
+
 # schedules daily deferred jobs at stable times for each installation
 internal_check_new_versions_job:
   cron: '0 0 * * *'

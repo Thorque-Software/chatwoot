@@ -132,6 +132,14 @@ La ventana de 24 hs **solo se reabre cuando el cliente escribe**. Un mensaje del
 
 ## Fase 3 — Post-venta con verificación de entrega (punto 5)
 
+> **Revisión solicitada el 2026-10-13:** n8n conserva programación y envío D1/D7/D30;
+> Chatwoot registra seguimientos, verifica entrega y muestra alertas/resolución en
+> el panel de vendedores. La fecha confirmada es la aplicación de `vendido`,
+> corregible si se cargó tarde. La propuesta está en
+> [POST_SALE_PLAN.md](POST_SALE_PLAN.md). El diseño original de abajo es histórico:
+> no implementar su DispatchJob/SendService ni activar un segundo emisor mientras
+> se revisa el nuevo reparto.
+
 ### Disparador de "compra"
 Por defecto: el vendedor aplica la label `vendido` a la conversación (se puede armar una macro nativa "Registrar venta" que ponga la label y pida producto). Opcionalmente atributos personalizados de contacto `producto_comprado` y `fecha_compra`; si `fecha_compra` existe se usa como base, si no, la hora en que se puso la label.
 

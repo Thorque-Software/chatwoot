@@ -19,5 +19,17 @@ export const DATE_PRESETS = [
 ];
 export const DEFAULT_PRESET = 'last_7_days';
 export const GROUP_BY_OPTIONS = ['day', 'week'];
-export const TABS = ['activity', 'windows'];
+export const TABS = ['activity', 'windows', 'post_sale'];
+export const POST_SALE_STATUSES = [
+  'awaiting_plan',
+  'scheduled',
+  'queued',
+  'sent',
+  'delivered',
+  'read',
+  'failed',
+  'unconfirmed',
+  'not_executed',
+  'cancelled',
+];
 export const CHART_COLOR = 'rgb(31, 147, 255)';

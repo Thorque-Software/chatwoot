@@ -1,0 +1,656 @@
+{
+  "workflowId": "fF0LK453uWJdBHsR",
+  "operations": [
+    {
+      "type": "removeNode",
+      "nodeName": "Buscar Conversaciones con Compra"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Clasificar Seguimientos"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Resumen Corrida"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Preparar Envio"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Hay Que Enviar?"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Enviar Plantilla WhatsApp"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Etiquetar Enviado"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Uno Por Uno"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Etiquetar Sin Enviar"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Solo Prueba Post-Venta"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Sticky Note 060b5c8e"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Sticky Note 3d7a90f3"
+    },
+    {
+      "type": "removeNode",
+      "nodeName": "Sticky Note c2a8f1a3"
+    },
+    {
+      "type": "removeConnection",
+      "source": "Config Chatwoot",
+      "target": "Hoy Se Manda?"
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Postventa Cada 15 Minutos",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -784,
+          -144
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 */15 * * * *"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Config Postventa",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -560,
+          -144
+        ],
+        "parameters": {
+          "mode": "manual",
+          "assignments": {
+            "assignments": [
+              {
+                "id": "url-postsale",
+                "name": "url_chatwoot",
+                "type": "string",
+                "value": "https://chatarroyo.thorque.com.ar/"
+              },
+              {
+                "id": "account-postsale",
+                "name": "account_number",
+                "type": "string",
+                "value": "1"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Leer Compras Postventa",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -336,
+          -144
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zI1K6Ff66q6QgBnj",
+            "name": "Chatwoot - admin"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Config Postventa').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Postventa').first().json.account_number + '/arroyo/post_sale' + '/purchases' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "timeout": 30000,
+            "pagination": {
+              "pagination": {
+                "paginationMode": "updateAParameterInEachRequest",
+                "parameters": {
+                  "parameters": [
+                    {
+                      "type": "qs",
+                      "name": "page",
+                      "value": "={{ $pageCount + 1 }}"
+                    }
+                  ]
+                },
+                "paginationCompleteWhen": "other",
+                "completeExpression": "={{ $response.body.meta.next_page === null }}",
+                "requestInterval": 150
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Preparar Compras Postventa",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -112,
+          -144
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "// Pure functions embedded verbatim in n8n Code nodes by post_sale-build.cjs.\nfunction zonedParts(value, timezone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hourCycle: 'h23',\n  }).formatToParts(new Date(value));\n  return Object.fromEntries(\n    parts\n      .filter(part => part.type !== 'literal')\n      .map(part => [part.type, Number(part.value)])\n  );\n}\n\nfunction localInstant(day, hour, timezone) {\n  const wanted = Date.UTC(\n    day.getUTCFullYear(),\n    day.getUTCMonth(),\n    day.getUTCDate(),\n    hour\n  );\n  let instant = wanted;\n  for (let attempt = 0; attempt < 3; attempt += 1) {\n    const parts = zonedParts(instant, timezone);\n    const actual = Date.UTC(\n      parts.year,\n      parts.month - 1,\n      parts.day,\n      parts.hour,\n      parts.minute,\n      parts.second\n    );\n    instant += wanted - actual;\n  }\n  return new Date(instant).toISOString();\n}\n\nfunction planPurchase(purchase, config) {\n  const local = zonedParts(purchase.purchased_at, config.timezone);\n  const stages = Object.fromEntries(\n    ['d1', 'd7', 'd30'].map(stage => {\n      const day = new Date(\n        Date.UTC(\n          local.year,\n          local.month - 1,\n          local.day + config.stages[stage].days\n        )\n      );\n      if (config.skip_sundays && day.getUTCDay() === 0)\n        day.setUTCDate(day.getUTCDate() + 1);\n      return [\n        stage,\n        localInstant(day, config.send_hour_local, config.timezone),\n      ];\n    })\n  );\n  return { revision: purchase.revision, stages };\n}\n\nfunction purchaseItems(pages) {\n  const seen = new Set();\n  return pages.flatMap(page => {\n    if (!page.config.enabled) return [];\n    return page.purchases\n      .filter(purchase => {\n        if (seen.has(purchase.reference)) return false;\n        seen.add(purchase.reference);\n        return true;\n      })\n      .map(purchase => ({ purchase, config: page.config }));\n  });\n}\n\nfunction activeConversationIds(pages) {\n  return [\n    ...new Set(\n      purchaseItems(pages).map(item => String(item.purchase.conversation_id))\n    ),\n  ];\n}\n\nfunction messageVariables(purchase) {\n  const contactName = String(purchase.contact.name || '');\n  const firstName = contactName.trim().split(/\\s+/)[0];\n  const sellerName = String(purchase.seller?.name || '');\n  const product = String(purchase.product || '');\n  return {\n    'contact.first_name': firstName,\n    'contact.name': contactName,\n    nombre: firstName,\n    cliente: firstName,\n    first_name: firstName,\n    customer_name: firstName,\n    vendedor: sellerName,\n    asesor: sellerName,\n    employee_name: sellerName,\n    'seller.name': sellerName,\n    'purchase.seller.name': sellerName,\n    producto: product,\n    product,\n    'purchase.product': product,\n  };\n}\n\nfunction approvedTemplate(purchase, stageConfig, config, variables) {\n  const template = purchase.inbox.message_templates.find(\n    candidate =>\n      candidate.name === stageConfig.template &&\n      candidate.status.toLowerCase() === 'approved' &&\n      candidate.language.toLowerCase() ===\n        config.template_language.toLowerCase()\n  );\n  if (!template) return null;\n  const components = template.components || [];\n  if (\n    components.some(\n      component =>\n        (component.type === 'HEADER' && component.format !== 'TEXT') ||\n        (component.type !== 'BODY' && /\\{\\{/.test(JSON.stringify(component)))\n    )\n  )\n    return null;\n  const bodyText =\n    components.find(component => component.type === 'BODY')?.text || '';\n  const names = [\n    ...new Set(\n      [...bodyText.matchAll(/\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g)].map(match => match[1])\n    ),\n  ];\n  if (names.length && template.parameter_format !== 'NAMED') return null;\n  if (names.some(name => !variables[name])) return null;\n  return {\n    name: template.name,\n    category: template.category,\n    language: template.language,\n    processed_params: {\n      body: Object.fromEntries(names.map(name => [name, variables[name]])),\n    },\n  };\n}\n\nfunction dueMessages(purchase, config, now, executionId) {\n  if (!config.enabled || purchase.revision !== purchase.planned_revision)\n    return [];\n  const variables = messageVariables(purchase);\n  const ageLimit = config.delivery_timeout_hours * 60 * 60 * 1000;\n  return purchase.follow_ups\n    .filter(followUp => {\n      const age =\n        new Date(now).getTime() - new Date(followUp.scheduled_at).getTime();\n      return (\n        followUp.status === 'scheduled' &&\n        !followUp.message_id &&\n        !followUp.attempted_at &&\n        age >= 0 &&\n        age < ageLimit\n      );\n    })\n    .map(followUp => {\n      const stage = config.stages[followUp.stage];\n      const content = stage.free_text.replace(\n        /\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g,\n        (match, name) => {\n          if (!(name in variables))\n            throw new Error('Unsupported post-sale text variable: ' + name);\n          return variables[name];\n        }\n      );\n      const body = { revision: purchase.revision, content };\n      if (executionId) body.execution_id = executionId;\n      if (!purchase.can_reply) {\n        const template = approvedTemplate(purchase, stage, config, variables);\n        if (template) body.template_params = template;\n      }\n      return {\n        id: followUp.id,\n        reference: purchase.reference,\n        conversation_id: purchase.conversation_id,\n        stage: followUp.stage,\n        body,\n      };\n    });\n}\n\n\nreturn purchaseItems($input.all().map(item => item.json)).map(({purchase, config}) => ({json: {purchase, needs_plan: purchase.revision !== purchase.planned_revision, plan: planPurchase(purchase, config)}}));"
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Requiere Plan Postventa?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          112,
+          -144
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "needs-plan",
+                "leftValue": "={{ $json.needs_plan }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Registrar Plan Postventa",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          336,
+          -240
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zI1K6Ff66q6QgBnj",
+            "name": "Chatwoot - admin"
+          }
+        },
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ $('Config Postventa').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Postventa').first().json.account_number + '/arroyo/post_sale' + '/purchases/' + encodeURIComponent($json.purchase.reference) + '/plan' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.plan) }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "timeout": 30000
+          }
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Seleccionar Etapas Postventa",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          560,
+          -96
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "// Pure functions embedded verbatim in n8n Code nodes by post_sale-build.cjs.\nfunction zonedParts(value, timezone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hourCycle: 'h23',\n  }).formatToParts(new Date(value));\n  return Object.fromEntries(\n    parts\n      .filter(part => part.type !== 'literal')\n      .map(part => [part.type, Number(part.value)])\n  );\n}\n\nfunction localInstant(day, hour, timezone) {\n  const wanted = Date.UTC(\n    day.getUTCFullYear(),\n    day.getUTCMonth(),\n    day.getUTCDate(),\n    hour\n  );\n  let instant = wanted;\n  for (let attempt = 0; attempt < 3; attempt += 1) {\n    const parts = zonedParts(instant, timezone);\n    const actual = Date.UTC(\n      parts.year,\n      parts.month - 1,\n      parts.day,\n      parts.hour,\n      parts.minute,\n      parts.second\n    );\n    instant += wanted - actual;\n  }\n  return new Date(instant).toISOString();\n}\n\nfunction planPurchase(purchase, config) {\n  const local = zonedParts(purchase.purchased_at, config.timezone);\n  const stages = Object.fromEntries(\n    ['d1', 'd7', 'd30'].map(stage => {\n      const day = new Date(\n        Date.UTC(\n          local.year,\n          local.month - 1,\n          local.day + config.stages[stage].days\n        )\n      );\n      if (config.skip_sundays && day.getUTCDay() === 0)\n        day.setUTCDate(day.getUTCDate() + 1);\n      return [\n        stage,\n        localInstant(day, config.send_hour_local, config.timezone),\n      ];\n    })\n  );\n  return { revision: purchase.revision, stages };\n}\n\nfunction purchaseItems(pages) {\n  const seen = new Set();\n  return pages.flatMap(page => {\n    if (!page.config.enabled) return [];\n    return page.purchases\n      .filter(purchase => {\n        if (seen.has(purchase.reference)) return false;\n        seen.add(purchase.reference);\n        return true;\n      })\n      .map(purchase => ({ purchase, config: page.config }));\n  });\n}\n\nfunction activeConversationIds(pages) {\n  return [\n    ...new Set(\n      purchaseItems(pages).map(item => String(item.purchase.conversation_id))\n    ),\n  ];\n}\n\nfunction messageVariables(purchase) {\n  const contactName = String(purchase.contact.name || '');\n  const firstName = contactName.trim().split(/\\s+/)[0];\n  const sellerName = String(purchase.seller?.name || '');\n  const product = String(purchase.product || '');\n  return {\n    'contact.first_name': firstName,\n    'contact.name': contactName,\n    nombre: firstName,\n    cliente: firstName,\n    first_name: firstName,\n    customer_name: firstName,\n    vendedor: sellerName,\n    asesor: sellerName,\n    employee_name: sellerName,\n    'seller.name': sellerName,\n    'purchase.seller.name': sellerName,\n    producto: product,\n    product,\n    'purchase.product': product,\n  };\n}\n\nfunction approvedTemplate(purchase, stageConfig, config, variables) {\n  const template = purchase.inbox.message_templates.find(\n    candidate =>\n      candidate.name === stageConfig.template &&\n      candidate.status.toLowerCase() === 'approved' &&\n      candidate.language.toLowerCase() ===\n        config.template_language.toLowerCase()\n  );\n  if (!template) return null;\n  const components = template.components || [];\n  if (\n    components.some(\n      component =>\n        (component.type === 'HEADER' && component.format !== 'TEXT') ||\n        (component.type !== 'BODY' && /\\{\\{/.test(JSON.stringify(component)))\n    )\n  )\n    return null;\n  const bodyText =\n    components.find(component => component.type === 'BODY')?.text || '';\n  const names = [\n    ...new Set(\n      [...bodyText.matchAll(/\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g)].map(match => match[1])\n    ),\n  ];\n  if (names.length && template.parameter_format !== 'NAMED') return null;\n  if (names.some(name => !variables[name])) return null;\n  return {\n    name: template.name,\n    category: template.category,\n    language: template.language,\n    processed_params: {\n      body: Object.fromEntries(names.map(name => [name, variables[name]])),\n    },\n  };\n}\n\nfunction dueMessages(purchase, config, now, executionId) {\n  if (!config.enabled || purchase.revision !== purchase.planned_revision)\n    return [];\n  const variables = messageVariables(purchase);\n  const ageLimit = config.delivery_timeout_hours * 60 * 60 * 1000;\n  return purchase.follow_ups\n    .filter(followUp => {\n      const age =\n        new Date(now).getTime() - new Date(followUp.scheduled_at).getTime();\n      return (\n        followUp.status === 'scheduled' &&\n        !followUp.message_id &&\n        !followUp.attempted_at &&\n        age >= 0 &&\n        age < ageLimit\n      );\n    })\n    .map(followUp => {\n      const stage = config.stages[followUp.stage];\n      const content = stage.free_text.replace(\n        /\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g,\n        (match, name) => {\n          if (!(name in variables))\n            throw new Error('Unsupported post-sale text variable: ' + name);\n          return variables[name];\n        }\n      );\n      const body = { revision: purchase.revision, content };\n      if (executionId) body.execution_id = executionId;\n      if (!purchase.can_reply) {\n        const template = approvedTemplate(purchase, stage, config, variables);\n        if (template) body.template_params = template;\n      }\n      return {\n        id: followUp.id,\n        reference: purchase.reference,\n        conversation_id: purchase.conversation_id,\n        stage: followUp.stage,\n        body,\n      };\n    });\n}\n\n\nconst config = $('Leer Compras Postventa').first().json.config;\nconst seen = new Set();\nreturn $input.all().flatMap(item => {\n  if (item.json.error) return [];\n  const purchase = item.json.purchase || item.json;\n  return dueMessages(purchase, config, $now.toISO(), String($execution.id)).filter(message => {\n    if (seen.has(message.id)) return false;\n    seen.add(message.id);\n    return true;\n  }).map(message => ({json: message}));\n});"
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Crear Mensaje Postventa",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          784,
+          -96
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zI1K6Ff66q6QgBnj",
+            "name": "Chatwoot - admin"
+          }
+        },
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Postventa').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Postventa').first().json.account_number + '/arroyo/post_sale' + '/follow_ups/' + $json.id + '/message' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.body) }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "timeout": 30000
+          }
+        },
+        "notes": "Única ruta de envío postventa. La respuesta queued/sent no demuestra delivered/read. Timeout: repetir esta ruta idempotente, nunca POST nativo. Plantillas verificadas desde metadata sanitizada de la compra."
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Compras para Coordinacion Comercial",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -336,
+          336
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zI1K6Ff66q6QgBnj",
+            "name": "Chatwoot - admin"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number + '/arroyo/post_sale' + '/purchases' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "timeout": 30000,
+            "pagination": {
+              "pagination": {
+                "paginationMode": "updateAParameterInEachRequest",
+                "parameters": {
+                  "parameters": [
+                    {
+                      "type": "qs",
+                      "name": "page",
+                      "value": "={{ $pageCount + 1 }}"
+                    }
+                  ]
+                },
+                "paginationCompleteWhen": "other",
+                "completeExpression": "={{ $response.body.meta.next_page === null }}",
+                "requestInterval": 150
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "addNode",
+      "node": {
+        "name": "Postventa Arroyo Borrador",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -784,
+          -752
+        ],
+        "parameters": {
+          "content": "## BORRADOR · Postventa Arroyo D1/D7/D30\n\nNo publicar antes de deploy y prueba con número propio. Postventa consulta cada 15 minutos; hora, zona, días, domingos, textos y nombres de plantilla salen de GET purchases. Fecha de compra y vendedor los registra Chatwoot al aplicar vendido.\n\nEl único POST saliente de postventa es /arroyo/post_sale/follow_ups/:id/message (idempotente por etapa/revisión). queued/sent NO significa entregado. Plantilla solo si metadata APPROVED y parámetros conocidos; sin plantilla válida fuera de ventana el backend registra fallo y tarea manual. Etapas atrasadas más que el plazo declarado quedan para watchdog/manual.\n\nFlag apagado por defecto. No importar vendido histórico. Rama comercial conserva cron10; lee compras vigentes para evitar contacto simultáneo y mergea solo seguimiento_* por ruta Arroyo. Credencial Chatwoot - admin descubierta; verificar usuario/rol real en staging.",
+          "width": 1240,
+          "height": 512,
+          "color": 4
+        }
+      }
+    },
+    {
+      "type": "addConnection",
+      "source": "Postventa Cada 15 Minutos",
+      "target": "Config Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Config Postventa",
+      "target": "Leer Compras Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Config Chatwoot",
+      "target": "Compras para Coordinacion Comercial",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Compras para Coordinacion Comercial",
+      "target": "Hoy Se Manda?",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Leer Compras Postventa",
+      "target": "Preparar Compras Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Preparar Compras Postventa",
+      "target": "Requiere Plan Postventa?",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Requiere Plan Postventa?",
+      "target": "Registrar Plan Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Requiere Plan Postventa?",
+      "target": "Seleccionar Etapas Postventa",
+      "sourceIndex": 1
+    },
+    {
+      "type": "addConnection",
+      "source": "Registrar Plan Postventa",
+      "target": "Seleccionar Etapas Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "addConnection",
+      "source": "Seleccionar Etapas Postventa",
+      "target": "Crear Mensaje Postventa",
+      "sourceIndex": 0
+    },
+    {
+      "type": "setNodeSettings",
+      "nodeName": "Registrar Plan Postventa",
+      "settings": {
+        "onError": "continueRegularOutput",
+        "retryOnFail": false
+      }
+    },
+    {
+      "type": "setNodeSettings",
+      "nodeName": "Crear Mensaje Postventa",
+      "settings": {
+        "onError": "continueRegularOutput",
+        "retryOnFail": false
+      }
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Clasificar Seguimiento Diario",
+      "path": "/jsCode",
+      "value": "// Pure functions embedded verbatim in n8n Code nodes by post_sale-build.cjs.\nfunction zonedParts(value, timezone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hourCycle: 'h23',\n  }).formatToParts(new Date(value));\n  return Object.fromEntries(\n    parts\n      .filter(part => part.type !== 'literal')\n      .map(part => [part.type, Number(part.value)])\n  );\n}\n\nfunction localInstant(day, hour, timezone) {\n  const wanted = Date.UTC(\n    day.getUTCFullYear(),\n    day.getUTCMonth(),\n    day.getUTCDate(),\n    hour\n  );\n  let instant = wanted;\n  for (let attempt = 0; attempt < 3; attempt += 1) {\n    const parts = zonedParts(instant, timezone);\n    const actual = Date.UTC(\n      parts.year,\n      parts.month - 1,\n      parts.day,\n      parts.hour,\n      parts.minute,\n      parts.second\n    );\n    instant += wanted - actual;\n  }\n  return new Date(instant).toISOString();\n}\n\nfunction planPurchase(purchase, config) {\n  const local = zonedParts(purchase.purchased_at, config.timezone);\n  const stages = Object.fromEntries(\n    ['d1', 'd7', 'd30'].map(stage => {\n      const day = new Date(\n        Date.UTC(\n          local.year,\n          local.month - 1,\n          local.day + config.stages[stage].days\n        )\n      );\n      if (config.skip_sundays && day.getUTCDay() === 0)\n        day.setUTCDate(day.getUTCDate() + 1);\n      return [\n        stage,\n        localInstant(day, config.send_hour_local, config.timezone),\n      ];\n    })\n  );\n  return { revision: purchase.revision, stages };\n}\n\nfunction purchaseItems(pages) {\n  const seen = new Set();\n  return pages.flatMap(page => {\n    if (!page.config.enabled) return [];\n    return page.purchases\n      .filter(purchase => {\n        if (seen.has(purchase.reference)) return false;\n        seen.add(purchase.reference);\n        return true;\n      })\n      .map(purchase => ({ purchase, config: page.config }));\n  });\n}\n\nfunction activeConversationIds(pages) {\n  return [\n    ...new Set(\n      purchaseItems(pages).map(item => String(item.purchase.conversation_id))\n    ),\n  ];\n}\n\nfunction messageVariables(purchase) {\n  const contactName = String(purchase.contact.name || '');\n  const firstName = contactName.trim().split(/\\s+/)[0];\n  const sellerName = String(purchase.seller?.name || '');\n  const product = String(purchase.product || '');\n  return {\n    'contact.first_name': firstName,\n    'contact.name': contactName,\n    nombre: firstName,\n    cliente: firstName,\n    first_name: firstName,\n    customer_name: firstName,\n    vendedor: sellerName,\n    asesor: sellerName,\n    employee_name: sellerName,\n    'seller.name': sellerName,\n    'purchase.seller.name': sellerName,\n    producto: product,\n    product,\n    'purchase.product': product,\n  };\n}\n\nfunction approvedTemplate(purchase, stageConfig, config, variables) {\n  const template = purchase.inbox.message_templates.find(\n    candidate =>\n      candidate.name === stageConfig.template &&\n      candidate.status.toLowerCase() === 'approved' &&\n      candidate.language.toLowerCase() ===\n        config.template_language.toLowerCase()\n  );\n  if (!template) return null;\n  const components = template.components || [];\n  if (\n    components.some(\n      component =>\n        (component.type === 'HEADER' && component.format !== 'TEXT') ||\n        (component.type !== 'BODY' && /\\{\\{/.test(JSON.stringify(component)))\n    )\n  )\n    return null;\n  const bodyText =\n    components.find(component => component.type === 'BODY')?.text || '';\n  const names = [\n    ...new Set(\n      [...bodyText.matchAll(/\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g)].map(match => match[1])\n    ),\n  ];\n  if (names.length && template.parameter_format !== 'NAMED') return null;\n  if (names.some(name => !variables[name])) return null;\n  return {\n    name: template.name,\n    category: template.category,\n    language: template.language,\n    processed_params: {\n      body: Object.fromEntries(names.map(name => [name, variables[name]])),\n    },\n  };\n}\n\nfunction dueMessages(purchase, config, now, executionId) {\n  if (!config.enabled || purchase.revision !== purchase.planned_revision)\n    return [];\n  const variables = messageVariables(purchase);\n  const ageLimit = config.delivery_timeout_hours * 60 * 60 * 1000;\n  return purchase.follow_ups\n    .filter(followUp => {\n      const age =\n        new Date(now).getTime() - new Date(followUp.scheduled_at).getTime();\n      return (\n        followUp.status === 'scheduled' &&\n        !followUp.message_id &&\n        !followUp.attempted_at &&\n        age >= 0 &&\n        age < ageLimit\n      );\n    })\n    .map(followUp => {\n      const stage = config.stages[followUp.stage];\n      const content = stage.free_text.replace(\n        /\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g,\n        (match, name) => {\n          if (!(name in variables))\n            throw new Error('Unsupported post-sale text variable: ' + name);\n          return variables[name];\n        }\n      );\n      const body = { revision: purchase.revision, content };\n      if (executionId) body.execution_id = executionId;\n      if (!purchase.can_reply) {\n        const template = approvedTemplate(purchase, stage, config, variables);\n        if (template) body.template_params = template;\n      }\n      return {\n        id: followUp.id,\n        reference: purchase.reference,\n        conversation_id: purchase.conversation_id,\n        stage: followUp.stage,\n        body,\n      };\n    });\n}\n\n\nconst activePostSaleConversations = new Set(activeConversationIds($('Compras para Coordinacion Comercial').all().map(item => item.json)));\nconst cfg = $('Config Chatwoot').first().json;\nconst TZ = 'America/Argentina/Buenos_Aires';\n\nconst MAX = Number(cfg.max_seguimiento_por_corrida ?? 40);\nconst MAX_ENVIOS = Number(cfg.max_envios_seguimiento ?? 3);\nconst DIAS_SALTEAR = Number(cfg.dias_inactividad_saltear ?? 45);\nconst DIAS_CERRAR = Number(cfg.dias_inactividad_cerrar ?? 60);\n\n// Espera despues del ultimo mensaje de la secuencia antes de dar por inactivo.\nconst ESPERA_INACTIVO = Number(cfg.dias_espera_inactivo ?? 2);\n// Margen para no confundir nuestra propia actividad (el mensaje, la etiqueta,\n// el atributo) con una respuesta del cliente.\nconst MARGEN_SEG = 600;\n\nconst ahora = $now.setZone(TZ);\nconst HOY = ahora.toFormat('yyyy-MM-dd');\n\nconst norm = (s) => String(s || '').toLowerCase().trim();\nconst L_SEG = norm(cfg.label_seguimiento);\nconst L_INACT = norm(cfg.label_inactivo);\nconst L_BICI = norm(cfg.label_bici);\nconst L_APAR = norm(cfg.label_aparatos);\n\n// Luxon: 1 = lunes ... 7 = domingo. Por defecto se apaga el domingo.\n// Este chequeo tambien vive en el nodo Hoy Se Manda?, antes de la busqueda.\n// Queda aca como segunda red por si alguien reconecta la rama directo.\nconst apagados = String(cfg.dias_sin_envio || '')\n  .split(',')\n  .map((s) => Number(String(s).trim()))\n  .filter((n) => n >= 1 && n <= 7);\n\nif (apagados.includes(ahora.weekday)) {\n  console.log('Hoy (weekday ' + ahora.weekday + ') esta en dias_sin_envio. No sale el seguimiento diario.');\n  return [];\n}\n\nconst alias = (v) => String(v || '').split(',').map(norm).filter(Boolean);\nconst ALIAS_JULI = alias(cfg.alias_juli);\nconst ALIAS_MARCOS = alias(cfg.alias_marcos);\n\n// SECUENCIA DE 3 PASOS. Lo que elige la plantilla es el NUMERO DE ENVIO, no la\n// fecha: envio 1 -> seg_dia_1, envio 2 -> seg_dia_3, envio 3 -> seg_dia_5.\n// Por eso si un domingo no sale, el paso siguiente cae el lunes y la cadencia\n// no se rompe.\nconst SECUENCIA = [cfg.template_seg_dia_1, cfg.template_seg_dia_3, cfg.template_seg_dia_5];\n\n// Texto de respaldo por si la ventana de 24hs esta abierta. Mismo orden que\n// SECUENCIA, replicando el texto aprobado de cada plantilla.\nconst FALLBACKS = [\n  (a, p) => '¡Hola! ¿Cómo estás? Te escribe ' + a + ' de Arroyo Fitness 🙂 Retomo tu consulta por ' + p + '. Quería saber cómo viste la propuesta y si te quedó alguna duda o hay algún punto que quieras revisar antes de avanzar. Estoy para ayudarte con eso.',\n  (a, p) => '¡Hola! ¿Cómo estás? Soy ' + a + ' de Arroyo Fitness. Retomo tu consulta por ' + p + '. Quería saber cómo venís con la decisión y si hay algún punto que quieras revisar antes de avanzar: qué opción elegir, forma de pago o cualquier otra duda. Comentame y lo vemos juntos.',\n  (a, p) => '¡Hola! ¿Cómo estás? Soy ' + a + ' de Arroyo Fitness. Retomo tu consulta por ' + p + '. Quería consultarte si ya pudiste definirte con la opción que vimos. Si necesitás que revisemos algún último detalle, comentame y lo vemos juntos 🙌',\n];\n\nconst cap = (s) => {\n  const t = String(s || '').trim();\n  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;\n};\n\n// El nodo de busqueda pagina: llega un item por pagina de Chatwoot.\nconst convs = $input.all().flatMap((i) => i.json.payload ?? i.json.data?.payload ?? []);\n\nconst vistos = new Set();\nconst salida = [];\nlet conEtiqueta = 0;\nlet sinEtiqueta = 0;\nlet sinVendedor = 0;\nlet yaHoy = 0;\nlet aInactivar = 0;\nlet aTerminar = 0;\nlet esperandoCierre = 0;\nlet salteadasPorViejas = 0;\nlet cerradasPorViejas = 0;\nlet cerradasPorViejasSinEnvios = 0;\n\nfor (const c of convs) {\n  // ARROYO: nueva compra registrada evita contacto comercial simultáneo.\n  if (activePostSaleConversations.has(String(c.id))) continue;\n  if (vistos.has(c.id)) continue;\n  vistos.add(c.id);\n\n  const labels = (c.labels ?? []).map(norm).filter(Boolean);\n  if (!labels.includes(L_SEG)) { sinEtiqueta++; continue; }\n  conEtiqueta++;\n\n  // Marca del ultimo envio. Evita el segundo mensaje si el flujo corre dos\n  // veces el mismo dia (prueba manual, reintento, doble activacion).\n  const attrs = c.custom_attributes ?? {};\n  const ultimoEnvio = String(attrs.seguimiento_ultimo_envio || '');\n  if (ultimoEnvio === HOY) { yaHoy++; continue; }\n\n  const enviados = Number(attrs.seguimiento_envios ?? 0);\n  const envioNumero = enviados + 1;\n\n  // FILTRO DE ANTIGUEDAD. La etiqueta seguimiento no caduca sola: un vendedor\n  // la pone, la charla se enfria y nadie la saca. Al conectar esta rama el\n  // 12/09 entraron de golpe conversaciones de hace meses y les salio un\n  // \"retomo tu consulta\" fuera de contexto.\n  //   mas de DIAS_CERRAR sin actividad  -> se cierra sacandole seguimiento\n  //   mas de DIAS_SALTEAR sin actividad -> no se le manda, pero la etiqueta\n  //                                        queda por si el vendedor la retoma\n  // Si Chatwoot no informa la fecha, se sigue de largo: preferimos mandar de\n  // mas antes que frenar todo por un dato que falta.\n  const ultimaActividad = Number(c.last_activity_at ?? c.timestamp ?? 0);\n  const diasInactivo = ultimaActividad > 0\n    ? Math.floor((ahora.toSeconds() - ultimaActividad) / 86400)\n    : null;\n\n  if (diasInactivo !== null && diasInactivo > DIAS_CERRAR) {\n    // Solo se marca inactivo al que efectivamente recibio algun mensaje de la\n    // secuencia. Si la etiqueta quedo puesta pero nunca salio nada, se cierra\n    // sin marcar: no hubo seguimiento del cual no contestar.\n    const marcarInactivo = enviados > 0;\n    if (marcarInactivo) cerradasPorViejas++; else cerradasPorViejasSinEnvios++;\n\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: 'inactiva hace ' + diasInactivo + ' dias' + (marcarInactivo ? ' -> inactivo' : ' (nunca recibio seguimiento)'),\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labels.filter((l) => l !== L_SEG),\n    } });\n    continue;\n  }\n\n  if (diasInactivo !== null && diasInactivo > DIAS_SALTEAR) {\n    salteadasPorViejas++;\n    continue;\n  }\n\n  // SECUENCIA COMPLETA. Ya recibio los 3 pasos. Antes se cerraba en la corrida\n  // del dia siguiente. Ahora se le dan ESPERA_INACTIVO dias mas de aire:\n  //   sin respuesta -> se le saca seguimiento y se le pone inactivo\n  //   contesto      -> se le saca seguimiento nomas (la secuencia ya termino),\n  //                    sin inactivo: respondio y la sigue el vendedor\n  // Se cierra aunque no tenga vendedor asignado: si no, quedaria reciclando\n  // para siempre en el filtro.\n  if (envioNumero > MAX_ENVIOS) {\n    const diasDesdeUltimo = ultimoEnvio\n      ? Math.floor(ahora.startOf('day').diff(DateTime.fromISO(ultimoEnvio, { zone: TZ }).startOf('day'), 'days').days)\n      : null;\n\n    // Todavia dentro de la ventana de espera: no se toca, se mira manana.\n    if (diasDesdeUltimo !== null && diasDesdeUltimo < ESPERA_INACTIVO) {\n      esperandoCierre++;\n      continue;\n    }\n\n    // Timestamp exacto del ultimo envio. Las conversaciones que venian de antes\n    // de este cambio no lo tienen: se aproxima con la fecha a las 10hs, que es\n    // la hora del cron.\n    const tsUltimoEnvio = Number(attrs.seguimiento_ultimo_envio_ts ?? 0) ||\n      (ultimoEnvio ? DateTime.fromISO(ultimoEnvio + 'T10:00', { zone: TZ }).toSeconds() : 0);\n\n    // Cualquier actividad posterior al ultimo mensaje cuenta como respuesta: en\n    // esos dias el flujo no le escribe nada, asi que si algo se movio fue el\n    // cliente o el vendedor.\n    const contesto = tsUltimoEnvio > 0 && ultimaActividad > tsUltimoEnvio + MARGEN_SEG;\n\n    // Sin fecha del ultimo envio no hay forma de saber si paso la espera: se\n    // cierra como siempre, sin marcarlo inactivo.\n    const marcarInactivo = !contesto && diasDesdeUltimo !== null;\n\n    // POST /labels reemplaza el set entero, asi que se manda la lista completa\n    // MENOS seguimiento (y con inactivo agregado si corresponde). Sin esto se\n    // pisarian vendido, bici, cotizado y las demas.\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    if (marcarInactivo) aInactivar++; else aTerminar++;\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: marcarInactivo\n        ? 'secuencia completa y ' + diasDesdeUltimo + ' dias sin respuesta -> inactivo'\n        : 'secuencia completa (' + enviados + ' envios), hubo actividad despues del ultimo mensaje',\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      dias_desde_ultimo_envio: diasDesdeUltimo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labelsBase,\n    } });\n    continue;\n  }\n\n  const asignado = norm(c.meta?.assignee?.available_name ?? c.meta?.assignee?.name ?? '');\n\n  let quien = '';\n  if (ALIAS_JULI.some((a) => asignado.includes(a))) quien = 'juli';\n  else if (ALIAS_MARCOS.some((a) => asignado.includes(a))) quien = 'marcos';\n\n  // Sin Juli ni Marcos asignado no se manda: la plantilla la firma una persona\n  // y no corresponde que salga de un chat que atendio otro.\n  if (!quien) { sinVendedor++; continue; }\n\n  // Las tres plantillas nuevas NO usan el nombre del cliente, solo asesor y\n  // producto. Por eso ya no se descarta a quien Chatwoot guardo con el\n  // telefono en vez del nombre: ese saludo feo no existe mas.\n  const asesor = cap(quien);\n\n  // El producto sale de las etiquetas de rubro que pone el sub-flujo\n  // \"arroyo v2 - etiquetar conversacion\". Sin rubro va el texto generico:\n  // la frase de la plantilla es fija y Meta RECHAZA una variable vacia.\n  let producto;\n  if (labels.includes(L_BICI)) producto = cfg.producto_bici;\n  else if (labels.includes(L_APAR)) producto = cfg.producto_aparatos;\n  else producto = cfg.producto_generico;\n\n  salida.push({ json: {\n    conversation_id: c.id,\n    accion: 'enviar',\n    nombre: String(c.meta?.sender?.name ?? '').trim().split(' ')[0],\n    vendedor: quien,\n    asesor: asesor,\n    producto: producto,\n    asignado_a: asignado,\n    ultimo_envio_previo: ultimoEnvio,\n    dias_inactivo: diasInactivo,\n    paso: envioNumero,\n    template_name: SECUENCIA[envioNumero - 1],\n    template_category: cfg.categoria_seguimiento ?? 'MARKETING',\n    template_language: cfg.template_language,\n    // Las claves tienen que coincidir EXACTO con las variables de la plantilla\n    // aprobada en Meta, o el envio se rechaza.\n    processed_params: { asesor: asesor, producto: producto },\n    fallback: FALLBACKS[envioNumero - 1](asesor, producto),\n    envio_numero: envioNumero,\n    fecha_envio: HOY\n  } });\n}\n\n// ROTACION JUSTA. Chatwoot devuelve las conversaciones ordenadas por ultima\n// actividad, y mandar un mensaje empuja ese chat al tope de la lista. Con un\n// tope por corrida eso significa que los mismos N reciben todos los dias y la\n// cola de atras no recibe nunca. Ordenamos por fecha del ultimo seguimiento\n// enviado: primero los que nunca recibieron (string vacio), despues del mas\n// viejo al mas nuevo.\nsalida.sort((a, b) => String(a.json.ultimo_envio_previo).localeCompare(String(b.json.ultimo_envio_previo)));\n\nconst enCola = salida.length;\nconst recortados = Math.max(0, enCola - MAX);\nif (recortados > 0) {\n  console.log('En cola hay ' + enCola + ' y el tope por corrida es ' + MAX + '. Quedan ' + recortados + ' para las proximas corridas (van entrando por rotacion, primero los que hace mas que no reciben).');\n}\nconsole.log('Conversaciones devueltas por la busqueda: ' + vistos.size + ' | con la etiqueta seguimiento: ' + conEtiqueta + ' | en cola: ' + enCola + ' | se procesan hoy: ' + Math.min(enCola, MAX) + ' | esperando el cierre (' + ESPERA_INACTIVO + 'd tras el ultimo mensaje): ' + esperandoCierre + ' | a marcar inactivo por secuencia completa: ' + aInactivar + ' | cierran sin inactivo porque hubo respuesta: ' + aTerminar + ' | salteadas por inactividad (+' + DIAS_SALTEAR + 'd, conservan la etiqueta): ' + salteadasPorViejas + ' | cerradas por inactividad (+' + DIAS_CERRAR + 'd) que quedan inactivo: ' + cerradasPorViejas + ' | cerradas por inactividad sin ningun envio previo (no se marcan): ' + cerradasPorViejasSinEnvios + ' | ya recibieron hoy: ' + yaHoy + ' | sin Juli/Marcos asignado: ' + sinVendedor);\n\nreturn salida.slice(0, MAX);"
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Config Chatwoot",
+      "path": "/assignments/assignments",
+      "value": [
+        {
+          "id": "url",
+          "name": "url_chatwoot",
+          "type": "string",
+          "value": "https://chatarroyo.thorque.com.ar/"
+        },
+        {
+          "id": "acc",
+          "name": "account_number",
+          "type": "string",
+          "value": "1"
+        },
+        {
+          "id": "lang",
+          "name": "template_language",
+          "type": "string",
+          "value": "es_AR"
+        },
+        {
+          "id": "lblseg",
+          "name": "label_seguimiento",
+          "type": "string",
+          "value": "seguimiento"
+        },
+        {
+          "id": "lblinact",
+          "name": "label_inactivo",
+          "type": "string",
+          "value": "inactivo"
+        },
+        {
+          "id": "espinact",
+          "name": "dias_espera_inactivo",
+          "type": "number",
+          "value": 2
+        },
+        {
+          "id": "catseg",
+          "name": "categoria_seguimiento",
+          "type": "string",
+          "value": "MARKETING"
+        },
+        {
+          "id": "aljuli",
+          "name": "alias_juli",
+          "type": "string",
+          "value": "juli,julieta"
+        },
+        {
+          "id": "almarcos",
+          "name": "alias_marcos",
+          "type": "string",
+          "value": "marcos"
+        },
+        {
+          "id": "diasoff",
+          "name": "dias_sin_envio",
+          "type": "string",
+          "value": "7"
+        },
+        {
+          "id": "maxseg",
+          "name": "max_seguimiento_por_corrida",
+          "type": "number",
+          "value": 150
+        },
+        {
+          "id": "soloconv",
+          "name": "solo_conversaciones",
+          "type": "string",
+          "value": ""
+        },
+        {
+          "id": "tplseg1",
+          "name": "template_seg_dia_1",
+          "type": "string",
+          "value": "seg_dia_1"
+        },
+        {
+          "id": "tplseg3",
+          "name": "template_seg_dia_3",
+          "type": "string",
+          "value": "seg_dia_3"
+        },
+        {
+          "id": "tplseg5",
+          "name": "template_seg_dia_5",
+          "type": "string",
+          "value": "seg_dia_5"
+        },
+        {
+          "id": "maxenvseg",
+          "name": "max_envios_seguimiento",
+          "type": "number",
+          "value": 3
+        },
+        {
+          "id": "lblbici",
+          "name": "label_bici",
+          "type": "string",
+          "value": "bici"
+        },
+        {
+          "id": "lblapar",
+          "name": "label_aparatos",
+          "type": "string",
+          "value": "aparatosgim"
+        },
+        {
+          "id": "prodbici",
+          "name": "producto_bici",
+          "type": "string",
+          "value": "una bicicleta"
+        },
+        {
+          "id": "prodapar",
+          "name": "producto_aparatos",
+          "type": "string",
+          "value": "equipamiento de gimnasio"
+        },
+        {
+          "id": "prodgen",
+          "name": "producto_generico",
+          "type": "string",
+          "value": "lo que estabas viendo"
+        },
+        {
+          "id": "inactsalt",
+          "name": "dias_inactividad_saltear",
+          "type": "number",
+          "value": 45
+        },
+        {
+          "id": "inactcerrar",
+          "name": "dias_inactividad_cerrar",
+          "type": "number",
+          "value": 60
+        }
+      ]
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Sticky Modo Prueba",
+      "path": "/content",
+      "value": "## Prueba comercial\n\nsolo_conversaciones en Config Chatwoot limita únicamente la rama comercial. Vacío permite todos los chats elegibles. Postventa se prueba en staging con cuenta/número propio y flag controlado; no ejecutar este borrador contra clientes. No publicar hasta verificar backend, rol admin y plantillas D1/D7/D30."
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Sticky Se Mando",
+      "path": "/content",
+      "value": "Rama comercial heredada: id confirma creación de mensaje, NO entrega Meta. Se conservan sus reglas. Los contadores seguimiento_* se guardan por merge atómico Arroyo. Postventa registra estados/errores aparte y no usa estos marcadores como prueba de entrega. Pendiente verificar sender real de la credencial comercial en staging."
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Sticky Seguimiento Diario",
+      "path": "/content",
+      "value": "## Seguimiento comercial diario\n\nSe conservan cron10, lunes a sábado, secuencia por número de envío seg_dia_1/seg_dia_3/seg_dia_5, vendedores Juli/Marcos, espera de cierre y límites de antigüedad. GET purchases excluye compras nuevas vigentes de postventa; ninguna venta histórica se reclasifica.\n\nConfig Chatwoot contiene solo configuración comercial. Postventa tiene trigger cada15 y configuración efectiva desde Rails. Marcar Envio Del Dia/Resetear Contador usan ruta Arroyo con lock para preservar atributos ajenos. Las etiquetas conservan el set ajeno ya leído por el clasificador comercial."
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Marcar Envio Del Dia",
+      "path": "/url",
+      "value": "={{ $('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number + '/arroyo/post_sale' + '/conversations/' + $('Armar Seguimiento').item.json.conversation_id + '/attributes' }}"
+    },
+    {
+      "type": "setNodeCredential",
+      "nodeName": "Marcar Envio Del Dia",
+      "credentialKey": "httpHeaderAuth",
+      "credentialId": "zI1K6Ff66q6QgBnj",
+      "credentialName": "Chatwoot - admin"
+    },
+    {
+      "type": "setNodeSettings",
+      "nodeName": "Marcar Envio Del Dia",
+      "settings": {
+        "onError": "stopWorkflow"
+      }
+    },
+    {
+      "type": "setNodeParameter",
+      "nodeName": "Resetear Contador",
+      "path": "/url",
+      "value": "={{ $('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number + '/arroyo/post_sale' + '/conversations/' + $('Armar Seguimiento').item.json.conversation_id + '/attributes' }}"
+    },
+    {
+      "type": "setNodeCredential",
+      "nodeName": "Resetear Contador",
+      "credentialKey": "httpHeaderAuth",
+      "credentialId": "zI1K6Ff66q6QgBnj",
+      "credentialName": "Chatwoot - admin"
+    },
+    {
+      "type": "setNodeSettings",
+      "nodeName": "Resetear Contador",
+      "settings": {
+        "onError": "stopWorkflow"
+      }
+    }
+  ]
+}

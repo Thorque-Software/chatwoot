@@ -5,6 +5,28 @@ en:
         arroyo/setting:
           invalid_field: 'Invalid value for %{field}'
   arroyo:
+    post_sale:
+      products:
+        bike: 'your bicycle'
+        gym: 'your equipment'
+        generic: 'your product'
+      alert_note: "Post-sale %{stage}: %{product}.\nReason: %{reason}\nCode: %{code}\nPhone: %{phone}\nOriginal seller: %{seller}\nPlease record the manual follow-up in the agent panel."
+      errors:
+        corrected_past: 'The corrected date left this stage in the past; manual follow-up is required'
+        disabled: 'Post-sale integration is disabled for this account'
+        panel_disabled: 'The agent panel is disabled for this account'
+        stale_revision: 'The purchase date changed. Refresh the schedule before sending.'
+        cancelled: 'This purchase is cancelled or excluded from contact'
+        invalid_plan: 'Provide a valid scheduled date for each post-sale stage'
+        invalid_date: 'Provide a valid purchase date and date range'
+        invalid_attributes: 'Only the documented follow-up attributes may be updated'
+        invalid_resolution: 'Choose a contact method and enter a resolution note'
+        no_pending_alert: 'There is no pending manual task for this stage'
+        not_due: 'This stage is not due yet'
+        closed_window: 'The 24-hour window is closed and no approved template was supplied'
+        send_failed: 'The message could not be sent'
+        unconfirmed: 'No delivery confirmation was received before the timeout'
+        not_executed: 'The scheduled stage was not executed by n8n'
     agent_panel:
       disabled: 'The agent panel is disabled for this account'
       csv:

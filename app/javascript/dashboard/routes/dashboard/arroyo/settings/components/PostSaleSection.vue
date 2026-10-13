@@ -159,9 +159,5 @@ const save = () => {
     >
       <MultiSelect v-model="form.alert_user_ids" :options="agentOptions" />
     </WithLabel>
-    <SwitchField
-      v-model="form.alert_email"
-      :label="t('ARROYO.SETTINGS.POST_SALE.ALERT_EMAIL.LABEL')"
-    />
   </SectionCard>
 </template>

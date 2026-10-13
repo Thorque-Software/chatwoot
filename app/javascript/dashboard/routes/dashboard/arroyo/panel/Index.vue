@@ -13,6 +13,7 @@ import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import PanelFilters from './components/PanelFilters.vue';
 import ActivityTab from './components/ActivityTab.vue';
 import WindowsTab from './components/WindowsTab.vue';
+import PostSaleTab from './components/PostSaleTab.vue';
 import ConversationsDrawer from './components/ConversationsDrawer.vue';
 import {
   DATE_PRESETS,
@@ -78,13 +79,25 @@ const filters = computed(() => {
   };
 });
 
+const showPostSale = computed(() =>
+  Boolean(
+    features.value?.post_sale?.enabled || features.value?.post_sale?.has_records
+  )
+);
+
 const activeTab = computed(() =>
-  TABS.includes(route.query.tab) ? route.query.tab : 'activity'
+  TABS.includes(route.query.tab) &&
+  (route.query.tab !== 'post_sale' || showPostSale.value)
+    ? route.query.tab
+    : 'activity'
 );
 
 const tabs = computed(() => [
   { key: 'activity', label: t('ARROYO.PANEL.TABS.ACTIVITY') },
   { key: 'windows', label: t('ARROYO.PANEL.TABS.WINDOWS') },
+  ...(showPostSale.value
+    ? [{ key: 'post_sale', label: t('ARROYO.PANEL.TABS.POST_SALE') }]
+    : []),
 ]);
 
 const apiParams = computed(() => ({
@@ -93,6 +106,13 @@ const apiParams = computed(() => ({
   group_by: filters.value.groupBy,
   user_ids: filters.value.userIds.length ? filters.value.userIds : undefined,
   inbox_ids: filters.value.inboxIds.length ? filters.value.inboxIds : undefined,
+}));
+
+const postSaleParams = computed(() => ({
+  since: apiParams.value.since,
+  until: apiParams.value.until,
+  user_ids: apiParams.value.user_ids,
+  inbox_ids: apiParams.value.inbox_ids,
 }));
 
 const updateQuery = changes => {
@@ -117,6 +137,7 @@ const alertError = error => {
 };
 
 const fetchActiveTab = async () => {
+  if (activeTab.value === 'post_sale') return;
   isLoading.value = true;
   try {
     if (activeTab.value === 'windows') {
@@ -224,8 +245,13 @@ onMounted(async () => {
         :filters="filters"
         :agent-options="agentOptions"
         :inbox-options="inboxOptions"
-        :show-agent-filter="showAgentFilter"
-        :show-date-filters="activeTab === 'activity'"
+        :show-agent-filter="
+          activeTab === 'post_sale'
+            ? currentRole === 'administrator'
+            : showAgentFilter
+        "
+        :show-date-filters="activeTab !== 'windows'"
+        :show-group-by="activeTab === 'activity'"
         @change="onFiltersChange"
       />
 
@@ -240,7 +266,27 @@ onMounted(async () => {
           @drill-down="openDrillDown"
         />
       </template>
-      <WindowsTab v-else :windows="windows" :is-loading="isLoading" />
+      <WindowsTab
+        v-else-if="activeTab === 'windows'"
+        :windows="windows"
+        :is-loading="isLoading"
+      />
+      <template v-else>
+        <p
+          v-if="
+            features?.post_sale?.has_records && !features?.post_sale?.enabled
+          "
+          class="mb-0 p-3 rounded-lg bg-n-solid-2 text-body-main text-n-slate-11"
+          data-testid="post-sale-disabled"
+        >
+          {{ t('ARROYO.PANEL.POST_SALE.DISABLED_HISTORY') }}
+        </p>
+        <PostSaleTab
+          :params="postSaleParams"
+          :timezone="timezone"
+          :agents="agentOptions"
+        />
+      </template>
     </div>
 
     <ConversationsDrawer

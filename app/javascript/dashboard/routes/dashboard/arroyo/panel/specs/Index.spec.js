@@ -5,6 +5,9 @@ import Index from '../Index.vue';
 import PanelFilters from '../components/PanelFilters.vue';
 import ArroyoAgentPanelAPI from '../../api/agentPanel';
 import ArroyoFeaturesAPI from '../../api/features';
+import PostSaleAPI from '../../api/postSale';
+import PostSaleTab from '../components/PostSaleTab.vue';
+import { useArroyoFeatures } from '../../composables/useArroyoFeatures';
 
 const metrics = values => ({
   conversations_attended: 0,
@@ -90,6 +93,7 @@ const mountPanel = async query => {
 
 describe('Arroyo agent panel', () => {
   beforeEach(() => {
+    useArroyoFeatures().features.value = null;
     vi.spyOn(ArroyoFeaturesAPI, 'get').mockResolvedValue({
       data: {
         timezone: 'America/Argentina/Buenos_Aires',
@@ -101,6 +105,9 @@ describe('Arroyo agent panel', () => {
     });
     vi.spyOn(ArroyoAgentPanelAPI, 'getConversations').mockResolvedValue({
       data: { count: 1, conversations: [conversation] },
+    });
+    vi.spyOn(PostSaleAPI, 'getFollowUps').mockResolvedValue({
+      data: { follow_ups: [], totals: {} },
     });
   });
 
@@ -123,6 +130,103 @@ describe('Arroyo agent panel', () => {
       group_by: 'day',
       user_ids: [7],
       inbox_ids: [3],
+    });
+  });
+
+  it('shows enabled post-sale and keeps the shared date and inbox filters', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, agents_see_only_own: true },
+        post_sale: { enabled: true },
+      },
+    });
+    const { wrapper } = await mountPanel({
+      tab: 'post_sale',
+      preset: 'custom',
+      since: '2026-10-01',
+      until: '2026-10-13',
+      inbox_ids: '3',
+    });
+    expect(wrapper.findComponent(PostSaleTab).exists()).toBe(true);
+    expect(wrapper.findComponent(PanelFilters).props('showDateFilters')).toBe(
+      true
+    );
+    expect(wrapper.findComponent(PanelFilters).props('showGroupBy')).toBe(
+      false
+    );
+    expect(PostSaleAPI.getFollowUps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        since: '2026-10-01',
+        until: '2026-10-13',
+        inbox_ids: [3],
+      })
+    );
+    expect(PostSaleAPI.getFollowUps.mock.calls[0][0]).not.toHaveProperty(
+      'group_by'
+    );
+    expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
+  });
+
+  it('falls back to activity when the post-sale flag is off', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true },
+        post_sale: { enabled: false, has_records: false },
+      },
+    });
+    const { wrapper } = await mountPanel({ tab: 'post_sale' });
+    expect(wrapper.findComponent(PostSaleTab).exists()).toBe(false);
+    expect(PostSaleAPI.getFollowUps).not.toHaveBeenCalled();
+  });
+
+  it('keeps history visible and permits manual resolution after disabling the integration', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true },
+        post_sale: { enabled: false, has_records: true },
+      },
+    });
+    const item = {
+      id: 12,
+      stage: 'd1',
+      status: 'failed',
+      manual_status: 'pending',
+      can_resolve: true,
+      purchase: {
+        reference: 'purchase-1',
+        purchased_at: '2026-10-06T15:00:00Z',
+        seller: { id: 7, name: 'Julieta' },
+        conversation_id: 42,
+        contact: { id: 1, name: 'Cliente Arroyo' },
+        can_edit_purchase: true,
+      },
+      message: null,
+    };
+    PostSaleAPI.getFollowUps.mockResolvedValue({
+      data: { follow_ups: [item], totals: {} },
+    });
+    vi.spyOn(PostSaleAPI, 'resolve').mockResolvedValue({ data: {} });
+    const { wrapper } = await mountPanel({ tab: 'post_sale' });
+    expect(wrapper.findComponent(PostSaleTab).exists()).toBe(true);
+    expect(wrapper.find('[data-testid="post-sale-disabled"]').text()).toContain(
+      'integration is disabled'
+    );
+    await wrapper.find('[data-testid="follow-up-12"]').trigger('click');
+    await flushPromises();
+    expect(
+      wrapper.find('[data-testid="purchase-date-save"]').attributes('disabled')
+    ).toBeUndefined();
+    await wrapper
+      .find('[data-testid="resolution-note"] textarea')
+      .setValue('Contactado por llamada');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(PostSaleAPI.resolve).toHaveBeenCalledWith(12, {
+      method: 'call',
+      note: 'Contactado por llamada',
     });
   });
 

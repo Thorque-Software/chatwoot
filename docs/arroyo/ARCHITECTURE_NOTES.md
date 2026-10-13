@@ -3,6 +3,50 @@
 Relevamiento del código de Chatwoot **v4.14.2** (la versión que corre en prod) para validar las suposiciones de `PLAN.md`.
 Las rutas son relativas a la raíz del repo y los números de línea corresponden a ese tag.
 
+## Actualización de integración n8n v3 (2026-10-13)
+
+El relevamiento actual de los cuatro workflows publicados de la carpeta Arroyo/v3
+está en [N8N_V3_ANALYSIS.md](N8N_V3_ANALYSIS.md). Esa revisión complementa y actualiza
+la sección 14, que describe el bot v2. Se consultaron definiciones publicadas y
+metadatos de ejecuciones; no se ejecutaron ni modificaron workflows.
+
+Decisión del usuario para la próxima Fase 3: **n8n programa y envía D1/D7/D30;
+Chatwoot verifica entrega y gestiona alertas en el panel**. La fecha de compra es
+la aplicación de `vendido`, corregible si se cargó tarde. El borrador de diseño
+está en [POST_SALE_PLAN.md](POST_SALE_PLAN.md); sus reglas operativas y nuevos
+hooks core se proponen para revisión antes de implementación.
+
+Diferencias contra las suposiciones del plan que deben resolverse antes de implementar:
+
+- El bot actual v3 usa reglas y textos fijos: saluda, pregunta localidad y deriva a
+  Julieta o Marcos. No vende ni usa IA. Conserva el filtro de entrantes en `pending`.
+- La postventa ya está automatizada fuera del fork: n8n procesa `vendido` para
+  recompra D+1 y seguimiento D+30 de la zona local, con plantillas según rubro.
+  Usa `conversation.created_at` como fecha base y el asignado actual como vendedor.
+  El plan propone fecha de compra/aplicación de etiqueta, vendedor original y D1/D7/D30.
+- Existe además seguimiento comercial con la etiqueta `seguimiento`: hasta tres
+  envíos en días habilitados. `seg_dia_1`, `seg_dia_3` y `seg_dia_5` son nombres de
+  plantillas elegidas por número de envío; no implementan intervalos de 1/3/5 días.
+- `Arroyo::Setting` no controla estos procesos externos. Activar una implementación
+  nueva sin una transición explícita puede duplicar mensajes a los mismos clientes.
+- Los dos envíos n8n incluyen `template_params`: el servicio nativo de WhatsApp
+  prioriza la plantilla incluso con ventana abierta. El campo `content` no activa
+  por sí solo una alternativa de texto libre.
+- La rama postventa etiqueta después de intentar crear el mensaje, incluso si el
+  nodo de envío continúa tras un error. La rama diaria comprueba el `id` creado,
+  pero ninguna comprueba `delivered`/`read` ni ejecuta un watchdog de entrega.
+- El endpoint de atributos de conversación reemplaza el hash completo. Los nodos
+  diarios de n8n escriben solamente tres atributos `seguimiento_*`, por lo que
+  pueden eliminar atributos ajenos. El endpoint de etiquetas también reemplaza
+  el conjunto; ambos procesos deben preservar datos y evitar escrituras concurrentes.
+
+Alternativa propuesta para revisión: mantener n8n como responsable de los envíos
+durante la preparación del fork y acordar la transición por automatización/cuenta,
+preservando etiquetas, contadores y plantillas existentes. Antes de activar la
+Fase 3, reconciliar fecha de compra, etapas, rubros, zona, vendedor, historial y
+verificación de entrega. Esta nota registra el desajuste; no cambia el plan ni
+autoriza una migración o cambios de producción.
+
 ---
 
 ## 0. Versión y branches

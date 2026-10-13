@@ -5,6 +5,28 @@ es:
         arroyo/setting:
           invalid_field: 'Valor inválido para %{field}'
   arroyo:
+    post_sale:
+      products:
+        bike: 'tu bicicleta'
+        gym: 'tu equipo'
+        generic: 'tu producto'
+      alert_note: "Postventa %{stage}: %{product}.\nMotivo: %{reason}\nCódigo: %{code}\nTeléfono: %{phone}\nVendedor original: %{seller}\nRegistrá el seguimiento manual en el panel de vendedores."
+      errors:
+        corrected_past: 'La fecha corregida dejó esta etapa en el pasado; requiere seguimiento manual'
+        disabled: 'La integración de postventa está desactivada para esta cuenta'
+        panel_disabled: 'El panel de vendedores está desactivado para esta cuenta'
+        stale_revision: 'Cambió la fecha de compra. Actualizá la programación antes de enviar.'
+        cancelled: 'Esta compra está cancelada o excluida de contacto'
+        invalid_plan: 'Indicá una fecha válida para cada etapa de postventa'
+        invalid_date: 'Indicá una fecha de compra y un rango de fechas válidos'
+        invalid_attributes: 'Solo se pueden actualizar los atributos de seguimiento documentados'
+        invalid_resolution: 'Elegí un método de contacto y escribí una nota de resolución'
+        no_pending_alert: 'Esta etapa no tiene una tarea manual pendiente'
+        not_due: 'Todavía no llegó la fecha de esta etapa'
+        closed_window: 'La ventana de 24 horas está cerrada y no se proporcionó una plantilla aprobada'
+        send_failed: 'No se pudo enviar el mensaje'
+        unconfirmed: 'No se recibió confirmación de entrega dentro del plazo'
+        not_executed: 'n8n no ejecutó esta etapa en la fecha prevista'
     agent_panel:
       disabled: 'El panel de vendedores está desactivado para esta cuenta'
       csv:

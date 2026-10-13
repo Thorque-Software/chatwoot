@@ -5,6 +5,7 @@ class SyncDispatcher < BaseDispatcher
   end
 
   def listeners
-    [ActionCableListener.instance, AgentBotListener.instance]
+    [ActionCableListener.instance, AgentBotListener.instance,
+     Arroyo::PostSaleListener.instance] # ARROYO: fecha y vendedor al registrar vendido
   end
 end

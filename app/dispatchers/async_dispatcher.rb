@@ -20,7 +20,8 @@ class AsyncDispatcher < BaseDispatcher
       Conversations::UnreadCounts::Listener.instance,
       ReportingEventListener.instance,
       WebhookListener.instance,
-      Arroyo::AssignmentListener.instance # ARROYO: asignaciones para el panel de vendedores
+      Arroyo::AssignmentListener.instance, # ARROYO: asignaciones para el panel de vendedores
+      Arroyo::PostSaleDeliveryListener.instance # ARROYO: entrega real de postventa
     ]
   end
 end

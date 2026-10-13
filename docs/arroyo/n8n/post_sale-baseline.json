@@ -1,0 +1,207 @@
+{
+  "workflowId": "fF0LK453uWJdBHsR",
+  "versionId": "9121f3ce-34c3-4258-ade7-6443a9975f56",
+  "activeVersionId": "f334bc60-3ddc-41a5-8b2e-4d69d6c321d2",
+  "commercialClassifier": "const cfg = $('Config Chatwoot').first().json;\nconst TZ = 'America/Argentina/Buenos_Aires';\n\nconst MAX = Number(cfg.max_seguimiento_por_corrida ?? 40);\nconst MAX_ENVIOS = Number(cfg.max_envios_seguimiento ?? 3);\nconst DIAS_SALTEAR = Number(cfg.dias_inactividad_saltear ?? 45);\nconst DIAS_CERRAR = Number(cfg.dias_inactividad_cerrar ?? 60);\n\n// Espera despues del ultimo mensaje de la secuencia antes de dar por inactivo.\nconst ESPERA_INACTIVO = Number(cfg.dias_espera_inactivo ?? 2);\n// Margen para no confundir nuestra propia actividad (el mensaje, la etiqueta,\n// el atributo) con una respuesta del cliente.\nconst MARGEN_SEG = 600;\n\nconst ahora = $now.setZone(TZ);\nconst HOY = ahora.toFormat('yyyy-MM-dd');\n\nconst norm = (s) => String(s || '').toLowerCase().trim();\nconst L_SEG = norm(cfg.label_seguimiento);\nconst L_INACT = norm(cfg.label_inactivo);\nconst L_BICI = norm(cfg.label_bici);\nconst L_APAR = norm(cfg.label_aparatos);\n\n// Luxon: 1 = lunes ... 7 = domingo. Por defecto se apaga el domingo.\n// Este chequeo tambien vive en el nodo Hoy Se Manda?, antes de la busqueda.\n// Queda aca como segunda red por si alguien reconecta la rama directo.\nconst apagados = String(cfg.dias_sin_envio || '')\n  .split(',')\n  .map((s) => Number(String(s).trim()))\n  .filter((n) => n >= 1 && n <= 7);\n\nif (apagados.includes(ahora.weekday)) {\n  console.log('Hoy (weekday ' + ahora.weekday + ') esta en dias_sin_envio. No sale el seguimiento diario.');\n  return [];\n}\n\nconst alias = (v) => String(v || '').split(',').map(norm).filter(Boolean);\nconst ALIAS_JULI = alias(cfg.alias_juli);\nconst ALIAS_MARCOS = alias(cfg.alias_marcos);\n\n// SECUENCIA DE 3 PASOS. Lo que elige la plantilla es el NUMERO DE ENVIO, no la\n// fecha: envio 1 -> seg_dia_1, envio 2 -> seg_dia_3, envio 3 -> seg_dia_5.\n// Por eso si un domingo no sale, el paso siguiente cae el lunes y la cadencia\n// no se rompe.\nconst SECUENCIA = [cfg.template_seg_dia_1, cfg.template_seg_dia_3, cfg.template_seg_dia_5];\n\n// Texto de respaldo por si la ventana de 24hs esta abierta. Mismo orden que\n// SECUENCIA, replicando el texto aprobado de cada plantilla.\nconst FALLBACKS = [\n  (a, p) => '¡Hola! ¿Cómo estás? Te escribe ' + a + ' de Arroyo Fitness 🙂 Retomo tu consulta por ' + p + '. Quería saber cómo viste la propuesta y si te quedó alguna duda o hay algún punto que quieras revisar antes de avanzar. Estoy para ayudarte con eso.',\n  (a, p) => '¡Hola! ¿Cómo estás? Soy ' + a + ' de Arroyo Fitness. Retomo tu consulta por ' + p + '. Quería saber cómo venís con la decisión y si hay algún punto que quieras revisar antes de avanzar: qué opción elegir, forma de pago o cualquier otra duda. Comentame y lo vemos juntos.',\n  (a, p) => '¡Hola! ¿Cómo estás? Soy ' + a + ' de Arroyo Fitness. Retomo tu consulta por ' + p + '. Quería consultarte si ya pudiste definirte con la opción que vimos. Si necesitás que revisemos algún último detalle, comentame y lo vemos juntos 🙌',\n];\n\nconst cap = (s) => {\n  const t = String(s || '').trim();\n  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;\n};\n\n// El nodo de busqueda pagina: llega un item por pagina de Chatwoot.\nconst convs = $input.all().flatMap((i) => i.json.payload ?? i.json.data?.payload ?? []);\n\nconst vistos = new Set();\nconst salida = [];\nlet conEtiqueta = 0;\nlet sinEtiqueta = 0;\nlet sinVendedor = 0;\nlet yaHoy = 0;\nlet aInactivar = 0;\nlet aTerminar = 0;\nlet esperandoCierre = 0;\nlet salteadasPorViejas = 0;\nlet cerradasPorViejas = 0;\nlet cerradasPorViejasSinEnvios = 0;\n\nfor (const c of convs) {\n  if (vistos.has(c.id)) continue;\n  vistos.add(c.id);\n\n  const labels = (c.labels ?? []).map(norm).filter(Boolean);\n  if (!labels.includes(L_SEG)) { sinEtiqueta++; continue; }\n  conEtiqueta++;\n\n  // Marca del ultimo envio. Evita el segundo mensaje si el flujo corre dos\n  // veces el mismo dia (prueba manual, reintento, doble activacion).\n  const attrs = c.custom_attributes ?? {};\n  const ultimoEnvio = String(attrs.seguimiento_ultimo_envio || '');\n  if (ultimoEnvio === HOY) { yaHoy++; continue; }\n\n  const enviados = Number(attrs.seguimiento_envios ?? 0);\n  const envioNumero = enviados + 1;\n\n  // FILTRO DE ANTIGUEDAD. La etiqueta seguimiento no caduca sola: un vendedor\n  // la pone, la charla se enfria y nadie la saca. Al conectar esta rama el\n  // 12/09 entraron de golpe conversaciones de hace meses y les salio un\n  // \"retomo tu consulta\" fuera de contexto.\n  //   mas de DIAS_CERRAR sin actividad  -> se cierra sacandole seguimiento\n  //   mas de DIAS_SALTEAR sin actividad -> no se le manda, pero la etiqueta\n  //                                        queda por si el vendedor la retoma\n  // Si Chatwoot no informa la fecha, se sigue de largo: preferimos mandar de\n  // mas antes que frenar todo por un dato que falta.\n  const ultimaActividad = Number(c.last_activity_at ?? c.timestamp ?? 0);\n  const diasInactivo = ultimaActividad > 0\n    ? Math.floor((ahora.toSeconds() - ultimaActividad) / 86400)\n    : null;\n\n  if (diasInactivo !== null && diasInactivo > DIAS_CERRAR) {\n    // Solo se marca inactivo al que efectivamente recibio algun mensaje de la\n    // secuencia. Si la etiqueta quedo puesta pero nunca salio nada, se cierra\n    // sin marcar: no hubo seguimiento del cual no contestar.\n    const marcarInactivo = enviados > 0;\n    if (marcarInactivo) cerradasPorViejas++; else cerradasPorViejasSinEnvios++;\n\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: 'inactiva hace ' + diasInactivo + ' dias' + (marcarInactivo ? ' -> inactivo' : ' (nunca recibio seguimiento)'),\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labels.filter((l) => l !== L_SEG),\n    } });\n    continue;\n  }\n\n  if (diasInactivo !== null && diasInactivo > DIAS_SALTEAR) {\n    salteadasPorViejas++;\n    continue;\n  }\n\n  // SECUENCIA COMPLETA. Ya recibio los 3 pasos. Antes se cerraba en la corrida\n  // del dia siguiente. Ahora se le dan ESPERA_INACTIVO dias mas de aire:\n  //   sin respuesta -> se le saca seguimiento y se le pone inactivo\n  //   contesto      -> se le saca seguimiento nomas (la secuencia ya termino),\n  //                    sin inactivo: respondio y la sigue el vendedor\n  // Se cierra aunque no tenga vendedor asignado: si no, quedaria reciclando\n  // para siempre en el filtro.\n  if (envioNumero > MAX_ENVIOS) {\n    const diasDesdeUltimo = ultimoEnvio\n      ? Math.floor(ahora.startOf('day').diff(DateTime.fromISO(ultimoEnvio, { zone: TZ }).startOf('day'), 'days').days)\n      : null;\n\n    // Todavia dentro de la ventana de espera: no se toca, se mira manana.\n    if (diasDesdeUltimo !== null && diasDesdeUltimo < ESPERA_INACTIVO) {\n      esperandoCierre++;\n      continue;\n    }\n\n    // Timestamp exacto del ultimo envio. Las conversaciones que venian de antes\n    // de este cambio no lo tienen: se aproxima con la fecha a las 10hs, que es\n    // la hora del cron.\n    const tsUltimoEnvio = Number(attrs.seguimiento_ultimo_envio_ts ?? 0) ||\n      (ultimoEnvio ? DateTime.fromISO(ultimoEnvio + 'T10:00', { zone: TZ }).toSeconds() : 0);\n\n    // Cualquier actividad posterior al ultimo mensaje cuenta como respuesta: en\n    // esos dias el flujo no le escribe nada, asi que si algo se movio fue el\n    // cliente o el vendedor.\n    const contesto = tsUltimoEnvio > 0 && ultimaActividad > tsUltimoEnvio + MARGEN_SEG;\n\n    // Sin fecha del ultimo envio no hay forma de saber si paso la espera: se\n    // cierra como siempre, sin marcarlo inactivo.\n    const marcarInactivo = !contesto && diasDesdeUltimo !== null;\n\n    // POST /labels reemplaza el set entero, asi que se manda la lista completa\n    // MENOS seguimiento (y con inactivo agregado si corresponde). Sin esto se\n    // pisarian vendido, bici, cotizado y las demas.\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    if (marcarInactivo) aInactivar++; else aTerminar++;\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: marcarInactivo\n        ? 'secuencia completa y ' + diasDesdeUltimo + ' dias sin respuesta -> inactivo'\n        : 'secuencia completa (' + enviados + ' envios), hubo actividad despues del ultimo mensaje',\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      dias_desde_ultimo_envio: diasDesdeUltimo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labelsBase,\n    } });\n    continue;\n  }\n\n  const asignado = norm(c.meta?.assignee?.available_name ?? c.meta?.assignee?.name ?? '');\n\n  let quien = '';\n  if (ALIAS_JULI.some((a) => asignado.includes(a))) quien = 'juli';\n  else if (ALIAS_MARCOS.some((a) => asignado.includes(a))) quien = 'marcos';\n\n  // Sin Juli ni Marcos asignado no se manda: la plantilla la firma una persona\n  // y no corresponde que salga de un chat que atendio otro.\n  if (!quien) { sinVendedor++; continue; }\n\n  // Las tres plantillas nuevas NO usan el nombre del cliente, solo asesor y\n  // producto. Por eso ya no se descarta a quien Chatwoot guardo con el\n  // telefono en vez del nombre: ese saludo feo no existe mas.\n  const asesor = cap(quien);\n\n  // El producto sale de las etiquetas de rubro que pone el sub-flujo\n  // \"arroyo v2 - etiquetar conversacion\". Sin rubro va el texto generico:\n  // la frase de la plantilla es fija y Meta RECHAZA una variable vacia.\n  let producto;\n  if (labels.includes(L_BICI)) producto = cfg.producto_bici;\n  else if (labels.includes(L_APAR)) producto = cfg.producto_aparatos;\n  else producto = cfg.producto_generico;\n\n  salida.push({ json: {\n    conversation_id: c.id,\n    accion: 'enviar',\n    nombre: String(c.meta?.sender?.name ?? '').trim().split(' ')[0],\n    vendedor: quien,\n    asesor: asesor,\n    producto: producto,\n    asignado_a: asignado,\n    ultimo_envio_previo: ultimoEnvio,\n    dias_inactivo: diasInactivo,\n    paso: envioNumero,\n    template_name: SECUENCIA[envioNumero - 1],\n    template_category: cfg.categoria_seguimiento ?? 'MARKETING',\n    template_language: cfg.template_language,\n    // Las claves tienen que coincidir EXACTO con las variables de la plantilla\n    // aprobada en Meta, o el envio se rechaza.\n    processed_params: { asesor: asesor, producto: producto },\n    fallback: FALLBACKS[envioNumero - 1](asesor, producto),\n    envio_numero: envioNumero,\n    fecha_envio: HOY\n  } });\n}\n\n// ROTACION JUSTA. Chatwoot devuelve las conversaciones ordenadas por ultima\n// actividad, y mandar un mensaje empuja ese chat al tope de la lista. Con un\n// tope por corrida eso significa que los mismos N reciben todos los dias y la\n// cola de atras no recibe nunca. Ordenamos por fecha del ultimo seguimiento\n// enviado: primero los que nunca recibieron (string vacio), despues del mas\n// viejo al mas nuevo.\nsalida.sort((a, b) => String(a.json.ultimo_envio_previo).localeCompare(String(b.json.ultimo_envio_previo)));\n\nconst enCola = salida.length;\nconst recortados = Math.max(0, enCola - MAX);\nif (recortados > 0) {\n  console.log('En cola hay ' + enCola + ' y el tope por corrida es ' + MAX + '. Quedan ' + recortados + ' para las proximas corridas (van entrando por rotacion, primero los que hace mas que no reciben).');\n}\nconsole.log('Conversaciones devueltas por la busqueda: ' + vistos.size + ' | con la etiqueta seguimiento: ' + conEtiqueta + ' | en cola: ' + enCola + ' | se procesan hoy: ' + Math.min(enCola, MAX) + ' | esperando el cierre (' + ESPERA_INACTIVO + 'd tras el ultimo mensaje): ' + esperandoCierre + ' | a marcar inactivo por secuencia completa: ' + aInactivar + ' | cierran sin inactivo porque hubo respuesta: ' + aTerminar + ' | salteadas por inactividad (+' + DIAS_SALTEAR + 'd, conservan la etiqueta): ' + salteadasPorViejas + ' | cerradas por inactividad (+' + DIAS_CERRAR + 'd) que quedan inactivo: ' + cerradasPorViejas + ' | cerradas por inactividad sin ningun envio previo (no se marcan): ' + cerradasPorViejasSinEnvios + ' | ya recibieron hoy: ' + yaHoy + ' | sin Juli/Marcos asignado: ' + sinVendedor);\n\nreturn salida.slice(0, MAX);",
+  "attributeNodes": [
+    {
+      "name": "Marcar Envio Del Dia",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Chatwoot').first().json.url_chatwoot }}api/v1/accounts/{{ $('Config Chatwoot').first().json.account_number }}/conversations/{{ $('Armar Seguimiento').item.json.conversation_id }}/custom_attributes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ custom_attributes: { seguimiento_ultimo_envio: $('Armar Seguimiento').item.json.fecha_envio, seguimiento_envios: $('Armar Seguimiento').item.json.envio_numero, seguimiento_ultimo_envio_ts: $('Armar Seguimiento').item.json.fecha_envio_ts } }) }}",
+        "options": {}
+      }
+    },
+    {
+      "name": "Resetear Contador",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Chatwoot').first().json.url_chatwoot }}api/v1/accounts/{{ $('Config Chatwoot').first().json.account_number }}/conversations/{{ $('Armar Seguimiento').item.json.conversation_id }}/custom_attributes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ custom_attributes: { seguimiento_ultimo_envio: '', seguimiento_envios: 0, seguimiento_ultimo_envio_ts: 0 } }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "commercialAssignments": [
+    {
+      "id": "url",
+      "name": "url_chatwoot",
+      "type": "string",
+      "value": "https://chatarroyo.thorque.com.ar/"
+    },
+    {
+      "id": "acc",
+      "name": "account_number",
+      "type": "string",
+      "value": "1"
+    },
+    {
+      "id": "lang",
+      "name": "template_language",
+      "type": "string",
+      "value": "es_AR"
+    },
+    {
+      "id": "lblseg",
+      "name": "label_seguimiento",
+      "type": "string",
+      "value": "seguimiento"
+    },
+    {
+      "id": "lblinact",
+      "name": "label_inactivo",
+      "type": "string",
+      "value": "inactivo"
+    },
+    {
+      "id": "espinact",
+      "name": "dias_espera_inactivo",
+      "type": "number",
+      "value": 2
+    },
+    {
+      "id": "catseg",
+      "name": "categoria_seguimiento",
+      "type": "string",
+      "value": "MARKETING"
+    },
+    {
+      "id": "aljuli",
+      "name": "alias_juli",
+      "type": "string",
+      "value": "juli,julieta"
+    },
+    {
+      "id": "almarcos",
+      "name": "alias_marcos",
+      "type": "string",
+      "value": "marcos"
+    },
+    {
+      "id": "diasoff",
+      "name": "dias_sin_envio",
+      "type": "string",
+      "value": "7"
+    },
+    {
+      "id": "maxseg",
+      "name": "max_seguimiento_por_corrida",
+      "type": "number",
+      "value": 150
+    },
+    {
+      "id": "soloconv",
+      "name": "solo_conversaciones",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "id": "tplseg1",
+      "name": "template_seg_dia_1",
+      "type": "string",
+      "value": "seg_dia_1"
+    },
+    {
+      "id": "tplseg3",
+      "name": "template_seg_dia_3",
+      "type": "string",
+      "value": "seg_dia_3"
+    },
+    {
+      "id": "tplseg5",
+      "name": "template_seg_dia_5",
+      "type": "string",
+      "value": "seg_dia_5"
+    },
+    {
+      "id": "maxenvseg",
+      "name": "max_envios_seguimiento",
+      "type": "number",
+      "value": 3
+    },
+    {
+      "id": "lblbici",
+      "name": "label_bici",
+      "type": "string",
+      "value": "bici"
+    },
+    {
+      "id": "lblapar",
+      "name": "label_aparatos",
+      "type": "string",
+      "value": "aparatosgim"
+    },
+    {
+      "id": "prodbici",
+      "name": "producto_bici",
+      "type": "string",
+      "value": "una bicicleta"
+    },
+    {
+      "id": "prodapar",
+      "name": "producto_aparatos",
+      "type": "string",
+      "value": "equipamiento de gimnasio"
+    },
+    {
+      "id": "prodgen",
+      "name": "producto_generico",
+      "type": "string",
+      "value": "lo que estabas viendo"
+    },
+    {
+      "id": "inactsalt",
+      "name": "dias_inactividad_saltear",
+      "type": "number",
+      "value": 45
+    },
+    {
+      "id": "inactcerrar",
+      "name": "dias_inactividad_cerrar",
+      "type": "number",
+      "value": 60
+    }
+  ],
+  "removeNodes": [
+    "Buscar Conversaciones con Compra",
+    "Clasificar Seguimientos",
+    "Resumen Corrida",
+    "Preparar Envio",
+    "Hay Que Enviar?",
+    "Enviar Plantilla WhatsApp",
+    "Etiquetar Enviado",
+    "Uno Por Uno",
+    "Etiquetar Sin Enviar",
+    "Solo Prueba Post-Venta",
+    "Sticky Note 060b5c8e",
+    "Sticky Note 3d7a90f3",
+    "Sticky Note c2a8f1a3"
+  ]
+}

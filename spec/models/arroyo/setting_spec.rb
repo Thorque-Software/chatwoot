@@ -95,5 +95,26 @@ RSpec.describe Arroyo::Setting do
       expect(setting).not_to be_valid
       expect(setting.errors.full_messages).to eq(['Invalid value for post_sale.alert_user_ids'])
     end
+
+    it 'requires an alert recipient before enabling post-sale' do
+      setting.merge_config(post_sale: { enabled: true })
+
+      expect(setting).not_to be_valid
+      expect(setting.errors.full_messages).to eq(['Invalid value for post_sale.alert_user_ids'])
+    end
+
+    it 'requires inbox access for an agent recipient but permits account administrators' do
+      channel = create(:channel_whatsapp, account: account, sync_templates: false, validate_provider_config: false)
+      agent = create(:user, account: account, role: :agent)
+      setting.merge_config(post_sale: { enabled: true, alert_user_ids: [agent.id] })
+      expect(setting).not_to be_valid
+
+      create(:inbox_member, inbox: channel.inbox, user: agent)
+      expect(setting).to be_valid
+
+      administrator = create(:user, account: account, role: :administrator)
+      setting.merge_config(post_sale: { alert_user_ids: [administrator.id] })
+      expect(setting).to be_valid
+    end
   end
 end

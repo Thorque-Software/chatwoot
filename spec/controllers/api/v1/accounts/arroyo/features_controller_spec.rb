@@ -11,7 +11,8 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::FeaturesController', type: :request d
       expect(response).to have_http_status(:success)
       expect(response.parsed_body).to eq(
         'timezone' => 'America/Argentina/Buenos_Aires',
-        'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false }
+        'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false },
+        'post_sale' => { 'enabled' => false, 'has_records' => false }
       )
     end
 

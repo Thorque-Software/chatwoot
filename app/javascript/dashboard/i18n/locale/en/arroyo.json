@@ -61,14 +61,14 @@
       },
       "POST_SALE": {
         "TITLE": "Post-sale",
-        "DESCRIPTION": "When a conversation gets the sale label, schedule follow-ups and alert the managers if a message is not delivered.",
+        "DESCRIPTION": "Chatwoot records the purchase when the sale label is applied. n8n reads this configuration, schedules and sends follow-ups; Chatwoot checks delivery and creates manual tasks. Alerts use native mentions and each manager's notification preferences.",
         "TRIGGER_LABEL": {
           "LABEL": "Sale label",
-          "HELP": "Applying this label to a conversation schedules the follow-ups."
+          "HELP": "Applying this label records the purchase date and seller. n8n schedules the stages from that date."
         },
         "SEND_HOUR_LOCAL": {
           "LABEL": "Send hour",
-          "HELP": "Hour of the day (0 to 23) in the business time zone."
+          "HELP": "Hour of the day (0 to 23) used by n8n in the business time zone. Defaults to 10:00 every day."
         },
         "SKIP_SUNDAYS": {
           "LABEL": "Move Sunday sends to Monday"
@@ -80,23 +80,20 @@
           },
           "FREE_TEXT": {
             "LABEL": "Message when the window is open",
-            "HELP": "You can use variables such as {variable}."
+            "HELP": "n8n uses this text when the window allows a reply. You can use variables such as {variable}."
           },
           "TEMPLATE": {
             "LABEL": "Template when the window is closed",
-            "HELP": "Name of the approved WhatsApp template. Leave empty to alert the managers instead of sending."
+            "HELP": "Name of the approved WhatsApp template used by n8n. Check its approval and variables before enabling sends."
           }
         },
         "DELIVERY_TIMEOUT_HOURS": {
           "LABEL": "Delivery timeout (hours)",
-          "HELP": "A sent follow-up without delivery confirmation after this time raises an alert."
+          "HELP": "Chatwoot creates a task if delivery is not confirmed after an attempt, or if n8n does not schedule or execute on time. Defaults to 6 hours."
         },
         "ALERT_USERS": {
           "LABEL": "Alert managers",
-          "HELP": "They are mentioned in a private note when a follow-up fails."
-        },
-        "ALERT_EMAIL": {
-          "LABEL": "Also send alerts by email"
+          "HELP": "They are mentioned in a private note when manual contact is needed. Configure managers with inbox access before enabling."
         }
       },
       "AGENT_PANEL": {
@@ -138,7 +135,91 @@
       "DAILY_TITLE": "Conversations attended per period",
       "TABS": {
         "ACTIVITY": "Activity",
-        "WINDOWS": "24-hour windows"
+        "WINDOWS": "24-hour windows",
+        "POST_SALE": "Post-sale"
+      },
+      "POST_SALE": {
+        "DESCRIPTION": "n8n schedules and sends follow-ups. Check their delivery here and record manual contact when needed.",
+        "DISABLED_HISTORY": "The integration is disabled; history remains available and you can resolve pending manual tasks.",
+        "STATUS_FILTER": "Follow-up status",
+        "ALL_STATUSES": "All statuses",
+        "RETRY": "Retry",
+        "LOAD_ERROR": "Could not load follow-ups",
+        "SAVE_ERROR": "Could not save the change",
+        "EMPTY": "No follow-ups match these filters",
+        "LIMIT": "Showing {shown} of {total} follow-ups.",
+        "PREVIOUS_PAGE": "Previous page",
+        "NEXT_PAGE": "Next page",
+        "TEMPLATE": "Template:",
+        "DETAIL": "Post-sale details",
+        "OPEN_CONVERSATION": "Open conversation",
+        "PURCHASE_DATE": "Purchase date",
+        "DATE_HELP": "Time in {timezone}. A correction only changes stages with no attempt yet; n8n schedules them again.",
+        "SAVE_DATE": "Save date",
+        "PURCHASE_STAGES": "Stages for this purchase",
+        "MESSAGE": "Stage message",
+        "PROVIDER_ID": "Provider ID: {id}",
+        "OPEN_MESSAGE": "View message in conversation",
+        "NO_MESSAGE": "No message has been created for this stage yet.",
+        "RESOLVE": "Record manual follow-up",
+        "RESOLVE_HELP": "Record contact you have already made. This does not send messages or change automatic delivery status.",
+        "METHOD": "Contact method",
+        "NOTE": "Outcome and note",
+        "RESOLUTION": "Recorded manual follow-up",
+        "STATUSES": {
+          "AWAITING_PLAN": "Awaiting scheduling",
+          "SCHEDULED": "Scheduled",
+          "QUEUED": "Processing",
+          "SENT": "Sent",
+          "DELIVERED": "Delivered",
+          "READ": "Read",
+          "FAILED": "Failed",
+          "UNCONFIRMED": "Delivery unconfirmed",
+          "NOT_EXECUTED": "Not executed",
+          "CANCELLED": "Cancelled"
+        },
+        "MANUAL_STATUSES": {
+          "PENDING": "Pending",
+          "RESOLVED": "Resolved manually",
+          "CLOSED_AUTOMATICALLY": "Closed after confirmed delivery"
+        },
+        "SUMMARY": {
+          "SCHEDULED": "Awaiting scheduling / scheduled",
+          "PROCESSING": "Processing / sent",
+          "DELIVERED": "Delivered / read",
+          "FAILED": "Failed / not executed",
+          "UNCONFIRMED": "Unconfirmed",
+          "MANUAL_PENDING": "Pending manual tasks"
+        },
+        "COLUMNS": {
+          "CUSTOMER": "Customer",
+          "PRODUCT": "Product",
+          "SELLER": "Original seller",
+          "STAGE": "Stage",
+          "SCHEDULED_AT": "Scheduled for",
+          "ATTEMPTED_AT": "Attempted",
+          "STATUS": "Automatic status",
+          "REASON": "Reason",
+          "ASSIGNEE": "Responsible agent",
+          "MANUAL": "Manual task"
+        },
+        "DATES": {
+          "SCHEDULED_AT": "Scheduled for",
+          "ATTEMPTED_AT": "Attempted",
+          "DELIVERED_AT": "Delivered",
+          "READ_AT": "Read",
+          "RESOLVED_AT": "Manually resolved"
+        },
+        "METHODS": {
+          "CALL": "Phone call",
+          "PERSONAL_WHATSAPP": "Personal WhatsApp",
+          "OTHER": "Other"
+        },
+        "STAGES": {
+          "D1": "D+1",
+          "D7": "D+7",
+          "D30": "D+30"
+        }
       },
       "FILTERS": {
         "PERIOD": "Period",
