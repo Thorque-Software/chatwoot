@@ -2,7 +2,9 @@
 
 ## Implementación
 
-Rama de trabajo `arroyo/comments`, creada desde `arroyo/dev` en un worktree aislado. No se modificaron los cinco cambios locales previos del checkout principal ni se desplegó producción.
+Desarrollo realizado en `arroyo/comments`, creada desde `arroyo/dev` en un worktree aislado. El 14/10/2026 se integró en `arroyo/dev` por solicitud de Mauro, conservando los ajustes locales de instalación y pruebas de postventa. El esquema incluye ambas migraciones. Esta integración no despliega producción ni publica los workflows n8n.
+
+Verificación de la integración: **176 ejemplos RSpec sin fallos**, **33 pruebas Vitest aprobadas**, **12 pruebas Node de postventa aprobadas** y lógica de los workflows de comentarios verificada. RuboCop: 26 archivos sin infracciones, comprobados con los finales LF de Git. ESLint: sin errores; conserva 14 advertencias de formato Vue, claves i18n dinámicas y presentación condicional. Se aplicó Prettier a los cuatro componentes nuevos y se tradujeron los nombres de las redes en los selectores. Pruebas Rails en la base aislada `arroyo_integration_test`; ninguna petición real a Meta.
 
 Los vendedores atienden comentarios de Instagram y Facebook en bandejas API dedicadas. El módulo **Comentarios** lista comentarios, permite filtrar por red/estado y abre la conversación nativa. El editor advierte que la respuesta será pública; las notas privadas conservan el comportamiento nativo. Los administradores habilitan la función en Configuración → Arroyo y crean bandejas con vendedores asignados. El flag viene apagado por cuenta.
 

@@ -57,7 +57,7 @@ RSpec.describe 'Arroyo post-sale API', type: :request do
     foreign_channel = create(:channel_whatsapp, account: foreign_account, provider: 'whatsapp_cloud',
                                                 sync_templates: false, validate_provider_config: false)
     foreign_conversation = create(:conversation, account: foreign_account, inbox: foreign_channel.inbox, label_list: ['vendido'])
-    foreign_purchase = Arroyo::PostSale::RegisterPurchaseService.new(conversation: foreign_conversation, timestamp: Time.current).perform
+    foreign_purchase = Arroyo::PostSale::RegisterPurchaseService.new(conversation: foreign_conversation.reload, timestamp: Time.current).perform
 
     get "#{url}/follow_ups", headers: admin.create_new_auth_token, params: { purchase_reference: foreign_purchase.reference }
     expect(response.parsed_body['follow_ups']).to be_empty

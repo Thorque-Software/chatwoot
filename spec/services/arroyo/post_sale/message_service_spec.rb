@@ -55,11 +55,12 @@ RSpec.describe Arroyo::PostSale::MessageService do
     travel_to(follow_up.scheduled_at) do
       create(:message, account: account, inbox: channel.inbox, conversation: conversation, message_type: :incoming)
       service = lambda {
-        described_class.new(follow_up: follow_up, revision: purchase.revision,
-                            content: 'How is your product?', execution_id: 'fixture').perform
+        result = described_class.new(follow_up: follow_up, revision: purchase.revision,
+                                     content: 'How is your product?', execution_id: 'fixture').perform
+        expect(result.status).to eq('queued'), result.error_message
       }
       expect { 2.times { service.call } }.to change {
-        conversation.messages.where("content_attributes ->> 'arroyo_kind' = 'post_sale'").count
+        conversation.messages.where(id: purchase.follow_ups.select(:message_id)).count
       }.by(1)
     end
 

@@ -1,6 +1,8 @@
 {
   "ARROYO": {
     "SOCIAL_COMMENTS": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
       "TITLE": "Comentarios",
       "DESCRIPTION": "Comentarios de Instagram y Facebook, atendidos por el equipo de ventas.",
       "HUMAN_LABEL": "Atención por vendedores",

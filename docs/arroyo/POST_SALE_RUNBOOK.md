@@ -1,5 +1,7 @@
 # Postventa Arroyo: estado y puesta en marcha
 
+Actualización del 14/10/2026: comentarios públicos integrados en `arroyo/dev`, junto con las exclusiones del respaldo privado en Git/Docker y las correcciones de fixtures/assertions de postventa. El esquema incluye postventa y comentarios. La verificación conjunta en una copia Linux aislada completó **176 ejemplos RSpec, 0 fallos**, incluyendo los servicios/controladores Arroyo y los puntos core afectados. Las limitaciones Rails descritas más abajo corresponden a la revisión inicial del 13/10; la prueba real con Meta y el despliegue siguen pendientes. La integración en Git no publica los borradores n8n ni activa automatizaciones.
+
 Actualizado el 13 de octubre de 2026. Avance desarrollado en `arroyo/dev`, cuya publicación en GitHub fue solicitada por Mauro con las pruebas Rails pendientes ya informadas. Sin despliegue ni activación. Workflow n8n: [arroyo v3 · seguimientos post-venta](https://n8narroyo.thorque.com.ar/workflow/fF0LK453uWJdBHsR), carpeta Arroyo/v3.
 
 `Staging` significa un entorno de pruebas separado de producción; no es una rama Git ni presupone que ya exista esa infraestructura. Las ramas remotas verificadas del fork son `arroyo/main` y `develop`; este avance se publica en `arroyo/dev`. No se crea una rama `staging`. Los pasos de prueba integrada de este documento requieren disponer de una instancia local o un entorno separado que ejecute `arroyo/dev`.
