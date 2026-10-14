@@ -12,6 +12,7 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::FeaturesController', type: :request d
       expect(response.parsed_body).to eq(
         'timezone' => 'America/Argentina/Buenos_Aires',
         'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false },
+        'social_comments' => { 'enabled' => false, 'inboxes' => [] },
         'post_sale' => { 'enabled' => false, 'has_records' => false }
       )
     end

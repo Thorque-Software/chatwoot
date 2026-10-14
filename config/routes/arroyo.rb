@@ -1,6 +1,19 @@
 # Rutas del fork Arroyo. Se cargan con `draw :arroyo` dentro del scope de cuenta
 # en config/routes.rb: /api/v1/accounts/:account_id/arroyo/...
 namespace :arroyo do
+  scope :social_comments, controller: 'social_comments' do
+    get 'channels', action: :channels
+    post 'channels', action: :create_channel
+    patch 'channels/:id', action: :update_channel
+    get 'comments', action: :index
+    get 'conversations/:conversation_id', action: :context
+    get 'verify', action: :verify
+    post 'ingest', action: :ingest
+    post 'enrich', action: :enrich
+    post 'claim', action: :claim
+    post 'replies/:id/acknowledge', action: :acknowledge
+    post 'replies/:id/retry', action: :retry
+  end
   scope :post_sale, controller: 'post_sale' do
     get 'purchases', action: :purchases
     put 'purchases/:reference/plan', action: :plan

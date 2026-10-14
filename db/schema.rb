@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_06_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -168,12 +168,137 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_06_130000) do
     t.index ["conversation_id"], name: "index_arroyo_assignment_events_on_conversation_id"
   end
 
+  create_table "arroyo_follow_ups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "purchase_id", null: false
+    t.string "stage", null: false
+    t.string "status", default: "awaiting_plan", null: false
+    t.datetime "scheduled_at"
+    t.datetime "attempted_at"
+    t.bigint "message_id"
+    t.string "execution_id"
+    t.string "channel_used"
+    t.string "template_name"
+    t.string "error_code"
+    t.text "error_message"
+    t.datetime "delivered_at"
+    t.datetime "read_at"
+    t.string "manual_status"
+    t.datetime "alerted_at"
+    t.bigint "alert_assignee_id"
+    t.bigint "alert_message_id"
+    t.bigint "resolved_by_id"
+    t.datetime "resolved_at"
+    t.string "resolution_method"
+    t.text "resolution_note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "manual_status"], name: "index_arroyo_follow_ups_on_account_id_and_manual_status"
+    t.index ["account_id"], name: "index_arroyo_follow_ups_on_account_id"
+    t.index ["alert_assignee_id"], name: "index_arroyo_follow_ups_on_alert_assignee_id"
+    t.index ["alert_message_id"], name: "index_arroyo_follow_ups_on_alert_message_id"
+    t.index ["message_id"], name: "unique_arroyo_follow_up_message", unique: true
+    t.index ["purchase_id", "stage"], name: "index_arroyo_follow_ups_on_purchase_id_and_stage", unique: true
+    t.index ["purchase_id"], name: "index_arroyo_follow_ups_on_purchase_id"
+    t.index ["resolved_by_id"], name: "index_arroyo_follow_ups_on_resolved_by_id"
+    t.index ["status", "scheduled_at"], name: "index_arroyo_follow_ups_on_status_and_scheduled_at"
+  end
+
+  create_table "arroyo_post_sale_purchases", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "seller_id"
+    t.string "reference", null: false
+    t.datetime "purchased_at", null: false
+    t.datetime "recorded_at", null: false
+    t.string "product"
+    t.string "rubro"
+    t.integer "revision", default: 1, null: false
+    t.integer "planned_revision", default: 0, null: false
+    t.datetime "cancelled_at"
+    t.jsonb "date_changes", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "purchased_at"], name: "index_arroyo_purchases_on_account_and_date"
+    t.index ["account_id"], name: "index_arroyo_post_sale_purchases_on_account_id"
+    t.index ["contact_id"], name: "index_arroyo_post_sale_purchases_on_contact_id"
+    t.index ["conversation_id"], name: "index_arroyo_post_sale_purchases_on_conversation_id", unique: true
+    t.index ["inbox_id"], name: "index_arroyo_post_sale_purchases_on_inbox_id"
+    t.index ["reference"], name: "index_arroyo_post_sale_purchases_on_reference", unique: true
+    t.index ["seller_id"], name: "index_arroyo_post_sale_purchases_on_seller_id"
+  end
+
   create_table "arroyo_settings", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.jsonb "config", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_arroyo_settings_on_account_id", unique: true
+  end
+
+  create_table "arroyo_social_channels", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.string "platform", null: false
+    t.string "external_account_id"
+    t.string "api_version"
+    t.boolean "publishing_enabled", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "platform", "external_account_id"], name: "arroyo_social_channel_external_account", unique: true, where: "(external_account_id IS NOT NULL)"
+    t.index ["account_id"], name: "index_arroyo_social_channels_on_account_id"
+    t.index ["inbox_id"], name: "index_arroyo_social_channels_on_inbox_id", unique: true
+  end
+
+  create_table "arroyo_social_comments", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "channel_id", null: false
+    t.bigint "conversation_id"
+    t.bigint "message_id"
+    t.string "remote_id", null: false
+    t.string "thread_id", null: false
+    t.string "parent_id"
+    t.string "author_id"
+    t.string "author_name"
+    t.text "body"
+    t.string "media_id"
+    t.text "post_url"
+    t.text "comment_url"
+    t.datetime "remote_updated_at", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "created_at"], name: "index_arroyo_social_comments_on_account_id_and_created_at"
+    t.index ["account_id"], name: "index_arroyo_social_comments_on_account_id"
+    t.index ["channel_id", "remote_id"], name: "index_arroyo_social_comments_on_channel_id_and_remote_id", unique: true
+    t.index ["channel_id", "thread_id"], name: "index_arroyo_social_comments_on_channel_id_and_thread_id"
+    t.index ["channel_id"], name: "index_arroyo_social_comments_on_channel_id"
+    t.index ["conversation_id"], name: "index_arroyo_social_comments_on_conversation_id"
+    t.index ["message_id"], name: "index_arroyo_social_comments_on_message_id"
+  end
+
+  create_table "arroyo_social_replies", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "comment_id", null: false
+    t.bigint "message_id"
+    t.bigint "sender_id"
+    t.string "client_request_id"
+    t.string "status", default: "pending_configuration", null: false
+    t.string "claim_token"
+    t.datetime "claimed_at"
+    t.datetime "published_at"
+    t.string "remote_reply_id"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "status", "created_at"], name: "arroyo_social_reply_queue"
+    t.index ["account_id"], name: "index_arroyo_social_replies_on_account_id"
+    t.index ["comment_id", "client_request_id"], name: "arroyo_social_reply_request", unique: true
+    t.index ["comment_id"], name: "index_arroyo_social_replies_on_comment_id"
+    t.index ["message_id"], name: "index_arroyo_social_replies_on_message_id", unique: true
+    t.index ["sender_id"], name: "index_arroyo_social_replies_on_sender_id"
   end
 
   create_table "article_embeddings", force: :cascade do |t|
@@ -491,8 +616,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_06_130000) do
     t.boolean "smtp_enable_ssl_tls", default: false
     t.jsonb "provider_config", default: {}
     t.string "provider"
-    t.string "imap_authentication", default: "plain"
     t.boolean "verified_for_sending", default: false, null: false
+    t.string "imap_authentication", default: "plain"
     t.index ["email"], name: "index_channel_email_on_email", unique: true
     t.index ["forward_to_email"], name: "index_channel_email_on_forward_to_email", unique: true
   end
@@ -1341,6 +1466,27 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_06_130000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "arroyo_follow_ups", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_follow_ups", "arroyo_post_sale_purchases", column: "purchase_id", on_delete: :cascade
+  add_foreign_key "arroyo_follow_ups", "messages", column: "alert_message_id", on_delete: :nullify
+  add_foreign_key "arroyo_follow_ups", "messages", on_delete: :nullify
+  add_foreign_key "arroyo_follow_ups", "users", column: "alert_assignee_id", on_delete: :nullify
+  add_foreign_key "arroyo_follow_ups", "users", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "arroyo_post_sale_purchases", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_post_sale_purchases", "contacts", on_delete: :cascade
+  add_foreign_key "arroyo_post_sale_purchases", "conversations", on_delete: :cascade
+  add_foreign_key "arroyo_post_sale_purchases", "inboxes", on_delete: :cascade
+  add_foreign_key "arroyo_post_sale_purchases", "users", column: "seller_id", on_delete: :nullify
+  add_foreign_key "arroyo_social_channels", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_social_channels", "inboxes", on_delete: :cascade
+  add_foreign_key "arroyo_social_comments", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_social_comments", "arroyo_social_channels", column: "channel_id", on_delete: :cascade
+  add_foreign_key "arroyo_social_comments", "conversations", on_delete: :nullify
+  add_foreign_key "arroyo_social_comments", "messages", on_delete: :nullify
+  add_foreign_key "arroyo_social_replies", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_social_replies", "arroyo_social_comments", column: "comment_id", on_delete: :cascade
+  add_foreign_key "arroyo_social_replies", "messages", on_delete: :nullify
+  add_foreign_key "arroyo_social_replies", "users", column: "sender_id", on_delete: :nullify
   add_foreign_key "inboxes", "portals"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").

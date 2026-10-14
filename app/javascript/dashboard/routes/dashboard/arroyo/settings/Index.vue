@@ -12,6 +12,7 @@ import WindowKeeperSection from './components/WindowKeeperSection.vue';
 import PostSaleSection from './components/PostSaleSection.vue';
 import AgentPanelSection from './components/AgentPanelSection.vue';
 import EmailMarketingSection from './components/EmailMarketingSection.vue';
+import SocialCommentsSection from './components/SocialCommentsSection.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -88,6 +89,11 @@ onMounted(() => {
           :config="config.email_marketing"
           :is-saving="savingSection === 'email_marketing'"
           @save="saveSection('email_marketing', $event)"
+        />
+        <SocialCommentsSection
+          :config="config.social_comments"
+          :is-saving="savingSection === 'social_comments'"
+          @save="saveSection('social_comments', $event)"
         />
       </div>
     </template>

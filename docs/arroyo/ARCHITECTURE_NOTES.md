@@ -405,3 +405,13 @@ Sin pendientes abiertos.
   - Ruta `/app/accounts/:id/arroyo/panel`. Los filtros viven en la URL (`preset`, `since`, `until`, `group_by`, `user_ids`, `inbox_ids`, `tab`).
   - "Panel de vendedores" aparece en el menú cuando el panel está activo. Si `hide_native_reports` está activo, se oculta "Reportes" del menú; la ruta nativa sigue funcionando.
 - Archivos core tocados en esta fase: `app/dispatchers/async_dispatcher.rb`, `app/javascript/dashboard/routes/dashboard/dashboard.routes.js`, `app/javascript/dashboard/components-next/sidebar/Sidebar.vue` (todos con `ARROYO:`).
+
+## Comentarios públicos (14/10/2026)
+
+- Implementación y configuración final: `SOCIAL_COMMENTS_DESIGN.md`, `SOCIAL_COMMENTS_PLAN.md` y `SOCIAL_COMMENTS_RUNBOOK.md`.
+- El canal API nativo sí ejecuta `Messages::SendEmailNotificationService` mediante `SendReplyJob`: no basta con dejar vacío su webhook. Un guard puntual evita ese transporte en los inboxes registrados como `Arroyo::SocialChannel`.
+- `sender_type = User` no demuestra interacción humana. Las macros reconstruyen un User también cuando se ejecutan con API key. La respuesta pública exige un `HumanReplyContext` limitado a la creación directa del controlador de mensajes con sesión; los jobs/macros no lo heredan. Las notas privadas y otros canales siguen el comportamiento nativo.
+- El builder deja `content_type` en nil hasta validar el mensaje; se acepta ese default de texto y se rechazan tipos explícitos distintos y adjuntos públicos.
+- Los webhooks pueden compartir timestamp entre alta y edición. Se deduplica por ID de comentario y se actualiza el cuerpo aunque el timestamp coincida; se descartan eventos anteriores y se conserva la eliminación.
+- Estado nativo `sent` del inbox API significa guardado en el pipeline local. Solo `arroyo_public_reply_status = published` más el ID remoto prueba publicación. La UI oculta el recibo nativo y usa el estado público; resultados inciertos no muestran el reintento genérico de mensajes privados.
+- Fuente de revisión local: worktree `arroyo/comments` basado en `arroyo/dev`; puertos 3300/3336 y base `arroyo_comments_local`. Los cambios previos del checkout principal permanecen separados.

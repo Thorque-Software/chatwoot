@@ -17,6 +17,9 @@ class SendReplyJob < ApplicationJob
 
   def perform(message_id)
     message = Message.find(message_id)
+    # ARROYO: el canal de comentarios usa exclusivamente n8n, nunca notificaciones de email del inbox API.
+    return if ::Arroyo::SocialChannel.for_inbox(message.inbox)
+
     channel_name = message.conversation.inbox.channel.class.to_s
 
     return send_on_facebook_page(message) if channel_name == 'Channel::FacebookPage'

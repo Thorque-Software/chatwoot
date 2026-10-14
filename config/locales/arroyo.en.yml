@@ -5,6 +5,24 @@ en:
         arroyo/setting:
           invalid_field: 'Invalid value for %{field}'
   arroyo:
+    social_comments:
+      errors:
+        disabled: 'Public comments are disabled for this account.'
+        invalid_members: 'Choose agents belonging to this account.'
+        invalid_payload: 'The original Meta event is invalid.'
+        invalid_signature: 'The Meta signature or verification token is invalid.'
+        not_configured: 'Meta is not connected. This reply is saved and requires an explicit retry after configuration.'
+        humans_only: 'Only a signed-in person may submit a public reply. Bots and integration API keys cannot publish.'
+        text_only: 'Public replies support text only.'
+        deleted: 'This comment was deleted. It cannot receive another reply.'
+        stale_claim: 'This callback does not belong to the current publication attempt.'
+        invalid_status: 'A successful publication requires the reply ID returned by Meta.'
+        failed: 'Meta rejected the public reply. Review the connection before retrying.'
+        unconfirmed: 'The publication outcome is unknown. Check Meta before sending another reply.'
+        unsafe_retry: 'This attempt cannot be repeated safely. Check the comment on Meta.'
+        forbidden: 'You do not have access to this comments inbox.'
+        invalid_link: 'The publication URL must be an HTTPS Facebook or Instagram link.'
+        cannot_delete_reply: 'Manage published replies on Meta. Deleting local text does not withdraw a public comment.'
     post_sale:
       products:
         bike: 'your bicycle'

@@ -16,6 +16,8 @@ import ArticleSearchPopover from 'dashboard/routes/dashboard/helpcenter/componen
 import CopilotEditorSection from './CopilotEditorSection.vue';
 import MessageSignatureMissingAlert from './MessageSignatureMissingAlert.vue';
 import ReplyBoxBanner from './ReplyBoxBanner.vue';
+// ARROYO: contexto de respuesta pública
+import PublicCommentBanner from 'dashboard/routes/dashboard/arroyo/comments/components/PublicCommentBanner.vue';
 import QuotedEmailPreview from './QuotedEmailPreview.vue';
 import { REPLY_EDITOR_MODES } from 'dashboard/components/widgets/WootWriter/constants';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
@@ -66,6 +68,8 @@ export default {
     AttachmentPreview,
     AudioRecorder,
     ReplyBoxBanner,
+    // ARROYO: aviso de publicación y vínculo a la publicación original
+    PublicCommentBanner,
     EmojiInput,
     MessageSignatureMissingAlert,
     ReplyBottomPanel,
@@ -285,6 +289,12 @@ export default {
       return MESSAGE_MAX_LENGTH.GENERAL;
     },
     showFileUpload() {
+      // ARROYO: las respuestas públicas admiten texto; las notas conservan adjuntos
+      if (
+        this.inbox?.additional_attributes?.arroyo_social_comments &&
+        !this.isPrivate
+      )
+        return false;
       const { image_send: imageSend } =
         this.currentChat?.additional_attributes?.tiktok_capabilities ?? {};
       const tiktokAttachmentSupported = imageSend ?? true;
@@ -306,6 +316,9 @@ export default {
       let sendMessageText = this.$t('CONVERSATION.REPLYBOX.SEND');
       if (this.isPrivate) {
         sendMessageText = this.$t('CONVERSATION.REPLYBOX.CREATE');
+        // ARROYO: distinguir una respuesta pública de un mensaje directo
+      } else if (this.inbox?.additional_attributes?.arroyo_social_comments) {
+        sendMessageText = this.$t('ARROYO.SOCIAL_COMMENTS.PUBLIC_SEND');
       }
       const keyLabel = this.isEditorHotKeyEnabled('cmd_enter')
         ? `(${this.shortcutKey})`
@@ -1244,6 +1257,12 @@ export default {
 
 <template>
   <ReplyBoxBanner :message="message" :is-on-private-note="isOnPrivateNote" />
+  <!-- ARROYO: advertencia antes de responder públicamente -->
+  <PublicCommentBanner
+    :conversation-id="conversationId"
+    :inbox-id="inbox?.id"
+    :is-private="isPrivate"
+  />
   <div ref="replyEditor" class="reply-box" :class="replyBoxClass">
     <ReplyTopPanel
       :mode="replyType"

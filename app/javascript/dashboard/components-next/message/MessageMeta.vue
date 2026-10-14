@@ -8,6 +8,9 @@ import { useInbox } from 'dashboard/composables/useInbox';
 import { useMessageContext } from './provider.js';
 
 import { MESSAGE_STATUS, MESSAGE_TYPES } from './constants';
+// ARROYO: publicación confirmada por Meta, independiente del estado nativo sent
+import PublicReplyStatus from 'dashboard/routes/dashboard/arroyo/comments/components/PublicReplyStatus.vue';
+import { publicReplyState } from 'dashboard/routes/dashboard/arroyo/comments/helpers';
 
 const {
   isAFacebookInbox,
@@ -37,6 +40,8 @@ const readableTime = computed(() =>
 );
 
 const showStatusIndicator = computed(() => {
+  // ARROYO: los comentarios públicos muestran su estado específico
+  if (publicReplyState(contentAttributes.value)) return false;
   if (isPrivate.value) return false;
   // Don't show status for failed messages, we already show error message
   if (status.value === MESSAGE_STATUS.FAILED) return false;
@@ -138,6 +143,8 @@ const statusToShow = computed(() => {
     </div>
     <Icon v-if="isPrivate" icon="i-lucide-lock-keyhole" class="size-3" />
     <MessageStatus v-if="showStatusIndicator" :status="statusToShow" />
+    <!-- ARROYO: autor del comentario y estado de la publicación -->
+    <PublicReplyStatus :attributes="contentAttributes" />
   </div>
 </template>
 `

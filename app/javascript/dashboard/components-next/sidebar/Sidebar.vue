@@ -46,6 +46,8 @@ const { t } = useI18n();
 const {
   fetchFeatures: fetchArroyoFeatures,
   isAgentPanelEnabled,
+  // ARROYO: comentarios públicos sin bot
+  isSocialCommentsEnabled,
   hideNativeReports,
 } = useArroyoFeatures();
 
@@ -542,6 +544,17 @@ const menuItems = computed(() => {
         },
       ],
     },
+    // ARROYO: comentarios públicos habilitados por cuenta
+    ...(isSocialCommentsEnabled.value
+      ? [
+          {
+            name: 'Arroyo Comments',
+            label: t('ARROYO.SOCIAL_COMMENTS.TITLE'),
+            icon: 'i-lucide-message-circle',
+            to: accountScopedRoute('arroyo_social_comments'),
+          },
+        ]
+      : []),
     // ARROYO: panel de vendedores
     ...(isAgentPanelEnabled.value
       ? [
