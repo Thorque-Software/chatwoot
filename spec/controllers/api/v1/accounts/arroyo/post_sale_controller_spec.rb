@@ -98,4 +98,30 @@ RSpec.describe 'Arroyo post-sale API', type: :request do
     expect(response.parsed_body['follow_ups']).to be_empty
     expect(response.parsed_body['totals']['manual_pending']).to eq(0)
   end
+
+  it 'filters stages before pagination and counts only stages visible to the user' do
+    purchase = Arroyo::PostSalePurchase.find_by!(conversation: conversation)
+    follow_up = purchase.follow_ups.find_by!(stage: 'd7')
+    follow_up.update!(status: 'failed', manual_status: 'pending', alert_assignee: agent)
+
+    %w[d1 d7 d30].each do |stage|
+      get "#{url}/follow_ups", headers: agent.create_new_auth_token, params: { stage: stage }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['follow_ups'].pluck('stage')).to eq([stage])
+      expect(response.parsed_body['meta']['total']).to eq(1)
+      expect(response.parsed_body['totals'].except('manual_pending').values.sum).to eq(1)
+    end
+
+    get "#{url}/follow_ups", headers: agent.create_new_auth_token,
+                             params: { stage: 'd7', status: 'failed', manual_status: 'pending' }
+    expect(response.parsed_body['follow_ups'].pluck('id')).to eq([follow_up.id])
+    expect(response.parsed_body['totals']).to eq('failed' => 1, 'manual_pending' => 1)
+  end
+
+  it 'keeps stage-filtered results and totals restricted to the authorized seller or alert assignee' do
+    get "#{url}/follow_ups", headers: other.create_new_auth_token, params: { stage: 'd7' }
+    expect(response.parsed_body['follow_ups']).to be_empty
+    expect(response.parsed_body['meta']['total']).to eq(0)
+    expect(response.parsed_body['totals']).to eq('manual_pending' => 0)
+  end
 end

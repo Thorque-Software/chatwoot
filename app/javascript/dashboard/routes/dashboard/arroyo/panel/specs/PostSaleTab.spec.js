@@ -342,8 +342,10 @@ describe('Arroyo post-sale panel', () => {
     const wrapper = await mountTab();
     expect(wrapper.findAll('[data-testid^="summary-"]')).toHaveLength(5);
     expect(
-      wrapper.get('[data-testid="advanced-status-filter"]').element.open
-    ).toBe(false);
+      wrapper
+        .get('[data-testid="advanced-status-filter"]')
+        .attributes('aria-expanded')
+    ).toBe('false');
     await wrapper.get('[data-testid="summary-failed"]').trigger('click');
     await flushPromises();
     expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
@@ -371,5 +373,71 @@ describe('Arroyo post-sale panel', () => {
         status: ['failed', 'not_executed', 'unconfirmed'],
       })
     );
+  });
+  it.each(['d1', 'd7', 'd30'])(
+    'combines stage %s with manual and state filters, resetting pagination and clearing all filters',
+    async stage => {
+      PostSaleAPI.getFollowUps.mockResolvedValue({
+        data: {
+          follow_ups: [followUp()],
+          totals: {},
+          meta: { total: 201, next_page: 2 },
+        },
+      });
+      const wrapper = await mountTab();
+      await wrapper.get('[data-testid="summary-failed"]').trigger('click');
+      await wrapper
+        .get('[data-testid="summary-manual_pending"]')
+        .trigger('click');
+      await flushPromises();
+      await wrapper.get('[data-testid="next-page"]').trigger('click');
+      await flushPromises();
+      await wrapper.get('[data-testid="stage-filter"] select').setValue(stage);
+      await flushPromises();
+      expect(PostSaleAPI.getFollowUps.mock.lastCall[0]).toMatchObject({
+        ...params,
+        stage,
+        status: ['failed', 'not_executed', 'unconfirmed'],
+        manual_status: 'pending',
+      });
+      expect(PostSaleAPI.getFollowUps.mock.lastCall[0]).not.toHaveProperty(
+        'page'
+      );
+      await wrapper.get('[data-testid="stage-filter"] select').setValue('');
+      await flushPromises();
+      expect(PostSaleAPI.getFollowUps.mock.lastCall[0].stage).toBeUndefined();
+      await wrapper.get('[data-testid="stage-filter"] select').setValue('d7');
+      await wrapper.setProps({ filterResetKey: 1 });
+      await flushPromises();
+      expect(
+        wrapper.get('[data-testid="stage-filter"] select').element.value
+      ).toBe('');
+      expect(PostSaleAPI.getFollowUps.mock.lastCall[0]).toMatchObject({
+        stage: undefined,
+        manual_status: undefined,
+        status: undefined,
+      });
+    }
+  );
+
+  it('opens advanced filters and contextual help independently with accessible controls', async () => {
+    const wrapper = await mountTab();
+    const advanced = wrapper.get('[data-testid="advanced-status-filter"]');
+    const help = wrapper.get('[data-testid="view-help-toggle"]');
+    expect(advanced.attributes('aria-expanded')).toBe('false');
+    expect(help.attributes('aria-expanded')).toBe('false');
+    await advanced.trigger('click');
+    expect(advanced.attributes('aria-expanded')).toBe('true');
+    expect(help.attributes('aria-expanded')).toBe('false');
+    await help.trigger('click');
+    await wrapper.get('[data-testid="summary-delivered"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="status-explanation"]').text()).toContain(
+      'ARROYO.PANEL.POST_SALE.SUMMARY_HELP.DELIVERED'
+    );
+    expect(help.attributes('aria-expanded')).toBe('true');
+    await advanced.trigger('click');
+    expect(advanced.attributes('aria-expanded')).toBe('false');
+    expect(help.attributes('aria-expanded')).toBe('true');
   });
 });

@@ -225,16 +225,15 @@
         "QUICK_FILTERS": "Filter follow-ups",
         "VIEW_DETAIL": "View details",
         "FIELD_VALUE": "{label}: {value}",
-        "COUNTS_HELP": "Counts refer to stages. Manual contact pending is an additional filter and may overlap with Issues. Use More filters to view cancellations.",
+        "COUNTS_HELP": "Numbers count stages matching the filters. Manual contact is independent of delivery status. Canceled stages are under “More filters”.",
         "EMPTY_HELP": "Check the purchase date, seller and status filters. Use Clear filters to broaden the search.",
         "SUMMARY_HELP": {
-          "ALL": "Showing all statuses for the selected purchases. Pending manual tasks appear first.",
-          "SCHEDULED": "Stages with no sending attempt: waiting for a schedule or for their scheduled date.",
-          "PROCESSING": "The message is queued or accepted by the provider, but delivery is not confirmed yet.",
-          "DELIVERED": "The channel confirmed delivery or reading. This does not necessarily mean the customer replied.",
-          "FAILED": "Includes failed sends, stages not executed on time and deliveries unconfirmed past the deadline. Each follow-up shows its reason.",
-          "UNCONFIRMED": "The delivery confirmation deadline passed. Review the details and contact the customer if the manual task is still pending.",
-          "MANUAL_PENDING": "These stages require manual contact. Open Record manual follow-up, contact the customer outside the automatic send and save the outcome."
+          "ALL": "Pending: awaiting a schedule or scheduled. In progress: queued or sent without delivery confirmation. Delivered: delivery or reading confirmed. Issues: failed, missed or unconfirmed within the time limit.",
+          "SCHEDULED": "Awaiting schedule: no date assigned yet. Scheduled: waiting for the planned send date.",
+          "PROCESSING": "Queued: Chatwoot queued the message. Sent: the provider accepted it, but delivery is not confirmed yet.",
+          "DELIVERED": "Delivered: delivery was confirmed. Read: reading was also confirmed. Neither means the customer replied.",
+          "FAILED": "Failed: a send error occurred. Not executed: no attempt within the time limit. Unconfirmed: attempted without confirmation; it may have arrived.",
+          "MANUAL_PENDING": "Requires a seller to contact the customer. Save the outcome in “Record manual follow-up”."
         },
         "STATE_HELP": {
           "AWAITING_PLAN": "The purchase is registered; this stage still needs a scheduled date.",
@@ -246,7 +245,7 @@
           "FAILED": "The send did not complete. Review the reason and manual task status.",
           "UNCONFIRMED": "No delivery confirmation arrived within the deadline. Review the manual task.",
           "NOT_EXECUTED": "This stage was not sent on schedule. Check whether manual contact is required.",
-          "CANCELLED": "This stage is canceled and is not waiting for automatic sending."
+          "CANCELLED": "The follow-up stopped because the sale was canceled or the contact was excluded. This stage will not be sent."
         },
         "NEXT_ACTION": {
           "PENDING": "Manual contact is needed. Contact the customer and record the outcome using the action in this row.",
@@ -254,7 +253,9 @@
         },
         "ADVANCED_FILTERS": "More filters",
         "VIEW_HELP": "About this view",
-        "SPECIFIC_STATUS": "Filtered status: {status}"
+        "SPECIFIC_STATUS": "Filtered status: {status}",
+        "STAGE_FILTER": "Follow-up stage",
+        "ALL_STAGES": "All stages"
       },
       "FILTERS": {
         "PERIOD": "Period",

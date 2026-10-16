@@ -225,16 +225,15 @@
         "QUICK_FILTERS": "Filtrar seguimientos",
         "VIEW_DETAIL": "Ver detalle",
         "FIELD_VALUE": "{label}: {value}",
-        "COUNTS_HELP": "Los números cuentan etapas. «Contacto manual pendiente» es un filtro adicional y puede coincidir con «Con incidencias». Las cancelaciones se consultan desde «Más filtros».",
+        "COUNTS_HELP": "Los números cuentan etapas con los filtros aplicados. El contacto manual es independiente del estado. Cancelados: en «Más filtros».",
         "EMPTY_HELP": "Revisá la fecha de compra, el vendedor y los filtros de estado. Podés ampliar la búsqueda con «Quitar filtros».",
         "SUMMARY_HELP": {
-          "ALL": "Mostrando todos los estados para las compras seleccionadas. Las tareas manuales pendientes aparecen primero.",
-          "SCHEDULED": "Etapas que aún no intentaron enviarse: esperan que se les asigne una fecha o que llegue la fecha prevista.",
-          "PROCESSING": "El mensaje está en cola o fue aceptado por el proveedor, pero todavía no hay confirmación de entrega.",
-          "DELIVERED": "El canal confirmó que el mensaje fue entregado o leído. Esto no significa necesariamente que el cliente haya respondido.",
-          "FAILED": "Incluye envíos fallidos, etapas no ejecutadas a tiempo y entregas sin confirmar dentro del plazo. El motivo aparece en cada seguimiento.",
-          "UNCONFIRMED": "Pasó el plazo de espera sin confirmación de entrega. Revisá el detalle y contactá al cliente si la tarea manual sigue pendiente.",
-          "MANUAL_PENDING": "Estas etapas requieren contacto manual. Abrí «Registrar seguimiento manual», contactá al cliente por fuera del envío automático y guardá el resultado."
+          "ALL": "Pendientes: por programar o programados. En curso: en cola o enviados sin confirmar entrega. Entregados: entrega o lectura confirmadas. Con incidencias: fallidos, no ejecutados o sin confirmación en plazo.",
+          "SCHEDULED": "Por programar: falta asignar fecha. Programado: espera la fecha prevista para el envío.",
+          "PROCESSING": "En proceso: Chatwoot dejó el mensaje en cola. Enviado: el proveedor lo aceptó, pero aún no confirma entrega.",
+          "DELIVERED": "Entregado: se confirmó la entrega. Leído: también se confirmó la lectura. Ninguno implica una respuesta del cliente.",
+          "FAILED": "Fallido: hubo un error de envío. No ejecutado: no se intentó en plazo. Entrega no confirmada: se intentó, pero falta confirmación; podría haber llegado.",
+          "MANUAL_PENDING": "Requiere contacto del vendedor. Registrá el resultado en «Registrar seguimiento manual»."
         },
         "STATE_HELP": {
           "AWAITING_PLAN": "La compra está registrada; falta asignar fecha a esta etapa.",
@@ -246,7 +245,7 @@
           "FAILED": "El envío no se completó. Revisá el motivo y el estado de la tarea manual.",
           "UNCONFIRMED": "No se recibió confirmación de entrega dentro del plazo. Revisá la tarea manual.",
           "NOT_EXECUTED": "Esta etapa no se envió en la fecha prevista. Revisá si requiere contacto manual.",
-          "CANCELLED": "Esta etapa está cancelada y no está pendiente de envío automático."
+          "CANCELLED": "El seguimiento se interrumpió por cancelación de venta o exclusión del contacto. No se enviará esta etapa."
         },
         "NEXT_ACTION": {
           "PENDING": "Requiere contacto manual. Contactá al cliente y registrá el resultado desde el botón de esta fila.",
@@ -254,7 +253,9 @@
         },
         "ADVANCED_FILTERS": "Más filtros",
         "VIEW_HELP": "Ayuda de esta vista",
-        "SPECIFIC_STATUS": "Estado filtrado: {status}"
+        "SPECIFIC_STATUS": "Estado filtrado: {status}",
+        "STAGE_FILTER": "Etapa postventa",
+        "ALL_STAGES": "Todas las etapas"
       },
       "FILTERS": {
         "PERIOD": "Período",
