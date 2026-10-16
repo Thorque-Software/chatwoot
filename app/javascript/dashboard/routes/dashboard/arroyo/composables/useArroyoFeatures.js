@@ -18,9 +18,6 @@ export function useArroyoFeatures() {
     features,
     fetchFeatures,
     timezone: computed(() => features.value?.timezone),
-    isSocialCommentsEnabled: computed(() =>
-      Boolean(features.value?.social_comments?.enabled)
-    ),
     isAgentPanelEnabled: computed(() =>
       Boolean(features.value?.agent_panel?.enabled)
     ),

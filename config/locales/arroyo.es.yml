@@ -5,24 +5,6 @@ es:
         arroyo/setting:
           invalid_field: 'Valor inválido para %{field}'
   arroyo:
-    social_comments:
-      errors:
-        disabled: 'Los comentarios públicos están desactivados para esta cuenta.'
-        invalid_members: 'Seleccioná vendedores que pertenezcan a esta cuenta.'
-        invalid_payload: 'El evento original de Meta no es válido.'
-        invalid_signature: 'La firma o el token de verificación de Meta no es válido.'
-        not_configured: 'Meta todavía no está conectado. La respuesta se guardó y requiere un reintento explícito después de configurar la conexión.'
-        humans_only: 'Solo una persona con sesión iniciada puede responder públicamente. Los bots y las API keys de integración no pueden publicar.'
-        text_only: 'Las respuestas públicas admiten únicamente texto.'
-        deleted: 'Este comentario fue eliminado y no admite nuevas respuestas.'
-        stale_claim: 'La confirmación no corresponde al intento de publicación actual.'
-        invalid_status: 'Para confirmar la publicación se necesita el identificador de respuesta devuelto por Meta.'
-        failed: 'Meta rechazó la respuesta pública. Revisá la conexión antes de reintentar.'
-        unconfirmed: 'No se pudo confirmar el resultado. Revisá Meta antes de enviar otra respuesta.'
-        unsafe_retry: 'Este intento no se puede repetir de forma segura. Revisá el comentario en Meta.'
-        forbidden: 'No tenés acceso a esta bandeja de comentarios.'
-        invalid_link: 'El enlace de la publicación debe usar HTTPS y pertenecer a Facebook o Instagram.'
-        cannot_delete_reply: 'Las respuestas publicadas se administran en Meta. Borrar el texto local no retira un comentario público.'
     post_sale:
       products:
         bike: 'tu bicicleta'

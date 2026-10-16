@@ -1,6 +1,10 @@
 # Postventa Arroyo: estado y puesta en marcha
 
-Actualización del 14/10/2026: comentarios públicos integrados en `arroyo/dev`, junto con las exclusiones del respaldo privado en Git/Docker y las correcciones de fixtures/assertions de postventa. El esquema incluye postventa y comentarios. La verificación conjunta en una copia Linux aislada completó **176 ejemplos RSpec, 0 fallos**, incluyendo los servicios/controladores Arroyo y los puntos core afectados. Las limitaciones Rails descritas más abajo corresponden a la revisión inicial del 13/10; la prueba real con Meta y el despliegue siguen pendientes. La integración en Git no publica los borradores n8n ni activa automatizaciones.
+Actualización del 16/10/2026: se retiró la funcionalidad Arroyo de comentarios públicos por solicitud de Mauro. Se conservan el panel de vendedores, seguimiento comercial y toda la integración de postventa. Los tres workflows de comentarios se archivaron; no se modifica el workflow de seguimientos/postventa ni se publica su borrador. La mensajería nativa de Instagram y WhatsApp permanece intacta. Las tablas de comentarios se conservan sin uso para respetar migraciones históricas y evitar borrar datos.
+
+La verificación conjunta del 14/10 completó **176 ejemplos RSpec, 0 fallos** antes de esta retirada. Las limitaciones Rails descritas más abajo corresponden a la revisión inicial del 13/10; la prueba real con WhatsApp y el despliegue siguen pendientes.
+
+Verificación de la retirada del 16/10: **152 ejemplos RSpec sin fallos**, **23 pruebas Vitest del panel/postventa aprobadas** y **12 pruebas Node de la integración n8n de postventa aprobadas**. RuboCop en los ocho archivos Ruby modificados y ESLint en los archivos JS/Vue afectados: sin errores. Sin referencias al módulo de comentarios en `app`, `config`, `spec` o `enterprise`. Ninguna llamada real a Meta durante estas pruebas.
 
 Actualizado el 13 de octubre de 2026. Avance desarrollado en `arroyo/dev`, cuya publicación en GitHub fue solicitada por Mauro con las pruebas Rails pendientes ya informadas. Sin despliegue ni activación. Workflow n8n: [arroyo v3 · seguimientos post-venta](https://n8narroyo.thorque.com.ar/workflow/fF0LK453uWJdBHsR), carpeta Arroyo/v3.
 

@@ -28,8 +28,8 @@ class Messages::MessageBuilder
     # When the message has no quoted content, it will just be rendered as a regular message
     # The frontend is equipped to handle this case
     process_email_content
-    # ARROYO: los comentarios públicos solo se publican mediante la cola de respuestas humanas.
-    @message = Arroyo::SocialComments::ReplyService.persist(@message, @user, @params[:echo_id])
+    @message.save!
+    @message
   end
 
   private

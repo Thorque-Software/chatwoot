@@ -59,8 +59,7 @@ class Arroyo::Setting < ApplicationRecord
       'alert_email' => false
     },
     'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false },
-    'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' },
-    'social_comments' => { 'enabled' => false }
+    'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' }
   }.freeze
 
   VALIDATORS = {
@@ -87,7 +86,6 @@ class Arroyo::Setting < ApplicationRecord
   end
 
   RULES = {
-    'social_comments.enabled' => [:boolean],
     'timezone' => [:timezone],
     'window_keeper.enabled' => [:boolean],
     # El nudge se manda entre nudge_after_hours y 23 h 45 min desde el último entrante
