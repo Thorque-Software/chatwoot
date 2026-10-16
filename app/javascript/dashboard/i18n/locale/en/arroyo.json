@@ -143,8 +143,8 @@
       "POST_SALE": {
         "DESCRIPTION": "n8n schedules and sends follow-ups. Check their delivery here and record manual contact when needed.",
         "DISABLED_HISTORY": "The integration is disabled; history remains available and you can resolve pending manual tasks.",
-        "STATUS_FILTER": "Or choose a specific status",
-        "ALL_STATUSES": "All statuses",
+        "STATUS_FILTER": "Exact status",
+        "ALL_STATUSES": "All",
         "RETRY": "Retry",
         "LOAD_ERROR": "Could not load follow-ups",
         "SAVE_ERROR": "Could not save the change",
@@ -186,12 +186,12 @@
           "CLOSED_AUTOMATICALLY": "Closed after confirmed delivery"
         },
         "SUMMARY": {
-          "SCHEDULED": "Waiting to send",
-          "PROCESSING": "Sending in progress",
-          "DELIVERED": "Delivery confirmed",
-          "FAILED": "Failed or not sent",
+          "SCHEDULED": "Pending",
+          "PROCESSING": "In progress",
+          "DELIVERED": "Delivered",
+          "FAILED": "Issues",
           "UNCONFIRMED": "Delivery unconfirmed",
-          "MANUAL_PENDING": "Manual contact needed"
+          "MANUAL_PENDING": "Manual contact pending"
         },
         "COLUMNS": {
           "CUSTOMER": "Customer",
@@ -218,38 +218,29 @@
           "OTHER": "Other"
         },
         "STAGES": {
-          "D1": "D+1 · first stage",
-          "D7": "D+7 · second stage",
-          "D30": "D+30 · third stage"
+          "D1": "D+1",
+          "D7": "D+7",
+          "D30": "D+30"
         },
         "QUICK_FILTERS": "Filter follow-ups",
-        "PRIORITY_HELP": "Pending manual tasks appear first. Select a summary to filter; each row is one stage of a purchase.",
         "VIEW_DETAIL": "View details",
         "FIELD_VALUE": "{label}: {value}",
-        "REVIEW_TITLE": "What needs your attention",
-        "REVIEW_HELP": "Choose a group to focus on that work, or select a specific status. Choosing another group replaces the previous selection.",
-        "COUNTS_HELP": "Counts refer to stages, not customers. Each purchase has multiple stages and a manual task can also be a failed message. Totals follow the purchase filters.",
-        "EMPTY_HELP": "Try Clear filters or All statuses. If a purchase is missing, check that it was registered for post-sale and that you can access it.",
-        "GUIDE": {
-          "TITLE": "How to read this page",
-          "STAGES": "Each row is one follow-up stage of a purchase: D+1, D+7 or D+30. Open the details to see all stages and their scheduled dates.",
-          "DELIVERY": "Sent does not confirm delivery. Delivered and Read indicate confirmation from the channel. Scheduled dates follow the post-sale configuration.",
-          "MANUAL": "A failed or unconfirmed message may create a task to contact the customer by phone or personal WhatsApp. Recording that contact preserves the original message outcome."
-        },
+        "COUNTS_HELP": "Counts refer to stages. Manual contact pending is an additional filter and may overlap with Issues. Use More filters to view cancellations.",
+        "EMPTY_HELP": "Check the purchase date, seller and status filters. Use Clear filters to broaden the search.",
         "SUMMARY_HELP": {
           "ALL": "Showing all statuses for the selected purchases. Pending manual tasks appear first.",
           "SCHEDULED": "Stages with no sending attempt: waiting for a schedule or for their scheduled date.",
-          "PROCESSING": "Messages being prepared or sent, without delivery confirmation yet. Do not assume the customer received them.",
+          "PROCESSING": "The message is queued or accepted by the provider, but delivery is not confirmed yet.",
           "DELIVERED": "The channel confirmed delivery or reading. This does not necessarily mean the customer replied.",
-          "FAILED": "The message failed or the stage missed its scheduled time. Review the reason and any remaining manual task.",
+          "FAILED": "Includes failed sends, stages not executed on time and deliveries unconfirmed past the deadline. Each follow-up shows its reason.",
           "UNCONFIRMED": "The delivery confirmation deadline passed. Review the details and contact the customer if the manual task is still pending.",
           "MANUAL_PENDING": "These stages require manual contact. Open Record manual follow-up, contact the customer outside the automatic send and save the outcome."
         },
         "STATE_HELP": {
           "AWAITING_PLAN": "The purchase is registered; this stage still needs a scheduled date.",
           "SCHEDULED": "Waiting for the scheduled date. No manual contact is needed for now.",
-          "QUEUED": "The message is being prepared. Delivery is not confirmed yet.",
-          "SENT": "The message was sent, but receipt by the customer is not confirmed yet.",
+          "QUEUED": "Chatwoot created and queued the message. Sending and delivery are not confirmed yet.",
+          "SENT": "The provider accepted the request and assigned an identifier. Delivery to the customer is not confirmed yet.",
           "DELIVERED": "The channel confirmed delivery. This does not imply a customer reply.",
           "READ": "The channel confirmed the customer read the message.",
           "FAILED": "The send did not complete. Review the reason and manual task status.",
@@ -260,7 +251,10 @@
         "NEXT_ACTION": {
           "PENDING": "Manual contact is needed. Contact the customer and record the outcome using the action in this row.",
           "RESOLVED": "Manual contact has already been recorded. The original automatic message status is preserved."
-        }
+        },
+        "ADVANCED_FILTERS": "More filters",
+        "VIEW_HELP": "About this view",
+        "SPECIFIC_STATUS": "Filtered status: {status}"
       },
       "FILTERS": {
         "PERIOD": "Period",
@@ -283,23 +277,13 @@
         },
         "ALL_PURCHASES": "All purchases",
         "PURCHASE_PERIOD": "Purchase date",
-        "PURCHASE_TITLE": "Filter purchases",
-        "PURCHASE_HELP": "Choose which purchases to review. These filters change the results, not scheduled messages.",
-        "PURCHASE_SELLER": "Purchase seller",
-        "PURCHASE_INBOX": "Conversation inbox",
-        "DATE_HELP": "Uses the purchase date, not the scheduled message date. Follow-ups can continue for a month after a purchase.",
-        "SELLER_HELP": "Filters by the seller recorded on the purchase, who may differ from the person assigned to a manual task.",
-        "INBOX_HELP": "Choose the inbox used to help the customer. An empty selection includes all inboxes you can access.",
+        "PURCHASE_SELLER": "Seller",
+        "PURCHASE_INBOX": "Inbox",
         "SCOPE": {
           "TITLE": "Purchases included by your filters",
           "CLEAR": "Clear filters",
-          "ALL_DATES": "Any purchase date",
           "DATE_RANGE": "Purchased from {since} to {until}",
-          "ALL_SELLERS": "All sellers you can access",
-          "OWN_ACCESS": "Your purchases and tasks assigned to you",
-          "ALL_INBOXES": "All inboxes you can access",
-          "OPTION_ID": "Selection {id}",
-          "HELP": "All conditions apply together. Clearing filters broadens the search and resets the follow-up status; your permissions still apply."
+          "OPTION_ID": "Selection {id}"
         }
       },
       "METRICS": {

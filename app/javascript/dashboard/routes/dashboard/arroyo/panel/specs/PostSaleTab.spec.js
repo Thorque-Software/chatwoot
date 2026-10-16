@@ -293,7 +293,7 @@ describe('Arroyo post-sale panel', () => {
     expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         status: ['delivered', 'read'],
-        manual_status: undefined,
+        manual_status: 'pending',
       })
     );
   });
@@ -327,6 +327,8 @@ describe('Arroyo post-sale panel', () => {
     expect(wrapper.get('[data-testid="status-explanation"]').text()).toContain(
       'ARROYO.PANEL.POST_SALE.SUMMARY_HELP.MANUAL_PENDING'
     );
+    await wrapper.get('[data-testid="follow-up-12"]').trigger('click');
+    await flushPromises();
     expect(wrapper.get('[data-testid="follow-up-advice-12"]').text()).toContain(
       'ARROYO.PANEL.POST_SALE.NEXT_ACTION.PENDING'
     );
@@ -334,6 +336,40 @@ describe('Arroyo post-sale panel', () => {
     await flushPromises();
     expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
       expect.objectContaining({ manual_status: undefined, status: undefined })
+    );
+  });
+  it('offers four main groups and keeps manual work independent of delivery state', async () => {
+    const wrapper = await mountTab();
+    expect(wrapper.findAll('[data-testid^="summary-"]')).toHaveLength(5);
+    expect(
+      wrapper.get('[data-testid="advanced-status-filter"]').element.open
+    ).toBe(false);
+    await wrapper.get('[data-testid="summary-failed"]').trigger('click');
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        status: ['failed', 'not_executed', 'unconfirmed'],
+      })
+    );
+    await wrapper
+      .get('[data-testid="summary-manual_pending"]')
+      .trigger('click');
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        status: ['failed', 'not_executed', 'unconfirmed'],
+        manual_status: 'pending',
+      })
+    );
+    await wrapper
+      .get('[data-testid="summary-manual_pending"]')
+      .trigger('click');
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        manual_status: undefined,
+        status: ['failed', 'not_executed', 'unconfirmed'],
+      })
     );
   });
 });

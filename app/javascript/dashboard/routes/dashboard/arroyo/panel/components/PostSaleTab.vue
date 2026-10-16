@@ -22,6 +22,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const status = ref('');
 const summaryFilter = ref('');
+const manualOnly = ref(false);
 const page = ref(1);
 const data = ref(null);
 const isLoading = ref(false);
@@ -110,17 +111,10 @@ const summaries = computed(() => {
     {
       key: 'failed',
       label: t('ARROYO.PANEL.POST_SALE.SUMMARY.FAILED'),
-      count: (totals.failed || 0) + (totals.not_executed || 0),
-    },
-    {
-      key: 'unconfirmed',
-      label: t('ARROYO.PANEL.POST_SALE.SUMMARY.UNCONFIRMED'),
-      count: totals.unconfirmed || 0,
-    },
-    {
-      key: 'manual_pending',
-      label: t('ARROYO.PANEL.POST_SALE.SUMMARY.MANUAL_PENDING'),
-      count: totals.manual_pending || 0,
+      count:
+        (totals.failed || 0) +
+        (totals.not_executed || 0) +
+        (totals.unconfirmed || 0),
     },
   ];
 });
@@ -162,6 +156,7 @@ watch(
   () => {
     status.value = '';
     summaryFilter.value = '';
+    manualOnly.value = false;
     page.value = 1;
   }
 );
@@ -169,8 +164,17 @@ const summaryStatuses = {
   scheduled: ['awaiting_plan', 'scheduled'],
   processing: ['queued', 'sent'],
   delivered: ['delivered', 'read'],
-  failed: ['failed', 'not_executed'],
-  unconfirmed: ['unconfirmed'],
+  failed: ['failed', 'not_executed', 'unconfirmed'],
+};
+const manualCount = computed(() => data.value?.totals?.manual_pending || 0);
+const visibleStatus = value => {
+  const group = Object.entries(summaryStatuses).find(([, values]) =>
+    values.includes(value)
+  );
+  return (
+    summaries.value.find(summary => summary.key === group?.[0])?.label ||
+    statusLabel(value)
+  );
 };
 const selectSummary = key => {
   status.value = '';
@@ -226,8 +230,7 @@ const fetchFollowUps = async () => {
     const response = await PostSaleAPI.getFollowUps({
       ...props.params,
       status: status.value || summaryStatuses[summaryFilter.value],
-      manual_status:
-        summaryFilter.value === 'manual_pending' ? 'pending' : undefined,
+      manual_status: manualOnly.value ? 'pending' : undefined,
       ...(page.value > 1 ? { page: page.value } : {}),
     });
     if (currentRequest === requestId) data.value = response.data;
@@ -308,13 +311,14 @@ const updatePurchase = () =>
   );
 
 watch(
-  [() => props.params, status, summaryFilter, page],
+  [() => props.params, status, summaryFilter, manualOnly, page],
   (values, previous) => {
     if (
       page.value !== 1 &&
       (values[0] !== previous[0] ||
         values[1] !== previous[1] ||
-        values[2] !== previous[2])
+        values[2] !== previous[2] ||
+        values[3] !== previous[3])
     ) {
       page.value = 1;
       return;
@@ -328,33 +332,6 @@ watch(
 
 <template>
   <section class="flex flex-col gap-4" :aria-busy="isLoading">
-    <details class="rounded-lg border border-n-weak p-4">
-      <summary class="cursor-pointer text-sm font-semibold text-n-slate-12">
-        {{ t('ARROYO.PANEL.POST_SALE.GUIDE.TITLE') }}
-      </summary>
-      <div class="mt-3 flex max-w-3xl flex-col gap-2 text-sm text-n-slate-11">
-        <p class="m-0">{{ t('ARROYO.PANEL.POST_SALE.GUIDE.STAGES') }}</p>
-        <p class="m-0">{{ t('ARROYO.PANEL.POST_SALE.GUIDE.DELIVERY') }}</p>
-        <p class="m-0">{{ t('ARROYO.PANEL.POST_SALE.GUIDE.MANUAL') }}</p>
-      </div>
-    </details>
-    <div class="flex flex-col gap-1">
-      <h2 class="mb-0 text-heading-3 text-n-slate-12">
-        {{ t('ARROYO.PANEL.POST_SALE.REVIEW_TITLE') }}
-      </h2>
-      <p class="mb-0 text-sm text-n-slate-11">
-        {{ t('ARROYO.PANEL.POST_SALE.REVIEW_HELP') }}
-      </p>
-    </div>
-    <label class="flex flex-col gap-1 text-label-small text-n-slate-11">
-      {{ t('ARROYO.PANEL.POST_SALE.STATUS_FILTER') }}
-      <Select
-        :model-value="status"
-        :options="statusOptions"
-        data-testid="status-filter"
-        @update:model-value="selectStatus"
-      />
-    </label>
     <div
       v-if="loadError"
       role="alert"
@@ -386,15 +363,13 @@ watch(
           {{ t('ARROYO.PANEL.POST_SALE.ALL_STATUSES') }}
         </button>
         <button
-          v-for="summary in [...summaries].reverse()"
+          v-for="summary in summaries"
           :key="summary.key"
           type="button"
           class="flex items-center gap-2 rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
           :class="{
             'bg-n-alpha-2 outline outline-1 outline-n-blue-9':
               summaryFilter === summary.key,
-            'text-n-amber-11':
-              summary.key === 'manual_pending' && summary.count > 0,
           }"
           :aria-pressed="summaryFilter === summary.key"
           :data-testid="`summary-${summary.key}`"
@@ -404,15 +379,60 @@ watch(
           <span class="font-semibold tabular-nums">{{ summary.count }}</span>
         </button>
       </div>
-      <p class="mb-0 text-label-small text-n-slate-11">
-        {{ t('ARROYO.PANEL.POST_SALE.COUNTS_HELP') }}
-      </p>
-      <p
-        class="m-0 text-sm text-n-slate-12"
-        data-testid="status-explanation"
-        role="status"
-      >
-        {{ filterExplanation }}
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded text-sm text-n-slate-12 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+          :aria-pressed="manualOnly"
+          data-testid="summary-manual_pending"
+          @click="manualOnly = !manualOnly"
+        >
+          <span
+            aria-hidden="true"
+            class="size-4 rounded border border-n-strong"
+            :class="manualOnly ? 'bg-n-blue-9' : 'bg-n-surface-1'"
+          />
+          <span>{{ t('ARROYO.PANEL.POST_SALE.SUMMARY.MANUAL_PENDING') }}</span>
+          <span class="font-semibold tabular-nums">{{ manualCount }}</span>
+        </button>
+        <details class="text-sm" data-testid="advanced-status-filter">
+          <summary class="cursor-pointer text-n-slate-11">
+            {{ t('ARROYO.PANEL.POST_SALE.ADVANCED_FILTERS') }}
+          </summary>
+          <label
+            class="mt-3 flex flex-col gap-1 text-label-small text-n-slate-11"
+          >
+            {{ t('ARROYO.PANEL.POST_SALE.STATUS_FILTER') }}
+            <Select
+              :model-value="status"
+              :options="statusOptions"
+              data-testid="status-filter"
+              @update:model-value="selectStatus"
+            />
+          </label>
+        </details>
+        <details class="text-sm">
+          <summary class="cursor-pointer text-n-blue-11">
+            {{ t('ARROYO.PANEL.POST_SALE.VIEW_HELP') }}
+          </summary>
+          <div
+            class="mt-3 flex max-w-2xl flex-col gap-2 text-sm text-n-slate-11"
+            data-testid="status-explanation"
+          >
+            <p class="m-0">{{ filterExplanation }}</p>
+            <p v-if="manualOnly" class="m-0">
+              {{ summaryHelp.manual_pending }}
+            </p>
+            <p class="m-0">{{ t('ARROYO.PANEL.POST_SALE.COUNTS_HELP') }}</p>
+          </div>
+        </details>
+      </div>
+      <p v-if="status" class="m-0 text-sm text-n-slate-11" role="status">
+        {{
+          t('ARROYO.PANEL.POST_SALE.SPECIFIC_STATUS', {
+            status: statusLabel(status),
+          })
+        }}
       </p>
       <p
         v-if="!data.follow_ups.length"
@@ -451,7 +471,7 @@ watch(
                 class="rounded px-2 py-1 text-label-small font-medium"
                 :class="statusClass(item.status)"
               >
-                {{ statusLabel(item.status) }}
+                {{ visibleStatus(item.status) }}
               </span>
               <span
                 v-if="item.manual_status"
@@ -465,12 +485,6 @@ watch(
                 {{ manualLabel(item.manual_status) }}
               </span>
             </div>
-            <p
-              class="m-0 text-sm text-n-slate-12"
-              :data-testid="`follow-up-advice-${item.id}`"
-            >
-              {{ nextAction(item) }}
-            </p>
             <p class="m-0 break-words text-sm text-n-slate-12">
               {{ item.purchase.product || t('ARROYO.PANEL.NO_DATA') }}
             </p>
@@ -608,7 +622,10 @@ watch(
           </dt>
           <dd>
             {{ statusLabel(selected.status) }}
-            <p class="mb-0 mt-1 text-xs text-n-slate-11">
+            <p
+              class="mb-0 mt-1 text-xs text-n-slate-11"
+              :data-testid="`follow-up-advice-${selected.id}`"
+            >
               {{ nextAction(selected) }}
             </p>
           </dd>

@@ -348,4 +348,24 @@ describe('Arroyo agent panel', () => {
       })
     );
   });
+  it('keeps default purchase filters compact without field explanations or a repeated scope panel', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true },
+        post_sale: { enabled: true },
+      },
+    });
+    const { wrapper } = await mountPanel({}, 'arroyo_post_sale');
+    expect(
+      wrapper.find('[data-testid="purchase-filter-context"]').exists()
+    ).toBe(false);
+    expect(wrapper.text()).not.toContain('These filters change');
+    expect(wrapper.text()).not.toContain('Uses the purchase date');
+    expect(wrapper.text()).not.toContain('Filters by the seller recorded');
+    expect(wrapper.text()).not.toContain('Choose the inbox used');
+    expect(
+      wrapper.find('[data-testid="clear-purchase-filters"]').exists()
+    ).toBe(true);
+  });
 });
