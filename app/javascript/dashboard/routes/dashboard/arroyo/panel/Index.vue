@@ -38,6 +38,7 @@ const currentRole = useMapGetter('getCurrentRole');
 const report = ref(null);
 const windows = ref(null);
 const isLoading = ref(false);
+const filterResetKey = ref(0);
 const drawer = ref({
   open: false,
   title: '',
@@ -159,6 +160,16 @@ const updateQuery = changes => {
   router.replace({ query: { ...route.query, ...changes } });
 };
 
+const clearPurchaseFilters = () => {
+  filterResetKey.value += 1;
+  updateQuery({
+    preset: 'all',
+    since: undefined,
+    until: undefined,
+    user_ids: undefined,
+    inbox_ids: undefined,
+  });
+};
 const onFiltersChange = changes => {
   const next = { ...filters.value, ...changes };
   updateQuery({
@@ -294,6 +305,7 @@ onMounted(async () => {
         :show-all-dates="activeTab === 'post_sale'"
         :show-group-by="activeTab === 'activity'"
         @change="onFiltersChange"
+        @clear="clearPurchaseFilters"
       />
 
       <template v-if="activeTab === 'activity'">
@@ -324,6 +336,7 @@ onMounted(async () => {
         </p>
         <PostSaleTab
           :params="postSaleParams"
+          :filter-reset-key="filterResetKey"
           :timezone="timezone"
           :agents="agentOptions"
         />

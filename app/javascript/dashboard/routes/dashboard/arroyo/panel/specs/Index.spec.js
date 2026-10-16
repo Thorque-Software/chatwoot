@@ -308,4 +308,44 @@ describe('Arroyo agent panel', () => {
     expect(ArroyoAgentPanelAPI.getWindows).toHaveBeenCalled();
     expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
   });
+
+  it('explains the current purchase filters and clears them from the URL', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true },
+        post_sale: { enabled: true },
+      },
+    });
+    const { wrapper, router } = await mountPanel(
+      {
+        preset: 'custom',
+        since: '2026-10-01',
+        until: '2026-10-13',
+        user_ids: '7',
+        inbox_ids: '3',
+      },
+      'arroyo_post_sale'
+    );
+    const context = wrapper.get('[data-testid="purchase-filter-context"]');
+    expect(context.text()).toContain('Julieta');
+    expect(context.text()).toContain('WhatsApp');
+    expect(context.text()).toContain('2026-10-01');
+    expect(context.text()).toContain('2026-10-13');
+    await wrapper
+      .get('[data-testid="clear-purchase-filters"]')
+      .trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.query.user_ids).toBeUndefined();
+    expect(router.currentRoute.value.query.inbox_ids).toBeUndefined();
+    expect(router.currentRoute.value.query.preset).toBe('all');
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        since: undefined,
+        until: undefined,
+        user_ids: undefined,
+        inbox_ids: undefined,
+      })
+    );
+  });
 });

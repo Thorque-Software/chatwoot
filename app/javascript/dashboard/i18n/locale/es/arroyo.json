@@ -143,7 +143,7 @@
       "POST_SALE": {
         "DESCRIPTION": "n8n programa y envía los seguimientos. Acá verificás su entrega y registrás el contacto manual cuando hace falta.",
         "DISABLED_HISTORY": "La integración está desactivada; el historial sigue disponible y podés resolver las tareas manuales pendientes.",
-        "STATUS_FILTER": "Estado del seguimiento",
+        "STATUS_FILTER": "O elegir un estado específico",
         "ALL_STATUSES": "Todos los estados",
         "RETRY": "Reintentar",
         "LOAD_ERROR": "No se pudieron cargar los seguimientos",
@@ -186,12 +186,12 @@
           "CLOSED_AUTOMATICALLY": "Cerrado por entrega comprobada"
         },
         "SUMMARY": {
-          "SCHEDULED": "Por programar / programados",
-          "PROCESSING": "En proceso / enviados",
-          "DELIVERED": "Entregados / leídos",
-          "FAILED": "Fallidos / no ejecutados",
-          "UNCONFIRMED": "Sin confirmación",
-          "MANUAL_PENDING": "Tareas manuales pendientes"
+          "SCHEDULED": "Pendientes de envío",
+          "PROCESSING": "En proceso de envío",
+          "DELIVERED": "Entrega confirmada",
+          "FAILED": "Fallidos o no enviados",
+          "UNCONFIRMED": "Sin entrega confirmada",
+          "MANUAL_PENDING": "Contacto manual pendiente"
         },
         "COLUMNS": {
           "CUSTOMER": "Cliente",
@@ -218,14 +218,49 @@
           "OTHER": "Otro"
         },
         "STAGES": {
-          "D1": "D+1",
-          "D7": "D+7",
-          "D30": "D+30"
+          "D1": "D+1 · primera etapa",
+          "D7": "D+7 · segunda etapa",
+          "D30": "D+30 · tercera etapa"
         },
         "QUICK_FILTERS": "Filtrar seguimientos",
         "PRIORITY_HELP": "Las tareas manuales pendientes aparecen primero. Seleccioná un resumen para filtrar; cada fila corresponde a una etapa de una compra.",
         "VIEW_DETAIL": "Ver detalle",
-        "FIELD_VALUE": "{label}: {value}"
+        "FIELD_VALUE": "{label}: {value}",
+        "REVIEW_TITLE": "Qué necesitás revisar",
+        "REVIEW_HELP": "Elegí un grupo para concentrarte en ese trabajo, o usá el estado específico. Seleccionar otro grupo reemplaza la selección anterior.",
+        "COUNTS_HELP": "Los números cuentan etapas, no clientes. Una compra tiene varias etapas y una tarea manual puede coincidir con un envío fallido. Los totales respetan los filtros de compra.",
+        "EMPTY_HELP": "Probá «Quitar filtros» o «Todos los estados». Si no aparece una compra, verificá que se haya registrado para postventa y que tengas permiso para verla.",
+        "GUIDE": {
+          "TITLE": "Cómo leer esta pantalla",
+          "STAGES": "Cada fila es una etapa de seguimiento de una compra: D+1, D+7 o D+30. Abrí el detalle para ver todas las etapas y sus fechas previstas.",
+          "DELIVERY": "«Enviado» todavía no acredita entrega. «Entregado» y «Leído» indican confirmación del canal. Las fechas previstas se calculan según la configuración de postventa.",
+          "MANUAL": "Si el envío falla o no se confirma a tiempo, puede quedar una tarea para contactar al cliente por llamada o WhatsApp personal. Registrar ese contacto conserva el resultado original del mensaje."
+        },
+        "SUMMARY_HELP": {
+          "ALL": "Mostrando todos los estados para las compras seleccionadas. Las tareas manuales pendientes aparecen primero.",
+          "SCHEDULED": "Etapas que aún no intentaron enviarse: esperan que se les asigne una fecha o que llegue la fecha prevista.",
+          "PROCESSING": "Mensajes en preparación o enviados, pero todavía sin confirmación de entrega. No los tomes como recibidos por el cliente.",
+          "DELIVERED": "El canal confirmó que el mensaje fue entregado o leído. Esto no significa necesariamente que el cliente haya respondido.",
+          "FAILED": "El mensaje falló o la etapa no se ejecutó a tiempo. Revisá el motivo y si todavía hay una tarea manual pendiente.",
+          "UNCONFIRMED": "Pasó el plazo de espera sin confirmación de entrega. Revisá el detalle y contactá al cliente si la tarea manual sigue pendiente.",
+          "MANUAL_PENDING": "Estas etapas requieren contacto manual. Abrí «Registrar seguimiento manual», contactá al cliente por fuera del envío automático y guardá el resultado."
+        },
+        "STATE_HELP": {
+          "AWAITING_PLAN": "La compra está registrada; falta asignar fecha a esta etapa.",
+          "SCHEDULED": "Esta etapa espera su fecha prevista. No requiere contacto manual por ahora.",
+          "QUEUED": "El envío está en preparación. Todavía no hay confirmación de entrega.",
+          "SENT": "El mensaje salió, pero todavía no hay confirmación de que el cliente lo recibió.",
+          "DELIVERED": "El canal confirmó la entrega. No implica que el cliente haya respondido.",
+          "READ": "El canal confirmó que el cliente leyó el mensaje.",
+          "FAILED": "El envío no se completó. Revisá el motivo y el estado de la tarea manual.",
+          "UNCONFIRMED": "No se recibió confirmación de entrega dentro del plazo. Revisá la tarea manual.",
+          "NOT_EXECUTED": "Esta etapa no se envió en la fecha prevista. Revisá si requiere contacto manual.",
+          "CANCELLED": "Esta etapa está cancelada y no está pendiente de envío automático."
+        },
+        "NEXT_ACTION": {
+          "PENDING": "Requiere contacto manual. Contactá al cliente y registrá el resultado desde el botón de esta fila.",
+          "RESOLVED": "El contacto manual ya fue registrado. Se conserva el estado original del mensaje automático."
+        }
       },
       "FILTERS": {
         "PERIOD": "Período",
@@ -247,7 +282,25 @@
           "WEEK": "Semana"
         },
         "ALL_PURCHASES": "Todas las compras",
-        "PURCHASE_PERIOD": "Fecha de compra"
+        "PURCHASE_PERIOD": "Fecha de compra",
+        "PURCHASE_TITLE": "Filtrar compras",
+        "PURCHASE_HELP": "Elegí qué compras querés revisar. Estos filtros cambian lo que ves; no modifican los envíos programados.",
+        "PURCHASE_SELLER": "Vendedor de la compra",
+        "PURCHASE_INBOX": "Bandeja de la conversación",
+        "DATE_HELP": "Se toma la fecha de compra, no la fecha prevista del mensaje. Una compra puede tener seguimientos hasta un mes después.",
+        "SELLER_HELP": "Filtra por quien figura como vendedor de la compra. Puede ser distinto del responsable de una tarea manual.",
+        "INBOX_HELP": "Elegí la bandeja por la que se atiende al cliente. Sin selección, se incluyen todas las que podés consultar.",
+        "SCOPE": {
+          "TITLE": "Estás viendo compras con estos filtros",
+          "CLEAR": "Quitar filtros",
+          "ALL_DATES": "Cualquier fecha de compra",
+          "DATE_RANGE": "Compradas del {since} al {until}",
+          "ALL_SELLERS": "Todos los vendedores que podés consultar",
+          "OWN_ACCESS": "Tus compras y las tareas que tenés asignadas",
+          "ALL_INBOXES": "Todas las bandejas que podés consultar",
+          "OPTION_ID": "Selección {id}",
+          "HELP": "Se aplican todas las condiciones a la vez. Quitar filtros amplía la búsqueda y también restablece el estado del seguimiento; tus permisos se mantienen."
+        }
       },
       "METRICS": {
         "CONVERSATIONS_ATTENDED": "Consultas atendidas",

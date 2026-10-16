@@ -317,4 +317,23 @@ describe('Arroyo post-sale panel', () => {
     });
     await flushPromises();
   });
+
+  it('explains the selected summary and clears state filters with the purchase filters', async () => {
+    const wrapper = await mountTab();
+    await wrapper
+      .get('[data-testid="summary-manual_pending"]')
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="status-explanation"]').text()).toContain(
+      'ARROYO.PANEL.POST_SALE.SUMMARY_HELP.MANUAL_PENDING'
+    );
+    expect(wrapper.get('[data-testid="follow-up-advice-12"]').text()).toContain(
+      'ARROYO.PANEL.POST_SALE.NEXT_ACTION.PENDING'
+    );
+    await wrapper.setProps({ filterResetKey: 1 });
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ manual_status: undefined, status: undefined })
+    );
+  });
 });
