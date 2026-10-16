@@ -440,4 +440,30 @@ describe('Arroyo post-sale panel', () => {
     expect(advanced.attributes('aria-expanded')).toBe('false');
     expect(help.attributes('aria-expanded')).toBe('true');
   });
+  it('closes the compact state selector after choosing a status or pressing Escape', async () => {
+    const wrapper = await mountTab();
+    const advanced = wrapper.get('[data-testid="advanced-status-filter"]');
+    await advanced.trigger('click');
+    await wrapper
+      .get('[data-testid="status-filter"] select')
+      .setValue('failed');
+    await flushPromises();
+    expect(advanced.attributes('aria-expanded')).toBe('false');
+    expect(PostSaleAPI.getFollowUps.mock.lastCall[0].status).toBe('failed');
+    await advanced.trigger('click');
+    expect(advanced.attributes('aria-expanded')).toBe('true');
+    await advanced.trigger('keydown', { key: 'Escape' });
+    expect(advanced.attributes('aria-expanded')).toBe('false');
+    expect(
+      wrapper.get('[data-testid="status-filter"] select').element.value
+    ).toBe('failed');
+  });
+
+  it('identifies the expanded explanation as a guide', async () => {
+    const wrapper = await mountTab();
+    await wrapper.get('[data-testid="view-help-toggle"]').trigger('click');
+    expect(wrapper.get('#post-sale-view-help h2').text()).toBe(
+      'ARROYO.PANEL.POST_SALE.VIEW_HELP_TITLE'
+    );
+  });
 });

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
@@ -24,6 +25,7 @@ const route = useRoute();
 const status = ref('');
 const stage = ref('');
 const showAdvanced = ref(false);
+const advancedTrigger = ref(null);
 const showHelp = ref(false);
 const summaryFilter = ref('');
 const manualOnly = ref(false);
@@ -166,6 +168,7 @@ watch(
   () => {
     status.value = '';
     stage.value = '';
+    showAdvanced.value = false;
     summaryFilter.value = '';
     manualOnly.value = false;
     page.value = 1;
@@ -191,9 +194,14 @@ const selectSummary = key => {
   status.value = '';
   summaryFilter.value = summaryFilter.value === key ? '' : key;
 };
+const closeAdvanced = () => {
+  showAdvanced.value = false;
+  advancedTrigger.value?.focus();
+};
 const selectStatus = value => {
   summaryFilter.value = '';
   status.value = value;
+  closeAdvanced();
 };
 const statusClass = value => {
   if (['failed', 'not_executed'].includes(value))
@@ -359,38 +367,80 @@ watch(
     </div>
     <div v-if="isLoading" class="flex justify-center py-10"><Spinner /></div>
     <template v-if="data && !loadError">
-      <div
-        class="flex flex-wrap items-center gap-2"
-        :aria-label="t('ARROYO.PANEL.POST_SALE.QUICK_FILTERS')"
-      >
-        <button
-          type="button"
-          class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
-          :class="{ 'bg-n-alpha-2': !summaryFilter && !status }"
-          :aria-pressed="!summaryFilter && !status"
-          @click="
-            summaryFilter = '';
-            status = '';
-          "
+      <div class="flex items-start justify-between gap-4">
+        <div
+          class="flex flex-wrap items-center gap-2"
+          :aria-label="t('ARROYO.PANEL.POST_SALE.QUICK_FILTERS')"
         >
-          {{ t('ARROYO.PANEL.POST_SALE.ALL_STATUSES') }}
-        </button>
-        <button
-          v-for="summary in summaries"
-          :key="summary.key"
-          type="button"
-          class="flex items-center gap-2 rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
-          :class="{
-            'bg-n-alpha-2 outline outline-1 outline-n-blue-9':
-              summaryFilter === summary.key,
-          }"
-          :aria-pressed="summaryFilter === summary.key"
-          :data-testid="`summary-${summary.key}`"
-          @click="selectSummary(summary.key)"
+          <button
+            type="button"
+            class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+            :class="{ 'bg-n-alpha-2': !summaryFilter && !status }"
+            :aria-pressed="!summaryFilter && !status"
+            @click="
+              summaryFilter = '';
+              status = '';
+            "
+          >
+            {{ t('ARROYO.PANEL.POST_SALE.ALL_STATUSES') }}
+          </button>
+          <button
+            v-for="summary in summaries"
+            :key="summary.key"
+            type="button"
+            class="flex items-center gap-2 rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+            :class="{
+              'bg-n-alpha-2 outline outline-1 outline-n-blue-9':
+                summaryFilter === summary.key,
+            }"
+            :aria-pressed="summaryFilter === summary.key"
+            :data-testid="`summary-${summary.key}`"
+            @click="selectSummary(summary.key)"
+          >
+            <span>{{ summary.label }}</span>
+            <span class="font-semibold tabular-nums">{{ summary.count }}</span>
+          </button>
+        </div>
+        <div
+          v-on-click-outside="() => (showAdvanced = false)"
+          class="relative ml-auto shrink-0"
+          @keydown.esc.stop.prevent="closeAdvanced"
         >
-          <span>{{ summary.label }}</span>
-          <span class="font-semibold tabular-nums">{{ summary.count }}</span>
-        </button>
+          <button
+            ref="advancedTrigger"
+            type="button"
+            class="flex min-h-10 items-center gap-2 rounded text-sm text-n-slate-11 hover:text-n-slate-12 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+            :aria-expanded="showAdvanced"
+            aria-controls="post-sale-advanced-filters"
+            data-testid="advanced-status-filter"
+            @click="showAdvanced = !showAdvanced"
+          >
+            <Icon
+              :icon="
+                showAdvanced
+                  ? 'i-lucide-chevron-down'
+                  : 'i-lucide-chevron-right'
+              "
+              class="size-4"
+            />
+            {{ t('ARROYO.PANEL.POST_SALE.ADVANCED_FILTERS') }}
+          </button>
+          <div
+            v-show="showAdvanced"
+            id="post-sale-advanced-filters"
+            class="absolute right-0 top-full z-20 mt-2 w-max max-w-72 rounded-lg border border-n-weak bg-n-solid-2 p-3"
+          >
+            <label class="flex flex-col gap-2 text-sm text-n-slate-11">
+              {{ t('ARROYO.PANEL.POST_SALE.STATUS_FILTER') }}
+              <Select
+                :model-value="status"
+                :options="statusOptions"
+                data-testid="status-filter"
+                @update:model-value="selectStatus"
+              />
+            </label>
+          </div>
+        </div>
       </div>
       <div class="flex flex-wrap items-end gap-x-5 gap-y-3">
         <label class="flex flex-col gap-2 text-sm text-n-slate-11">
@@ -416,22 +466,7 @@ watch(
           <span>{{ t('ARROYO.PANEL.POST_SALE.SUMMARY.MANUAL_PENDING') }}</span>
           <span class="font-semibold tabular-nums">{{ manualCount }}</span>
         </button>
-        <button
-          type="button"
-          class="flex min-h-10 items-center gap-2 rounded text-sm text-n-slate-11 hover:text-n-slate-12 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
-          :aria-expanded="showAdvanced"
-          aria-controls="post-sale-advanced-filters"
-          data-testid="advanced-status-filter"
-          @click="showAdvanced = !showAdvanced"
-        >
-          <Icon
-            :icon="
-              showAdvanced ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'
-            "
-            class="size-4"
-          />
-          {{ t('ARROYO.PANEL.POST_SALE.ADVANCED_FILTERS') }}
-        </button>
+
         <button
           type="button"
           class="flex min-h-10 items-center gap-2 rounded text-sm text-n-blue-11 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
@@ -450,29 +485,22 @@ watch(
         </button>
       </div>
       <div
-        v-show="showAdvanced"
-        id="post-sale-advanced-filters"
-        class="border-t border-n-weak pt-4"
-      >
-        <label class="flex flex-col gap-2 text-sm text-n-slate-11">
-          {{ t('ARROYO.PANEL.POST_SALE.STATUS_FILTER') }}
-          <Select
-            :model-value="status"
-            :options="statusOptions"
-            data-testid="status-filter"
-            @update:model-value="selectStatus"
-          />
-        </label>
-      </div>
-      <div
         v-show="showHelp"
         id="post-sale-view-help"
+        role="region"
+        aria-labelledby="post-sale-guide-title"
         class="border-t border-n-weak pt-4"
       >
         <div
           class="flex max-w-2xl flex-col gap-2 text-sm text-n-slate-11"
           data-testid="status-explanation"
         >
+          <h2
+            id="post-sale-guide-title"
+            class="m-0 text-sm font-medium text-n-slate-12"
+          >
+            {{ t('ARROYO.PANEL.POST_SALE.VIEW_HELP_TITLE') }}
+          </h2>
           <p class="m-0">{{ filterExplanation }}</p>
           <p v-if="manualOnly" class="m-0">{{ summaryHelp.manual_pending }}</p>
           <p class="m-0">{{ t('ARROYO.PANEL.POST_SALE.COUNTS_HELP') }}</p>

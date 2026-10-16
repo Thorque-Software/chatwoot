@@ -255,7 +255,8 @@
         "VIEW_HELP": "About this view",
         "SPECIFIC_STATUS": "Filtered status: {status}",
         "STAGE_FILTER": "Follow-up stage",
-        "ALL_STAGES": "All stages"
+        "ALL_STAGES": "All stages",
+        "VIEW_HELP_TITLE": "Guide to this view"
       },
       "FILTERS": {
         "PERIOD": "Period",

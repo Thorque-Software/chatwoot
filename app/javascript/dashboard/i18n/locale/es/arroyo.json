@@ -255,7 +255,8 @@
         "VIEW_HELP": "Ayuda de esta vista",
         "SPECIFIC_STATUS": "Estado filtrado: {status}",
         "STAGE_FILTER": "Etapa postventa",
-        "ALL_STAGES": "Todas las etapas"
+        "ALL_STAGES": "Todas las etapas",
+        "VIEW_HELP_TITLE": "Guía de esta vista"
       },
       "FILTERS": {
         "PERIOD": "Período",
