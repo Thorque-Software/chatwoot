@@ -46,6 +46,7 @@ const { t } = useI18n();
 const {
   fetchFeatures: fetchArroyoFeatures,
   isAgentPanelEnabled,
+  isPostSaleVisible,
   hideNativeReports,
 } = useArroyoFeatures();
 
@@ -391,6 +392,27 @@ const menuItems = computed(() => {
         },
       ],
     },
+    // ARROYO: accesos diarios para vendedores, con los mismos flags y permisos del panel.
+    ...(isAgentPanelEnabled.value
+      ? [
+          {
+            name: 'Arroyo Follow Ups',
+            label: t('ARROYO.SIDEBAR.FOLLOW_UPS'),
+            icon: 'i-lucide-clock-3',
+            to: accountScopedRoute('arroyo_follow_ups'),
+          },
+          ...(isPostSaleVisible.value
+            ? [
+                {
+                  name: 'Arroyo Post Sale',
+                  label: t('ARROYO.SIDEBAR.POST_SALE'),
+                  icon: 'i-lucide-calendar-check',
+                  to: accountScopedRoute('arroyo_post_sale'),
+                },
+              ]
+            : []),
+        ]
+      : []),
     {
       name: 'Captain',
       icon: 'i-woot-captain',

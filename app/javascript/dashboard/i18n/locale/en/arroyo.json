@@ -2,7 +2,9 @@
   "ARROYO": {
     "SIDEBAR": {
       "SETTINGS": "Arroyo",
-      "PANEL": "Agent panel"
+      "PANEL": "Agent panel",
+      "FOLLOW_UPS": "Follow-ups",
+      "POST_SALE": "Post-sale"
     },
     "SETTINGS": {
       "HEADER": {
@@ -219,7 +221,11 @@
           "D1": "D+1",
           "D7": "D+7",
           "D30": "D+30"
-        }
+        },
+        "QUICK_FILTERS": "Filter follow-ups",
+        "PRIORITY_HELP": "Pending manual tasks appear first. Select a summary to filter; each row is one stage of a purchase.",
+        "VIEW_DETAIL": "View details",
+        "FIELD_VALUE": "{label}: {value}"
       },
       "FILTERS": {
         "PERIOD": "Period",
@@ -239,7 +245,9 @@
           "LABEL": "Group by",
           "DAY": "Day",
           "WEEK": "Week"
-        }
+        },
+        "ALL_PURCHASES": "All purchases",
+        "PURCHASE_PERIOD": "Purchase date"
       },
       "METRICS": {
         "CONVERSATIONS_ATTENDED": "Conversations attended",
@@ -266,6 +274,16 @@
       },
       "API": {
         "ERROR": "Could not load the agent panel"
+      },
+      "PAGES": {
+        "WINDOWS": {
+          "TITLE": "Follow-ups",
+          "DESCRIPTION": "Review WhatsApp messaging windows and open each conversation to continue helping the customer."
+        },
+        "POST_SALE": {
+          "TITLE": "Post-sale",
+          "DESCRIPTION": "Review purchase follow-ups, check delivery and complete pending manual tasks."
+        }
       }
     }
   }

@@ -79,4 +79,23 @@ RSpec.describe 'Arroyo post-sale API', type: :request do
     get "#{url}/follow_ups", headers: agent.create_new_auth_token
     expect(response).to have_http_status(:ok)
   end
+
+  it 'filters manual tasks without losing overview totals and prioritizes pending work' do
+    purchase = Arroyo::PostSalePurchase.find_by!(conversation: conversation)
+    pending = purchase.follow_ups.find_by!(stage: 'd7')
+    pending.update!(status: 'failed', manual_status: 'pending', alert_assignee: agent)
+    delivered = purchase.follow_ups.find_by!(stage: 'd30')
+    delivered.update!(status: 'delivered')
+
+    get "#{url}/follow_ups", headers: agent.create_new_auth_token
+    expect(response.parsed_body['follow_ups'].first['id']).to eq(pending.id)
+
+    get "#{url}/follow_ups", headers: agent.create_new_auth_token, params: { manual_status: 'pending' }
+    expect(response.parsed_body['follow_ups'].pluck('id')).to eq([pending.id])
+    expect(response.parsed_body['totals']).to include('manual_pending' => 1, 'delivered' => 1)
+
+    get "#{url}/follow_ups", headers: other.create_new_auth_token, params: { manual_status: 'pending' }
+    expect(response.parsed_body['follow_ups']).to be_empty
+    expect(response.parsed_body['totals']['manual_pending']).to eq(0)
+  end
 end

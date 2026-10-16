@@ -275,4 +275,46 @@ describe('Arroyo post-sale panel', () => {
     await flushPromises();
     expect(wrapper.text()).toContain('ARROYO.PANEL.POST_SALE.EMPTY');
   });
+
+  it('filters manual tasks from the summary and keeps a direct conversation link', async () => {
+    const wrapper = await mountTab();
+    await wrapper
+      .get('[data-testid="summary-manual_pending"]')
+      .trigger('click');
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ ...params, manual_status: 'pending' })
+    );
+    expect(
+      wrapper.get('[data-testid="conversation-12"]').attributes('href')
+    ).toBe('/app/accounts/1/conversations/42');
+    await wrapper.get('[data-testid="summary-delivered"]').trigger('click');
+    await flushPromises();
+    expect(PostSaleAPI.getFollowUps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        status: ['delivered', 'read'],
+        manual_status: undefined,
+      })
+    );
+  });
+  it('keeps summary controls mounted while filtering so keyboard focus is retained', async () => {
+    const wrapper = await mountTab();
+    let finishLoad;
+    PostSaleAPI.getFollowUps.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finishLoad = resolve;
+        })
+    );
+    const button = wrapper.get('[data-testid="summary-manual_pending"]');
+    const original = button.element;
+    await button.trigger('click');
+    expect(wrapper.get('[data-testid="summary-manual_pending"]').element).toBe(
+      original
+    );
+    finishLoad({
+      data: { follow_ups: [followUp()], totals: { manual_pending: 1 } },
+    });
+    await flushPromises();
+  });
 });

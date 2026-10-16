@@ -2,7 +2,9 @@
   "ARROYO": {
     "SIDEBAR": {
       "SETTINGS": "Arroyo",
-      "PANEL": "Panel de vendedores"
+      "PANEL": "Panel de vendedores",
+      "FOLLOW_UPS": "Seguimientos",
+      "POST_SALE": "Postventa"
     },
     "SETTINGS": {
       "HEADER": {
@@ -219,7 +221,11 @@
           "D1": "D+1",
           "D7": "D+7",
           "D30": "D+30"
-        }
+        },
+        "QUICK_FILTERS": "Filtrar seguimientos",
+        "PRIORITY_HELP": "Las tareas manuales pendientes aparecen primero. Seleccioná un resumen para filtrar; cada fila corresponde a una etapa de una compra.",
+        "VIEW_DETAIL": "Ver detalle",
+        "FIELD_VALUE": "{label}: {value}"
       },
       "FILTERS": {
         "PERIOD": "Período",
@@ -239,7 +245,9 @@
           "LABEL": "Agrupar por",
           "DAY": "Día",
           "WEEK": "Semana"
-        }
+        },
+        "ALL_PURCHASES": "Todas las compras",
+        "PURCHASE_PERIOD": "Fecha de compra"
       },
       "METRICS": {
         "CONVERSATIONS_ATTENDED": "Consultas atendidas",
@@ -266,6 +274,16 @@
       },
       "API": {
         "ERROR": "No se pudo cargar el panel de vendedores"
+      },
+      "PAGES": {
+        "WINDOWS": {
+          "TITLE": "Seguimientos",
+          "DESCRIPTION": "Revisá las ventanas de WhatsApp y abrí cada conversación para continuar la atención."
+        },
+        "POST_SALE": {
+          "TITLE": "Postventa",
+          "DESCRIPTION": "Revisá los seguimientos de cada compra, comprobá su entrega y atendé las tareas manuales pendientes."
+        }
       }
     }
   }

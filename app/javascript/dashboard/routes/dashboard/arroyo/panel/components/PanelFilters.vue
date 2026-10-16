@@ -11,6 +11,7 @@ const props = defineProps({
   agentOptions: { type: Array, default: () => [] },
   inboxOptions: { type: Array, default: () => [] },
   showAgentFilter: { type: Boolean, default: true },
+  showAllDates: { type: Boolean, default: false },
   showDateFilters: { type: Boolean, default: true },
   showGroupBy: { type: Boolean, default: true },
 });
@@ -18,6 +19,11 @@ const props = defineProps({
 const emit = defineEmits(['change']);
 
 const { t } = useI18n();
+const periodLabel = computed(() =>
+  props.showAllDates
+    ? t('ARROYO.PANEL.FILTERS.PURCHASE_PERIOD')
+    : t('ARROYO.PANEL.FILTERS.PERIOD')
+);
 
 const presetLabels = computed(() => ({
   today: t('ARROYO.PANEL.FILTERS.PRESETS.TODAY'),
@@ -34,9 +40,12 @@ const groupByLabels = computed(() => ({
 }));
 
 const presetOptions = computed(() =>
-  DATE_PRESETS.map(preset => ({
+  [...(props.showAllDates ? ['all'] : []), ...DATE_PRESETS].map(preset => ({
     value: preset,
-    label: presetLabels.value[preset],
+    label:
+      preset === 'all'
+        ? t('ARROYO.PANEL.FILTERS.ALL_PURCHASES')
+        : presetLabels.value[preset],
   }))
 );
 
@@ -74,7 +83,7 @@ const onPresetChange = preset => {
   <div class="flex flex-wrap items-end gap-3">
     <template v-if="showDateFilters">
       <label class="flex flex-col gap-1 text-label-small text-n-slate-11">
-        {{ t('ARROYO.PANEL.FILTERS.PERIOD') }}
+        {{ periodLabel }}
         <Select
           :model-value="filters.preset"
           :options="presetOptions"

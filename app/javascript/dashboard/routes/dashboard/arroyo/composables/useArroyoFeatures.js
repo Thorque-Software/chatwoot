@@ -21,6 +21,12 @@ export function useArroyoFeatures() {
     isAgentPanelEnabled: computed(() =>
       Boolean(features.value?.agent_panel?.enabled)
     ),
+    isPostSaleVisible: computed(() =>
+      Boolean(
+        features.value?.post_sale?.enabled ||
+          features.value?.post_sale?.has_records
+      )
+    ),
     hideNativeReports: computed(() =>
       Boolean(
         features.value?.agent_panel?.enabled &&

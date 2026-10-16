@@ -1,13 +1,16 @@
-import { mount, flushPromises } from '@vue/test-utils';
+import { mount, flushPromises, enableAutoUnmount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { createStore } from 'vuex';
 import Index from '../Index.vue';
+import panelRoutes from '../panel.routes';
 import PanelFilters from '../components/PanelFilters.vue';
 import ArroyoAgentPanelAPI from '../../api/agentPanel';
 import ArroyoFeaturesAPI from '../../api/features';
 import PostSaleAPI from '../../api/postSale';
 import PostSaleTab from '../components/PostSaleTab.vue';
 import { useArroyoFeatures } from '../../composables/useArroyoFeatures';
+
+enableAutoUnmount(afterEach);
 
 const metrics = values => ({
   conversations_attended: 0,
@@ -54,19 +57,15 @@ const conversation = {
   last_activity_at: 1,
 };
 
-const mountPanel = async query => {
+const mountPanel = async (query, name = 'arroyo_agent_panel') => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      {
-        path: '/app/accounts/:accountId/arroyo/panel',
-        name: 'arroyo_agent_panel',
-        component: Index,
-      },
+      ...panelRoutes.routes,
       { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
     ],
   });
-  await router.push({ path: '/app/accounts/1/arroyo/panel', query });
+  await router.push({ name, params: { accountId: '1' }, query });
   const store = createStore({
     getters: { getCurrentRole: () => 'administrator' },
     modules: {
@@ -278,5 +277,35 @@ describe('Arroyo agent panel', () => {
     expect(drawer.find('a').attributes('href')).toBe(
       '/app/accounts/1/conversations/42'
     );
+  });
+  it('opens post-sale directly with all purchases, including older D+30 purchases', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true },
+        post_sale: { enabled: true },
+      },
+    });
+    const { wrapper } = await mountPanel({}, 'arroyo_post_sale');
+    expect(wrapper.findComponent(PostSaleTab).exists()).toBe(true);
+    expect(wrapper.get('h1').text()).toBe('Post-sale');
+    expect(PostSaleAPI.getFollowUps).toHaveBeenCalledWith(
+      expect.objectContaining({ since: undefined, until: undefined })
+    );
+    expect(wrapper.findComponent(PanelFilters).props('showAllDates')).toBe(
+      true
+    );
+    expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
+  });
+
+  it('opens follow-up windows directly without loading activity metrics', async () => {
+    const windows = { closing_soon: [], closed_today: [] };
+    vi.spyOn(ArroyoAgentPanelAPI, 'getWindows').mockResolvedValue({
+      data: windows,
+    });
+    const { wrapper } = await mountPanel({}, 'arroyo_follow_ups');
+    expect(wrapper.get('h1').text()).toBe('Follow-ups');
+    expect(ArroyoAgentPanelAPI.getWindows).toHaveBeenCalled();
+    expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
   });
 });

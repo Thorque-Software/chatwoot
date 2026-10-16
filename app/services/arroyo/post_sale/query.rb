@@ -15,6 +15,7 @@ class Arroyo::PostSale::Query
   end
 
   def apply_filters(scope)
+    scope = scope.where(manual_status: params[:manual_status]) if params[:manual_status].present?
     scope = scope.where(status: params[:status]) if params[:status].present?
     { purchase_reference: :reference, inbox_ids: :inbox_id, user_ids: :seller_id }.each do |param, column|
       scope = scope.where(arroyo_post_sale_purchases: { column => params[param] }) if params[param].present?

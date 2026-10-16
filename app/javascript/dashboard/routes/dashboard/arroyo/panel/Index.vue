@@ -63,9 +63,11 @@ const showAgentFilter = computed(
 // Los filtros viven en la URL para poder compartir el link
 const filters = computed(() => {
   const { query } = route;
-  const preset = DATE_PRESETS.includes(query.preset)
-    ? query.preset
-    : DEFAULT_PRESET;
+  const isPostSale =
+    route.meta.arroyoTab === 'post_sale' || query.tab === 'post_sale';
+  let preset = isPostSale ? 'all' : DEFAULT_PRESET;
+  if (DATE_PRESETS.includes(query.preset)) preset = query.preset;
+  if (isPostSale && query.preset === 'all') preset = 'all';
   const range =
     preset === 'custom' && query.since && query.until
       ? { since: query.since, until: query.until }
@@ -85,12 +87,50 @@ const showPostSale = computed(() =>
   )
 );
 
-const activeTab = computed(() =>
-  TABS.includes(route.query.tab) &&
-  (route.query.tab !== 'post_sale' || showPostSale.value)
-    ? route.query.tab
-    : 'activity'
+const activeTab = computed(() => {
+  // Los enlaces anteriores con ?tab= siguen funcionando.
+  const tab =
+    route.name === 'arroyo_agent_panel'
+      ? route.query.tab || 'activity'
+      : route.meta.arroyoTab || 'activity';
+  return TABS.includes(tab) && (tab !== 'post_sale' || showPostSale.value)
+    ? tab
+    : 'activity';
+});
+const pageHeadings = computed(() => ({
+  activity: {
+    title: t('ARROYO.PANEL.TITLE'),
+    description: t('ARROYO.PANEL.DESCRIPTION'),
+  },
+  windows: {
+    title: t('ARROYO.PANEL.PAGES.WINDOWS.TITLE'),
+    description: t('ARROYO.PANEL.PAGES.WINDOWS.DESCRIPTION'),
+  },
+  post_sale: {
+    title: t('ARROYO.PANEL.PAGES.POST_SALE.TITLE'),
+    description: t('ARROYO.PANEL.PAGES.POST_SALE.DESCRIPTION'),
+  },
+}));
+const pageTitle = computed(() => pageHeadings.value[activeTab.value].title);
+const pageDescription = computed(
+  () => pageHeadings.value[activeTab.value].description
 );
+const changeTab = tab => {
+  const names = {
+    activity: 'arroyo_agent_panel',
+    windows: 'arroyo_follow_ups',
+    post_sale: 'arroyo_post_sale',
+  };
+  router.push({
+    name: names[tab.key],
+    params: route.params,
+    query: {
+      ...route.query,
+      tab: undefined,
+      preset: route.query.preset === 'all' ? undefined : route.query.preset,
+    },
+  });
+};
 
 const tabs = computed(() => [
   { key: 'activity', label: t('ARROYO.PANEL.TABS.ACTIVITY') },
@@ -109,8 +149,8 @@ const apiParams = computed(() => ({
 }));
 
 const postSaleParams = computed(() => ({
-  since: apiParams.value.since,
-  until: apiParams.value.until,
+  since: filters.value.preset === 'all' ? undefined : apiParams.value.since,
+  until: filters.value.preset === 'all' ? undefined : apiParams.value.until,
   user_ids: apiParams.value.user_ids,
   inbox_ids: apiParams.value.inbox_ids,
 }));
@@ -213,15 +253,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full px-6 overflow-auto bg-n-surface-1">
+  <div class="w-full min-w-0 px-4 md:px-6 overflow-auto bg-n-surface-1">
     <div class="flex flex-col gap-5 pb-12 mx-auto max-w-6xl">
       <header class="flex flex-wrap items-start justify-between gap-4 pt-6">
         <div class="flex flex-col gap-2">
           <h1 class="text-heading-1 text-n-slate-12">
-            {{ t('ARROYO.PANEL.TITLE') }}
+            {{ pageTitle }}
           </h1>
           <p class="mb-0 text-body-main text-n-slate-11">
-            {{ t('ARROYO.PANEL.DESCRIPTION') }}
+            {{ pageDescription }}
           </p>
         </div>
         <Button
@@ -237,8 +277,8 @@ onMounted(async () => {
 
       <TabBar
         :tabs="tabs"
-        :initial-active-tab="TABS.indexOf(activeTab)"
-        @tab-changed="tab => updateQuery({ tab: tab.key })"
+        :initial-active-tab="tabs.findIndex(tab => tab.key === activeTab)"
+        @tab-changed="changeTab"
       />
 
       <PanelFilters
@@ -251,6 +291,7 @@ onMounted(async () => {
             : showAgentFilter
         "
         :show-date-filters="activeTab !== 'windows'"
+        :show-all-dates="activeTab === 'post_sale'"
         :show-group-by="activeTab === 'activity'"
         @change="onFiltersChange"
       />

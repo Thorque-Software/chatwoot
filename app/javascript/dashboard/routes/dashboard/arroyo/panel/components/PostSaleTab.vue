@@ -20,6 +20,7 @@ const props = defineProps({
 const { t, locale } = useI18n();
 const route = useRoute();
 const status = ref('');
+const summaryFilter = ref('');
 const page = ref(1);
 const data = ref(null);
 const isLoading = ref(false);
@@ -67,18 +68,6 @@ const labels = computed(() => ({
     d30: t('ARROYO.PANEL.POST_SALE.STAGES.D30'),
   },
 }));
-const columnLabels = computed(() => [
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.CUSTOMER'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.PRODUCT'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.SELLER'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.STAGE'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.SCHEDULED_AT'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.ATTEMPTED_AT'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.STATUS'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.REASON'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.ASSIGNEE'),
-  t('ARROYO.PANEL.POST_SALE.COLUMNS.MANUAL'),
-]);
 const dateLabels = computed(() => ({
   scheduled_at: t('ARROYO.PANEL.POST_SALE.DATES.SCHEDULED_AT'),
   attempted_at: t('ARROYO.PANEL.POST_SALE.DATES.ATTEMPTED_AT'),
@@ -134,6 +123,29 @@ const summaries = computed(() => {
     },
   ];
 });
+const summaryStatuses = {
+  scheduled: ['awaiting_plan', 'scheduled'],
+  processing: ['queued', 'sent'],
+  delivered: ['delivered', 'read'],
+  failed: ['failed', 'not_executed'],
+  unconfirmed: ['unconfirmed'],
+};
+const selectSummary = key => {
+  status.value = '';
+  summaryFilter.value = summaryFilter.value === key ? '' : key;
+};
+const selectStatus = value => {
+  summaryFilter.value = '';
+  status.value = value;
+};
+const statusClass = value => {
+  if (['failed', 'not_executed'].includes(value))
+    return 'text-n-ruby-11 bg-n-ruby-3';
+  if (['delivered', 'read'].includes(value))
+    return 'text-n-teal-11 bg-n-teal-3';
+  if (value === 'unconfirmed') return 'text-n-amber-11 bg-n-amber-3';
+  return 'text-n-slate-12 bg-n-alpha-2';
+};
 const formatDate = value =>
   value
     ? new Intl.DateTimeFormat(locale.value, {
@@ -171,7 +183,9 @@ const fetchFollowUps = async () => {
   try {
     const response = await PostSaleAPI.getFollowUps({
       ...props.params,
-      status: status.value || undefined,
+      status: status.value || summaryStatuses[summaryFilter.value],
+      manual_status:
+        summaryFilter.value === 'manual_pending' ? 'pending' : undefined,
       ...(page.value > 1 ? { page: page.value } : {}),
     });
     if (currentRequest === requestId) data.value = response.data;
@@ -252,11 +266,13 @@ const updatePurchase = () =>
   );
 
 watch(
-  [() => props.params, status, page],
+  [() => props.params, status, summaryFilter, page],
   (values, previous) => {
     if (
       page.value !== 1 &&
-      (values[0] !== previous[0] || values[1] !== previous[1])
+      (values[0] !== previous[0] ||
+        values[1] !== previous[1] ||
+        values[2] !== previous[2])
     ) {
       page.value = 1;
       return;
@@ -269,16 +285,14 @@ watch(
 </script>
 
 <template>
-  <section class="flex flex-col gap-4">
-    <p class="mb-0 text-body-main text-n-slate-11">
-      {{ t('ARROYO.PANEL.POST_SALE.DESCRIPTION') }}
-    </p>
+  <section class="flex flex-col gap-4" :aria-busy="isLoading">
     <label class="flex flex-col gap-1 text-label-small text-n-slate-11">
       {{ t('ARROYO.PANEL.POST_SALE.STATUS_FILTER') }}
       <Select
-        v-model="status"
+        :model-value="status"
         :options="statusOptions"
         data-testid="status-filter"
+        @update:model-value="selectStatus"
       />
     </label>
     <div
@@ -294,93 +308,154 @@ watch(
       />
     </div>
     <div v-if="isLoading" class="flex justify-center py-10"><Spinner /></div>
-    <template v-else-if="data && !loadError">
-      <div class="grid grid-cols-2 gap-3 lg:grid-cols-6">
-        <div
-          v-for="summary in summaries"
-          :key="summary.key"
-          class="flex flex-col gap-1 p-4 rounded-xl bg-n-solid-2 outline outline-1 outline-n-container"
+    <template v-if="data && !loadError">
+      <div
+        class="flex flex-wrap items-center gap-2"
+        :aria-label="t('ARROYO.PANEL.POST_SALE.QUICK_FILTERS')"
+      >
+        <button
+          type="button"
+          class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+          :class="{ 'bg-n-alpha-2': !summaryFilter && !status }"
+          :aria-pressed="!summaryFilter && !status"
+          @click="
+            summaryFilter = '';
+            status = '';
+          "
         >
-          <span class="text-label-small text-n-slate-11">{{
-            summary.label
-          }}</span>
-          <span class="text-heading-1 text-n-slate-12">{{
-            summary.count
-          }}</span>
-        </div>
+          {{ t('ARROYO.PANEL.POST_SALE.ALL_STATUSES') }}
+        </button>
+        <button
+          v-for="summary in [...summaries].reverse()"
+          :key="summary.key"
+          type="button"
+          class="flex items-center gap-2 rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+          :class="{
+            'bg-n-alpha-2 outline outline-1 outline-n-blue-9':
+              summaryFilter === summary.key,
+            'text-n-amber-11':
+              summary.key === 'manual_pending' && summary.count > 0,
+          }"
+          :aria-pressed="summaryFilter === summary.key"
+          :data-testid="`summary-${summary.key}`"
+          @click="selectSummary(summary.key)"
+        >
+          <span>{{ summary.label }}</span>
+          <span class="font-semibold tabular-nums">{{ summary.count }}</span>
+        </button>
       </div>
+      <p class="mb-0 text-label-small text-n-slate-11">
+        {{ t('ARROYO.PANEL.POST_SALE.PRIORITY_HELP') }}
+      </p>
       <p
         v-if="!data.follow_ups.length"
         class="py-10 text-center text-n-slate-11"
       >
         {{ t('ARROYO.PANEL.POST_SALE.EMPTY') }}
       </p>
-      <div v-else class="overflow-x-auto rounded-xl border border-n-weak">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-n-solid-2 text-n-slate-11">
-            <tr>
-              <th
-                v-for="column in columnLabels"
-                :key="column"
-                class="p-3 whitespace-nowrap"
+      <ul
+        v-else
+        class="m-0 list-none divide-y divide-n-weak rounded-xl border border-n-weak p-0"
+      >
+        <li
+          v-for="item in data.follow_ups"
+          :key="item.id"
+          class="flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between"
+        >
+          <div class="flex min-w-0 flex-1 flex-col gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                :data-testid="`follow-up-${item.id}`"
+                class="break-words text-left font-semibold text-n-blue-11 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+                @click="openDetail(item)"
               >
-                {{ column }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="text-n-slate-12">
-            <tr
-              v-for="item in data.follow_ups"
-              :key="item.id"
-              class="border-t border-n-weak"
-            >
-              <td class="p-3">
-                <button
-                  :data-testid="`follow-up-${item.id}`"
-                  class="text-left font-medium text-n-blue-11 hover:underline"
-                  @click="openDetail(item)"
-                >
-                  {{
-                    item.purchase.contact.name ||
-                    item.purchase.contact.phone_number
-                  }}
-                </button>
-              </td>
-              <td class="p-3">
-                {{ item.purchase.product || t('ARROYO.PANEL.NO_DATA') }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
-                {{ item.purchase.seller?.name || t('ARROYO.PANEL.UNASSIGNED') }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
-                {{ labels.stages[item.stage] }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
-                {{ formatDate(item.scheduled_at) }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
-                {{ formatDate(item.attempted_at) }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
+                {{
+                  item.purchase.contact.name ||
+                  item.purchase.contact.phone_number
+                }}
+              </button>
+              <span class="text-label-small text-n-slate-11">{{
+                labels.stages[item.stage]
+              }}</span>
+              <span
+                class="rounded px-2 py-1 text-label-small font-medium"
+                :class="statusClass(item.status)"
+              >
                 {{ statusLabel(item.status) }}
-              </td>
-              <td class="p-3">
-                <span class="block min-w-40">{{
-                  item.error_message ||
-                  item.error_code ||
-                  t('ARROYO.PANEL.NO_DATA')
-                }}</span>
-              </td>
-              <td class="p-3 whitespace-nowrap">
-                {{ assigneeName(item.alert_assignee_id) }}
-              </td>
-              <td class="p-3 whitespace-nowrap">
+              </span>
+              <span
+                v-if="item.manual_status"
+                class="text-label-small"
+                :class="
+                  item.manual_status === 'pending'
+                    ? 'text-n-amber-11'
+                    : 'text-n-slate-11'
+                "
+              >
                 {{ manualLabel(item.manual_status) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </span>
+            </div>
+            <p class="m-0 break-words text-sm text-n-slate-12">
+              {{ item.purchase.product || t('ARROYO.PANEL.NO_DATA') }}
+            </p>
+            <div
+              class="flex flex-wrap gap-x-5 gap-y-1 text-label-small text-n-slate-11"
+            >
+              <span>{{
+                t('ARROYO.PANEL.POST_SALE.FIELD_VALUE', {
+                  label: t('ARROYO.PANEL.POST_SALE.COLUMNS.SELLER'),
+                  value:
+                    item.purchase.seller?.name || t('ARROYO.PANEL.UNASSIGNED'),
+                })
+              }}</span>
+              <span>{{
+                t('ARROYO.PANEL.POST_SALE.FIELD_VALUE', {
+                  label: t('ARROYO.PANEL.POST_SALE.COLUMNS.SCHEDULED_AT'),
+                  value: formatDate(item.scheduled_at),
+                })
+              }}</span>
+              <span v-if="item.manual_status === 'pending'">{{
+                t('ARROYO.PANEL.POST_SALE.FIELD_VALUE', {
+                  label: t('ARROYO.PANEL.POST_SALE.COLUMNS.ASSIGNEE'),
+                  value: assigneeName(item.alert_assignee_id),
+                })
+              }}</span>
+            </div>
+            <p
+              v-if="item.error_message || item.error_code"
+              class="m-0 break-words text-sm text-n-ruby-11"
+            >
+              {{ item.error_message || item.error_code }}
+            </p>
+            <p
+              v-if="item.message?.content"
+              class="m-0 line-clamp-2 break-words text-sm text-n-slate-11"
+            >
+              {{ item.message.content }}
+            </p>
+          </div>
+          <div class="flex shrink-0 flex-wrap items-center gap-3">
+            <Button
+              slate
+              faded
+              sm
+              :label="
+                item.can_resolve && item.manual_status === 'pending'
+                  ? t('ARROYO.PANEL.POST_SALE.RESOLVE')
+                  : t('ARROYO.PANEL.POST_SALE.VIEW_DETAIL')
+              "
+              @click="openDetail(item)"
+            />
+            <router-link
+              :to="conversationUrl(item)"
+              :data-testid="`conversation-${item.id}`"
+              class="rounded px-1 py-2 text-sm text-n-blue-11 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+            >
+              {{ t('ARROYO.PANEL.POST_SALE.OPEN_CONVERSATION') }}
+            </router-link>
+          </div>
+        </li>
+      </ul>
       <p class="mb-0 text-label-small text-n-slate-11">
         {{
           t('ARROYO.PANEL.POST_SALE.LIMIT', {
@@ -478,6 +553,56 @@ watch(
           <span>{{ selected.error_code }}</span>
           <span>{{ selected.error_message }}</span>
         </p>
+        <form
+          v-if="selected.can_resolve && selected.manual_status === 'pending'"
+          class="flex flex-col gap-3 border-t border-n-weak pt-4"
+          @submit.prevent="resolve"
+        >
+          <h4 class="text-heading-3 text-n-slate-12">
+            {{ t('ARROYO.PANEL.POST_SALE.RESOLVE') }}
+          </h4>
+          <p class="mb-0 text-label-small text-n-slate-11">
+            {{ t('ARROYO.PANEL.POST_SALE.RESOLVE_HELP') }}
+          </p>
+          <label class="flex flex-col gap-1 text-sm text-n-slate-11">
+            {{ t('ARROYO.PANEL.POST_SALE.METHOD') }}
+            <Select
+              v-model="method"
+              :options="methodOptions"
+              :disabled="isSaving"
+            />
+          </label>
+          <TextArea
+            id="post-sale-resolution-note"
+            v-model="note"
+            :label="t('ARROYO.PANEL.POST_SALE.NOTE')"
+            :max-length="2000"
+            show-character-count
+            :disabled="isSaving"
+            data-testid="resolution-note"
+          />
+          <Button
+            type="submit"
+            :label="t('ARROYO.PANEL.POST_SALE.RESOLVE')"
+            :is-loading="isSaving"
+            :disabled="!note.trim() || isSaving"
+            data-testid="resolve-submit"
+          />
+        </form>
+        <div
+          v-else-if="selected.resolution_method || selected.resolution_note"
+          class="flex flex-col gap-2"
+        >
+          <h4 class="text-heading-3 text-n-slate-12">
+            {{ t('ARROYO.PANEL.POST_SALE.RESOLUTION') }}
+          </h4>
+          <span v-if="selected.resolution_method">{{
+            labels.methods[selected.resolution_method]
+          }}</span>
+          <p class="mb-0 whitespace-pre-wrap text-sm text-n-slate-11">
+            {{ selected.resolution_note }}
+          </p>
+        </div>
         <div class="flex flex-col gap-2">
           <h4 class="text-heading-3 text-n-slate-12">
             {{ t('ARROYO.PANEL.POST_SALE.PURCHASE_DATE') }}
@@ -565,56 +690,6 @@ watch(
           </template>
           <p v-else class="mb-0 text-sm text-n-slate-11">
             {{ t('ARROYO.PANEL.POST_SALE.NO_MESSAGE') }}
-          </p>
-        </div>
-        <form
-          v-if="selected.can_resolve && selected.manual_status === 'pending'"
-          class="flex flex-col gap-3 border-t border-n-weak pt-4"
-          @submit.prevent="resolve"
-        >
-          <h4 class="text-heading-3 text-n-slate-12">
-            {{ t('ARROYO.PANEL.POST_SALE.RESOLVE') }}
-          </h4>
-          <p class="mb-0 text-label-small text-n-slate-11">
-            {{ t('ARROYO.PANEL.POST_SALE.RESOLVE_HELP') }}
-          </p>
-          <label class="flex flex-col gap-1 text-sm text-n-slate-11">
-            {{ t('ARROYO.PANEL.POST_SALE.METHOD') }}
-            <Select
-              v-model="method"
-              :options="methodOptions"
-              :disabled="isSaving"
-            />
-          </label>
-          <TextArea
-            id="post-sale-resolution-note"
-            v-model="note"
-            :label="t('ARROYO.PANEL.POST_SALE.NOTE')"
-            :max-length="2000"
-            show-character-count
-            :disabled="isSaving"
-            data-testid="resolution-note"
-          />
-          <Button
-            type="submit"
-            :label="t('ARROYO.PANEL.POST_SALE.RESOLVE')"
-            :is-loading="isSaving"
-            :disabled="!note.trim() || isSaving"
-            data-testid="resolve-submit"
-          />
-        </form>
-        <div
-          v-else-if="selected.resolution_method || selected.resolution_note"
-          class="flex flex-col gap-2"
-        >
-          <h4 class="text-heading-3 text-n-slate-12">
-            {{ t('ARROYO.PANEL.POST_SALE.RESOLUTION') }}
-          </h4>
-          <span v-if="selected.resolution_method">{{
-            labels.methods[selected.resolution_method]
-          }}</span>
-          <p class="mb-0 whitespace-pre-wrap text-sm text-n-slate-11">
-            {{ selected.resolution_note }}
           </p>
         </div>
         <p v-if="mutationError" role="alert" class="text-n-ruby-11">

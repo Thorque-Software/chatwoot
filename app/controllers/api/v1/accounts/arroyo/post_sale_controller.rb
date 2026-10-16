@@ -21,8 +21,9 @@ class Api::V1::Accounts::Arroyo::PostSaleController < Api::V1::Accounts::BaseCon
 
   def index
     scope = ::Arroyo::PostSale::Query.new(account_user: Current.account_user, params: params).perform
-    totals = scope.group(:status).count.merge('manual_pending' => scope.where(manual_status: 'pending').count)
-    records = scope.order(created_at: :desc, id: :asc).offset(offset).limit(PAGE_SIZE)
+    totals = follow_up_totals
+    records = scope.order(Arel.sql("CASE WHEN arroyo_follow_ups.manual_status = 'pending' THEN 0 ELSE 1 END"), created_at: :desc, id: :asc)
+                   .offset(offset).limit(PAGE_SIZE)
                    .includes(:message, purchase: [:seller, :contact, :inbox, :conversation, :follow_ups])
     render json: { follow_ups: records.map { |record| presenter.follow_up(record) }, totals: totals,
                    timezone: setting.config['timezone'], meta: pagination(scope.count) }
@@ -61,6 +62,11 @@ class Api::V1::Accounts::Arroyo::PostSaleController < Api::V1::Accounts::BaseCon
   private
 
   PAGE_SIZE = 200
+
+  def follow_up_totals
+    overview = ::Arroyo::PostSale::Query.new(account_user: Current.account_user, params: params.except(:status, :manual_status)).perform
+    overview.group(:status).count.merge('manual_pending' => overview.where(manual_status: 'pending').count)
+  end
 
   def setting
     @setting ||= ::Arroyo::Setting.for(Current.account)
