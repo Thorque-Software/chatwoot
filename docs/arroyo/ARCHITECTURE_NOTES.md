@@ -419,3 +419,16 @@ El alcance activo es panel de vendedores, seguimiento comercial y postventa D+1/
 ## 20/10/2026 — Plantillas exclusivas
 
 Por pedido del usuario, se reemplaza la selección texto libre/template de D6 por plantilla obligatoria para todas las etapas de postventa. El recordatorio de ventana mostrado en Ajustes era configuración sin job/servicio de envío implementado; se retira ese formulario, conservando el panel de ventanas. La configuración fija y el servidor no aceptan cuerpos alternativos de postventa. Ver docs/arroyo/n8n/TEMPLATE_ONLY.md para contratos y publicación gradual.
+
+## 20/10/2026 — Límites del panel para el nuevo embudo comercial
+
+El diseño en [SALES_FUNNEL_DESIGN.md](SALES_FUNNEL_DESIGN.md) parte de diferencias verificadas frente al recorrido comercial pedido:
+
+- El reporte actual cuenta atendidas por fecha/autores de mensajes y asignadas por fecha/destinatarios de eventos; no mide una misma población de consultas. Sus diferencias no equivalen directamente a falta de atención.
+- Las ventas del reporte usan tagging y asignado actual; la compra de postventa sí conserva un vendedor original. No usar la primera atribución como histórico comercial fiable.
+- `Arroyo::AssignmentEvent` no registra explícitamente responsable anterior, actor ni origen. La alternancia Redis del subworkflow publicado `B5YmsSniVco8DT6Y` no incorpora tomas manuales.
+- `PostSalePurchase` tiene unicidad por conversación; `RegisterPurchaseService` reutiliza ese registro. Recompras en el mismo chat requieren una migración nueva y cambios de contrato, no solo otra tarjeta.
+- El clasificador comercial publicado compara actividad del chat para decidir inactividad al completar la secuencia. Eso no demuestra una respuesta del cliente.
+- No hay emisor de recordatorios 23–24 h implementado en el código Arroyo ni en los workflows v3 revisados. Auditar automatizaciones nativas antes de atribuir un supuesto envío; no reinstalar el formulario retirado ni generar eventos ficticios.
+
+Alternativa propuesta y aceptada a nivel conversacional: registro de oportunidades y eventos Arroyo, atención humana identificada por origen, venta atribuida al momento del resultado y reparto transaccional alimentado por asignaciones efectivas. El diseño escrito está pendiente de revisión; no se implementa ni publica como parte de esta documentación.
