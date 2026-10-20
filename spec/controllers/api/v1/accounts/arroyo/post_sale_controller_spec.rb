@@ -33,10 +33,29 @@ RSpec.describe 'Arroyo post-sale API', type: :request do
   end
 
   it 'returns only allowlisted channel metadata for n8n, without credentials' do
+    channel.update!(message_templates: [{ 'name' => 'seg_dia_1', 'language' => 'es_AR', 'status' => 'APPROVED',
+                                          'components' => [{ 'type' => 'BODY', 'text' => '{{asesor}} {{producto}}' }], 'secret' => 'must-not-leak' }])
     get "#{url}/purchases", headers: admin.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body['purchases'].first['inbox'].keys).to match_array(%w[id channel_type message_templates])
-    expect(response.parsed_body.to_json).not_to include('test_key', 'provider_config')
+    expect(response.parsed_body.to_json).not_to include('test_key', 'provider_config', 'must-not-leak')
+    expect(response.parsed_body.dig('config', 'commercial_templates', channel.inbox.id.to_s).first['name']).to eq('seg_dia_1')
+    expect(response.parsed_body.dig('config', 'stages', 'd1', 'free_text')).to eq('')
+  end
+
+  it 'accepts a revision without a configurable body and creates the approved template' do
+    channel.update!(message_templates: [{ 'name' => 'postventa_d1', 'language' => 'es_AR', 'status' => 'APPROVED',
+                                          'parameter_format' => 'NAMED', 'category' => 'MARKETING',
+                                          'components' => [{ 'type' => 'BODY', 'text' => 'Hola {{asesor}}, {{producto}}' }] }])
+    purchase = Arroyo::PostSalePurchase.find_by!(conversation: conversation)
+    purchase.update!(planned_revision: purchase.revision)
+    follow_up = purchase.follow_ups.find_by!(stage: 'd1')
+    follow_up.update!(status: 'scheduled', scheduled_at: Time.current)
+    post "#{url}/follow_ups/#{follow_up.id}/message", headers: admin.create_new_auth_token,
+                                                      params: { revision: 1, content: 'Ignore me' }, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(follow_up.reload.message.content).to eq("Hola #{agent.available_name}, #{purchase.product}")
+    expect(follow_up.channel_used).to eq('template')
   end
 
   it 'requires a current revision and audits correction' do

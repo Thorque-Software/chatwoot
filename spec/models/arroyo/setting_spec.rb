@@ -18,6 +18,11 @@ RSpec.describe Arroyo::Setting do
   end
 
   describe 'defaults' do
+    it 'does not expose legacy editable post-sale messages or alternate template names' do
+      setting.merge_config(post_sale: { stages: { d1: { free_text: 'Legacy body', template: 'other' } } })
+      expect(setting.section(:post_sale)['stages']['d1']).to eq('days' => 1, 'template' => 'postventa_d1')
+    end
+
     it 'are valid' do
       expect(setting).to be_valid
     end
@@ -50,8 +55,7 @@ RSpec.describe Arroyo::Setting do
 
       expect(setting.section(:post_sale)['stages']['d7']).to eq(
         'days' => 8,
-        'free_text' => described_class::DEFAULTS['post_sale']['stages']['d7']['free_text'],
-        'template' => nil
+        'template' => 'postventa_d7'
       )
     end
 
@@ -71,7 +75,6 @@ RSpec.describe Arroyo::Setting do
       'an unknown timezone' => [{ timezone: 'Mars/Olympus' }, 'timezone'],
       'a string where a boolean is expected' => [{ post_sale: { enabled: 'true' } }, 'post_sale.enabled'],
       'a send hour outside 0-23' => [{ post_sale: { send_hour_local: 24 } }, 'post_sale.send_hour_local'],
-      'a blank stage text' => [{ post_sale: { stages: { d1: { free_text: ' ' } } } }, 'post_sale.stages.d1.free_text'],
       'a daily email limit below the hourly one' => [{ email_marketing: { max_per_hour: 500, max_per_day: 400 } }, 'email_marketing.max_per_day']
     }.each do |description, (changes, field)|
       it "rejects #{description}" do

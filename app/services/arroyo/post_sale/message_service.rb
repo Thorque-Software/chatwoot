@@ -1,5 +1,5 @@
 class Arroyo::PostSale::MessageService
-  pattr_initialize [:follow_up!, :revision!, :content!, :template_params, :execution_id]
+  pattr_initialize [:follow_up!, :revision!, :content, :template_params, :execution_id]
 
   def perform
     follow_up.purchase.with_lock do
@@ -20,16 +20,17 @@ class Arroyo::PostSale::MessageService
     return purchase.cancel_pending! if purchase.excluded?
 
     validate_schedule
-    if template_params.blank? && !follow_up.conversation.can_reply?
-      record_closed_window
+    @approved_message = Arroyo::PostSale::TemplateService.new(purchase: purchase, stage: follow_up.stage).perform
+    if @approved_message.nil?
+      record_unavailable_template
     else
       create_message(purchase)
     end
   end
 
-  def record_closed_window
-    follow_up.update!(attempted_at: Time.current, status: 'failed', error_code: '131047',
-                      error_message: I18n.t('arroyo.post_sale.errors.closed_window', locale: follow_up.account.locale))
+  def record_unavailable_template
+    follow_up.update!(attempted_at: Time.current, status: 'failed', error_code: 'template_unavailable',
+                      error_message: I18n.t('arroyo.post_sale.errors.template_unavailable', locale: follow_up.account.locale))
   end
 
   def validate_schedule
@@ -42,13 +43,13 @@ class Arroyo::PostSale::MessageService
     reopen_conversation(conversation, purchase)
     message = Messages::MessageBuilder.new(nil, conversation, message_params(purchase)).perform
     follow_up.update!(message: message, attempted_at: Time.current, status: 'queued', execution_id: execution_id,
-                      channel_used: template_params.present? ? 'template' : 'free_text', template_name: template_params&.dig('name'))
+                      channel_used: 'template', template_name: @approved_message[:template_params]['name'])
   end
 
   def message_params(purchase)
-    { content: content, message_type: 'outgoing', private: false, template_params: template_params,
-      content_attributes: { arroyo_kind: 'post_sale', arroyo_purchase_reference: purchase.reference,
-                            arroyo_stage: follow_up.stage, arroyo_follow_up_id: follow_up.id } }
+    @approved_message.merge(message_type: 'outgoing', private: false,
+                            content_attributes: { arroyo_kind: 'post_sale', arroyo_purchase_reference: purchase.reference,
+                                                  arroyo_stage: follow_up.stage, arroyo_follow_up_id: follow_up.id })
   end
 
   def reopen_conversation(conversation, purchase)

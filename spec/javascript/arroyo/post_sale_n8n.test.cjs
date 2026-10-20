@@ -112,7 +112,6 @@ test('due send uses actual contact, product, seller and execution ID', () => {
         stage: 'd1',
         body: {
           revision: 1,
-          content: 'Hola Ana, soy Julieta. ¿Cómo va tu bicicleta?',
           execution_id: 'fixture-run',
         },
       },
@@ -128,8 +127,8 @@ test('nullable contact and original seller names do not abort a due batch', () =
     product: null,
   };
   assert.equal(
-    dueMessages(item, config, '2026-10-14T13:00:00Z')[0].body.content,
-    'Hola , soy . ¿Cómo va ?'
+    dueMessages(item, config, '2026-10-14T13:00:00Z')[0].body.revision,
+    1
   );
 });
 test('stale revisions, attempted/message stages, future or old stages never dispatch', () => {
@@ -154,65 +153,6 @@ test('stale revisions, attempted/message stages, future or old stages never disp
   assert.deepEqual(dueMessages(purchase, config, '2026-10-14T12:59:59Z'), []);
   assert.deepEqual(dueMessages(purchase, config, '2026-10-15T13:00:00Z'), []);
 });
-test('approved named template derives actual metadata and body parameter names', () => {
-  const template = {
-    name: 'postventa_d1',
-    language: 'es_AR',
-    status: 'APPROVED',
-    category: 'MARKETING',
-    parameter_format: 'NAMED',
-    components: [
-      {
-        type: 'BODY',
-        text: 'Hola {{nombre}}, soy {{asesor}}. ¿Cómo va {{producto}}?',
-      },
-    ],
-  };
-  const item = {
-    ...purchase,
-    can_reply: false,
-    inbox: { ...purchase.inbox, message_templates: [template] },
-  };
-  assert.deepEqual(
-    dueMessages(item, config, '2026-10-14T13:00:00Z')[0].body.template_params,
-    {
-      name: 'postventa_d1',
-      category: 'MARKETING',
-      language: 'es_AR',
-      processed_params: {
-        body: { nombre: 'Ana', asesor: 'Julieta', producto: 'tu bicicleta' },
-      },
-    }
-  );
-});
-test('missing, unapproved, positional and unsupported template variables omit template for visible backend failure', () => {
-  [
-    { status: 'PENDING' },
-    { parameter_format: 'POSITIONAL' },
-    { components: [{ type: 'BODY', text: '{{unknown}}' }] },
-    { components: [{ type: 'HEADER', format: 'IMAGE' }] },
-  ].forEach(extra => {
-    const template = {
-      name: 'postventa_d1',
-      language: 'es_AR',
-      status: 'APPROVED',
-      category: 'MARKETING',
-      parameter_format: 'NAMED',
-      components: [{ type: 'BODY', text: '{{nombre}}' }],
-      ...extra,
-    };
-    const item = {
-      ...purchase,
-      can_reply: false,
-      inbox: { ...purchase.inbox, message_templates: [template] },
-    };
-    assert.equal(
-      dueMessages(item, config, '2026-10-14T13:00:00Z')[0].body.template_params,
-      undefined
-    );
-  });
-});
-
 function runCode(code, inputs, linkedNodes, now = '2026-10-14T13:00:00Z') {
   // Only the n8n clock is substituted; the full production Code node runs unchanged.
   const clock = {
@@ -254,8 +194,8 @@ test('generated Code nodes run both existing and PUT response contracts without 
   );
   assert.equal(prepared[0].json.needs_plan, false);
   assert.equal(
-    runCode(select.parameters.jsCode, prepared, linked)[0].json.body.content,
-    'Hola Ana, soy Julieta. ¿Cómo va tu bicicleta?'
+    runCode(select.parameters.jsCode, prepared, linked)[0].json.body.revision,
+    1
   );
   assert.equal(
     runCode(select.parameters.jsCode, [{ json: { purchase } }], linked)[0].json
@@ -284,6 +224,7 @@ test('commercial classification preserves legacy behavior and excludes only regi
         payload: [
           {
             id: 77,
+            inbox_id: 5,
             labels: ['seguimiento'],
             last_activity_at: Date.parse('2026-10-14T12:00:00Z') / 1000,
             meta: {
@@ -298,7 +239,31 @@ test('commercial classification preserves legacy behavior and excludes only regi
   const linked = {
     'Config Chatwoot': { first: () => ({ json: cfg }) },
     'Compras para Coordinacion Comercial': {
-      all: () => [{ json: { config, purchases: [] } }],
+      first: () => linked['Compras para Coordinacion Comercial'].all()[0],
+      all: () => [
+        {
+          json: {
+            config: {
+              ...config,
+              commercial_templates: {
+                5: [
+                  {
+                    name: 'seg_dia_1',
+                    language: 'es_AR',
+                    status: 'APPROVED',
+                    category: 'MARKETING',
+                    parameter_format: 'NAMED',
+                    components: [
+                      { type: 'BODY', text: 'Hola {{asesor}}, {{producto}}' },
+                    ],
+                  },
+                ],
+              },
+            },
+            purchases: [],
+          },
+        },
+      ],
     },
   };
   const code = buildOperations(baseline).operations.find(
@@ -306,10 +271,10 @@ test('commercial classification preserves legacy behavior and excludes only regi
   ).value;
   const legacy = runCode(baseline.commercialClassifier, inputs, linked);
   assert.equal(legacy.length, 1);
-  assert.deepEqual(
-    JSON.parse(JSON.stringify(runCode(code, inputs, linked))),
-    JSON.parse(JSON.stringify(legacy))
-  );
+  const current = runCode(code, inputs, linked);
+  assert.equal(current.length, 1);
+  assert.equal(current[0].json.template_content, 'Hola Juli, la bicicleta');
+  assert.equal(current[0].json.processed_params.body.asesor, 'Juli');
   linked['Compras para Coordinacion Comercial'].all = () => [
     { json: { config, purchases: [purchase] } },
   ];

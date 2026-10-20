@@ -80,13 +80,9 @@
           "DAYS": {
             "LABEL": "Días después de la venta"
           },
-          "FREE_TEXT": {
-            "LABEL": "Mensaje con la ventana abierta",
-            "HELP": "n8n usa este texto cuando la ventana permite responder. Podés usar variables como {variable}."
-          },
           "TEMPLATE": {
-            "LABEL": "Plantilla con la ventana cerrada",
-            "HELP": "Nombre de la plantilla de WhatsApp aprobada que usa n8n. Verificá su aprobación y sus variables antes de activar los envíos."
+            "LABEL": "Plantilla de Meta",
+            "HELP": "Se usa siempre esta plantilla aprobada. El mensaje se edita en Meta."
           }
         },
         "DELIVERY_TIMEOUT_HOURS": {

@@ -40,17 +40,14 @@ class Arroyo::Setting < ApplicationRecord
       'stages' => {
         'd1' => {
           'days' => 1,
-          'free_text' => 'Hola {{contact.first_name}}, ¿cómo va {{producto}}? Podemos ayudarte y recomendarte accesorios.',
           'template' => 'postventa_d1'
         },
         'd7' => {
           'days' => 7,
-          'free_text' => 'Hola {{contact.first_name}}, ya pasó una semana. ¿Cómo va {{producto}}? ¿Necesitás ayuda o accesorios?',
           'template' => 'postventa_d7'
         },
         'd30' => {
           'days' => 30,
-          'free_text' => 'Hola {{contact.first_name}}, ya pasó un mes. ¿Cómo va {{producto}}? Si querés, vemos accesorios.',
           'template' => 'postventa_d30'
         }
       },
@@ -81,8 +78,7 @@ class Arroyo::Setting < ApplicationRecord
 
   STAGE_RULES = STAGES.each_with_object({}) do |stage, rules|
     rules["post_sale.stages.#{stage}.days"] = [:integer, 1, 365]
-    rules["post_sale.stages.#{stage}.free_text"] = [:text]
-    rules["post_sale.stages.#{stage}.template"] = [:optional_text]
+    rules["post_sale.stages.#{stage}.template"] = [:text]
   end
 
   RULES = {
@@ -123,7 +119,12 @@ class Arroyo::Setting < ApplicationRecord
 
   # Lo guardado en la columna son solo los valores que se cambiaron; el resto sale de DEFAULTS.
   def config
-    DEFAULTS.deep_dup.deep_merge(self[:config])
+    result = DEFAULTS.deep_dup.deep_merge(self[:config])
+    STAGES.each do |stage|
+      result['post_sale']['stages'][stage].delete('free_text')
+      result['post_sale']['stages'][stage]['template'] = DEFAULTS['post_sale']['stages'][stage]['template']
+    end
+    result
   end
 
   def merge_config(changes)

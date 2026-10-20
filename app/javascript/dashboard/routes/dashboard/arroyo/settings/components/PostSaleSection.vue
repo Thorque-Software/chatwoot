@@ -4,15 +4,10 @@ import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import WithLabel from 'v3/components/Form/WithLabel.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
-import TextArea from 'dashboard/components-next/textarea/TextArea.vue';
 import MultiSelect from 'dashboard/components-next/filter/inputs/MultiSelect.vue';
 import SectionCard from './SectionCard.vue';
 import SwitchField from './SwitchField.vue';
-import {
-  POST_SALE_STAGES,
-  LIQUID_VARIABLE_EXAMPLE,
-  MAX_MESSAGE_LENGTH,
-} from '../constants';
+import { POST_SALE_STAGES } from '../constants';
 
 const props = defineProps({
   config: { type: Object, required: true },
@@ -33,9 +28,6 @@ watch(
   [() => props.config, agentOptions],
   ([config]) => {
     const stages = JSON.parse(JSON.stringify(config.stages));
-    POST_SALE_STAGES.forEach(stage => {
-      stages[stage].template = stages[stage].template || '';
-    });
     form.value = {
       ...JSON.parse(JSON.stringify(config)),
       stages,
@@ -50,8 +42,7 @@ watch(
 const save = () => {
   const stages = {};
   POST_SALE_STAGES.forEach(stage => {
-    const { template, ...rest } = form.value.stages[stage];
-    stages[stage] = { ...rest, template: template.trim() || null };
+    stages[stage] = { days: form.value.stages[stage].days };
   });
   emit('save', {
     post_sale: {
@@ -115,29 +106,17 @@ const save = () => {
           class="w-full"
         />
       </WithLabel>
-      <WithLabel
-        :name="`${stage}_free_text`"
-        :label="t('ARROYO.SETTINGS.POST_SALE.STAGE.FREE_TEXT.LABEL')"
-        :help-message="
-          t('ARROYO.SETTINGS.POST_SALE.STAGE.FREE_TEXT.HELP', {
-            variable: LIQUID_VARIABLE_EXAMPLE,
-          })
-        "
-      >
-        <TextArea
-          v-model="form.stages[stage].free_text"
-          :max-length="MAX_MESSAGE_LENGTH"
-          class="w-full"
-          auto-height
-        />
-      </WithLabel>
-      <WithLabel
-        :name="`${stage}_template`"
-        :label="t('ARROYO.SETTINGS.POST_SALE.STAGE.TEMPLATE.LABEL')"
-        :help-message="t('ARROYO.SETTINGS.POST_SALE.STAGE.TEMPLATE.HELP')"
-      >
-        <Input v-model="form.stages[stage].template" class="w-full" />
-      </WithLabel>
+      <div class="flex flex-col gap-1">
+        <span class="text-sm text-n-slate-11">{{
+          t('ARROYO.SETTINGS.POST_SALE.STAGE.TEMPLATE.LABEL')
+        }}</span>
+        <span class="font-medium text-n-slate-12">{{
+          `postventa_${stage}`
+        }}</span>
+        <p class="m-0 text-sm text-n-slate-11">
+          {{ t('ARROYO.SETTINGS.POST_SALE.STAGE.TEMPLATE.HELP') }}
+        </p>
+      </div>
     </div>
     <WithLabel
       name="delivery_timeout_hours"

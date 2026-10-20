@@ -8,6 +8,11 @@ RSpec.describe Arroyo::PostSale::MessageService do
   let(:zone) { ActiveSupport::TimeZone['America/Argentina/Buenos_Aires'] }
 
   before do
+    channel.update!(message_templates: [{
+                      'name' => 'postventa_d1', 'language' => 'es_AR', 'status' => 'APPROVED',
+                      'category' => 'MARKETING', 'parameter_format' => 'NAMED',
+                      'components' => [{ 'type' => 'BODY', 'text' => 'Hola, soy {{asesor}}. ¿Cómo va {{producto}}?' }]
+                    }])
     setting = Arroyo::Setting.for(account)
     setting.merge_config(post_sale: { enabled: true, alert_user_ids: [seller.id] }, agent_panel: { enabled: true })
     setting.save!
@@ -70,7 +75,8 @@ RSpec.describe Arroyo::PostSale::MessageService do
     expect(follow_up.status).to eq('queued')
   end
 
-  it 'records failure and a manual task when the window is closed and no template was provided' do
+  it 'records failure and a manual task when the approved template is unavailable' do
+    channel.update!(message_templates: [])
     purchase = register_purchase
     schedule(purchase)
     follow_up = purchase.follow_ups.find_by!(stage: 'd1')
@@ -78,9 +84,56 @@ RSpec.describe Arroyo::PostSale::MessageService do
       described_class.new(follow_up: follow_up, revision: purchase.revision, content: 'Follow-up').perform
     end
 
-    expect(follow_up.reload).to have_attributes(status: 'failed', error_code: '131047', manual_status: 'pending',
+    expect(follow_up.reload).to have_attributes(status: 'failed', error_code: 'template_unavailable', manual_status: 'pending',
                                                 message_id: nil, alert_assignee_id: seller.id)
     expect(conversation.reload.label_list).to include('vendido', 'seguimiento-manual')
+  end
+
+  [true, false].each do |open_window|
+    it "uses only the approved stage template with reply window open=#{open_window}" do
+      purchase = register_purchase
+      schedule(purchase)
+      follow_up = purchase.follow_ups.find_by!(stage: 'd1')
+      travel_to(follow_up.scheduled_at) do
+        create(:message, account: account, inbox: channel.inbox, conversation: conversation, message_type: :incoming) if open_window
+        expect(conversation.reload.can_reply?).to eq(open_window)
+        described_class.new(follow_up: follow_up, revision: purchase.revision, content: 'Arbitrary editable text',
+                            template_params: { 'name' => 'other_template' }).perform
+      end
+      expect(follow_up.reload).to have_attributes(status: 'queued', channel_used: 'template', template_name: 'postventa_d1')
+      expect(follow_up.message.content).to eq("Hola, soy #{seller.available_name}. ¿Cómo va #{purchase.product}?")
+      expect(follow_up.message.additional_attributes.dig('template_params', 'processed_params', 'body')).to eq(
+        'asesor' => seller.available_name, 'producto' => purchase.product
+      )
+    end
+  end
+
+  it 'never falls back to text in an open window when a template is paused' do
+    channel.update!(message_templates: channel.message_templates.map { |item| item.merge('status' => 'PAUSED') })
+    purchase = register_purchase
+    schedule(purchase)
+    follow_up = purchase.follow_ups.find_by!(stage: 'd1')
+    travel_to(follow_up.scheduled_at) do
+      create(:message, account: account, inbox: channel.inbox, conversation: conversation, message_type: :incoming)
+      expect(conversation.reload.can_reply?).to be(true)
+      described_class.new(follow_up: follow_up, revision: purchase.revision, content: 'Do not send').perform
+    end
+    expect(follow_up.reload).to have_attributes(status: 'failed', message_id: nil, manual_status: 'pending')
+  end
+
+  it 'selects each stage template and retains the original seller when the conversation is reassigned' do
+    templates = %w[d1 d7 d30].map { |stage| channel.message_templates.first.merge('name' => "postventa_#{stage}") }
+    channel.update!(message_templates: templates)
+    purchase = register_purchase
+    schedule(purchase)
+    conversation.update!(assignee: create(:user, account: account))
+    purchase.follow_ups.each do |follow_up|
+      travel_to(follow_up.scheduled_at) do
+        described_class.new(follow_up: follow_up, revision: purchase.revision).perform
+      end
+      expect(follow_up.reload.template_name).to eq("postventa_#{follow_up.stage}")
+      expect(follow_up.message.additional_attributes.dig('template_params', 'processed_params', 'body', 'asesor')).to eq(seller.available_name)
+    end
   end
 
   it 'does not count initial sent as delivered and closes a pending alert on late delivery' do

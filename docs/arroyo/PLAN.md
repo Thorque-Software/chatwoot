@@ -1,5 +1,7 @@
 # Plan Chatwoot Arroyo — instrucciones para Claude Code
 
+> Actualización 20/10/2026: el pedido de plantillas exclusivas reemplaza la selección de texto libre según ventana descrita más abajo. Postventa siempre usa `postventa_d1/d7/d30`; el detalle vigente está en `n8n/TEMPLATE_ONLY.md`. El recordatorio editable de 24 h se retira de Ajustes; se conserva la consulta de ventanas.
+
 > Uso: este archivo vive en el repo como `docs/arroyo/PLAN.md`. La sección "Reglas del fork" está copiada en el `CLAUDE.md` de la raíz. Pedile a Claude Code las fases de a una: *"Leé docs/arroyo/PLAN.md y hacé la Fase 0"*, revisás, commit, siguiente fase.
 >
 > Las diferencias entre este plan y el código real (v4.14.2) están en `docs/arroyo/ARCHITECTURE_NOTES.md`, sección "Diferencias contra el plan". Ante contradicción, manda ARCHITECTURE_NOTES.

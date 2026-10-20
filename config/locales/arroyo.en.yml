@@ -12,6 +12,7 @@ en:
         generic: 'your product'
       alert_note: "Post-sale %{stage}: %{product}.\nReason: %{reason}\nCode: %{code}\nPhone: %{phone}\nOriginal seller: %{seller}\nPlease record the manual follow-up in the agent panel."
       errors:
+        template_unavailable: 'The approved Meta template is unavailable or its parameters are incomplete. Manual follow-up is required.'
         corrected_past: 'The corrected date left this stage in the past; manual follow-up is required'
         disabled: 'Post-sale integration is disabled for this account'
         panel_disabled: 'The agent panel is disabled for this account'

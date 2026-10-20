@@ -12,6 +12,7 @@ es:
         generic: 'tu producto'
       alert_note: "Postventa %{stage}: %{product}.\nMotivo: %{reason}\nCódigo: %{code}\nTeléfono: %{phone}\nVendedor original: %{seller}\nRegistrá el seguimiento manual en el panel de vendedores."
       errors:
+        template_unavailable: 'La plantilla aprobada de Meta no está disponible o faltan sus datos. Se requiere seguimiento manual.'
         corrected_past: 'La fecha corregida dejó esta etapa en el pasado; requiere seguimiento manual'
         disabled: 'La integración de postventa está desactivada para esta cuenta'
         panel_disabled: 'El panel de vendedores está desactivado para esta cuenta'

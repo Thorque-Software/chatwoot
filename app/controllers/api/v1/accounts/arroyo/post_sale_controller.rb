@@ -31,9 +31,7 @@ class Api::V1::Accounts::Arroyo::PostSaleController < Api::V1::Accounts::BaseCon
 
   def create_message
     record = follow_up_record
-    template = params.permit(template_params: {})[:template_params]&.to_h
-    ::Arroyo::PostSale::MessageService.new(follow_up: record, revision: params.require(:revision), content: params.require(:content),
-                                           execution_id: params[:execution_id], template_params: template).perform
+    ::Arroyo::PostSale::MessageService.new(follow_up: record, revision: params.require(:revision), execution_id: params[:execution_id]).perform
     render json: presenter.follow_up(record.reload)
   end
 
@@ -62,6 +60,7 @@ class Api::V1::Accounts::Arroyo::PostSaleController < Api::V1::Accounts::BaseCon
   private
 
   PAGE_SIZE = 200
+  COMMERCIAL_TEMPLATES = %w[seg_dia_1 seg_dia_3 seg_dia_5].freeze
 
   def follow_up_totals
     overview = ::Arroyo::PostSale::Query.new(account_user: Current.account_user, params: params.except(:status, :manual_status)).perform
@@ -97,7 +96,17 @@ class Api::V1::Accounts::Arroyo::PostSaleController < Api::V1::Accounts::BaseCon
   end
 
   def integration_config
-    setting.section(:post_sale).merge('timezone' => setting.config['timezone'], 'template_language' => 'es_AR', 'template_category' => 'MARKETING')
+    # Compatibility with the published n8n version during rollout; never a configurable or sent body.
+    stages = setting.section(:post_sale)['stages'].transform_values { |stage| stage.merge('free_text' => '') }
+    setting.section(:post_sale).merge('timezone' => setting.config['timezone'], 'template_language' => 'es_AR',
+                                      'stages' => stages, 'commercial_templates' => commercial_templates)
+  end
+
+  def commercial_templates
+    Current.account.inboxes.where(channel_type: 'Channel::Whatsapp').includes(:channel).to_h do |inbox|
+      templates = Array(inbox.channel.message_templates).select { |item| COMMERCIAL_TEMPLATES.include?(item['name']) }
+      [inbox.id.to_s, templates.map { |item| item.slice('name', 'language', 'status', 'category', 'parameter_format', 'components') }]
+    end
   end
 
   def page

@@ -415,3 +415,7 @@ Se archivaron los tres workflows exclusivos de comentarios en n8n: `URLYZDOrdxjt
 La migración histórica `20261014120000_create_arroyo_social_comments.rb` y sus tablas permanecen para respetar el historial y evitar pérdida de datos. No tienen rutas ni código de aplicación que las utilice. No se borran ni modifican migraciones existentes.
 
 El alcance activo es panel de vendedores, seguimiento comercial y postventa D+1/D+7/D+30 con verificación de entrega y tareas manuales. Las plantillas y la conexión WhatsApp necesarias para postventa se conservan. La publicación del borrador de postventa y el despliegue de producción siguen siendo pasos separados.
+
+## 20/10/2026 — Plantillas exclusivas
+
+Por pedido del usuario, se reemplaza la selección texto libre/template de D6 por plantilla obligatoria para todas las etapas de postventa. El recordatorio de ventana mostrado en Ajustes era configuración sin job/servicio de envío implementado; se retira ese formulario, conservando el panel de ventanas. La configuración fija y el servidor no aceptan cuerpos alternativos de postventa. Ver docs/arroyo/n8n/TEMPLATE_ONLY.md para contratos y publicación gradual.

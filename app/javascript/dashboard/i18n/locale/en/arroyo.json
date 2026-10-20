@@ -80,13 +80,9 @@
           "DAYS": {
             "LABEL": "Days after the sale"
           },
-          "FREE_TEXT": {
-            "LABEL": "Message when the window is open",
-            "HELP": "n8n uses this text when the window allows a reply. You can use variables such as {variable}."
-          },
           "TEMPLATE": {
-            "LABEL": "Template when the window is closed",
-            "HELP": "Name of the approved WhatsApp template used by n8n. Check its approval and variables before enabling sends."
+            "LABEL": "Meta template",
+            "HELP": "This approved template is always used. Edit its message in Meta."
           }
         },
         "DELIVERY_TIMEOUT_HOURS": {

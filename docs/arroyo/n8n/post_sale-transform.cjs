@@ -84,70 +84,9 @@ function activeConversationIds(pages) {
   ];
 }
 
-function messageVariables(purchase) {
-  const contactName = String(purchase.contact.name || '');
-  const firstName = contactName.trim().split(/\s+/)[0];
-  const sellerName = String(purchase.seller?.name || '');
-  const product = String(purchase.product || '');
-  return {
-    'contact.first_name': firstName,
-    'contact.name': contactName,
-    nombre: firstName,
-    cliente: firstName,
-    first_name: firstName,
-    customer_name: firstName,
-    vendedor: sellerName,
-    asesor: sellerName,
-    employee_name: sellerName,
-    'seller.name': sellerName,
-    'purchase.seller.name': sellerName,
-    producto: product,
-    product,
-    'purchase.product': product,
-  };
-}
-
-function approvedTemplate(purchase, stageConfig, config, variables) {
-  const template = purchase.inbox.message_templates.find(
-    candidate =>
-      candidate.name === stageConfig.template &&
-      candidate.status.toLowerCase() === 'approved' &&
-      candidate.language.toLowerCase() ===
-        config.template_language.toLowerCase()
-  );
-  if (!template) return null;
-  const components = template.components || [];
-  if (
-    components.some(
-      component =>
-        (component.type === 'HEADER' && component.format !== 'TEXT') ||
-        (component.type !== 'BODY' && /\{\{/.test(JSON.stringify(component)))
-    )
-  )
-    return null;
-  const bodyText =
-    components.find(component => component.type === 'BODY')?.text || '';
-  const names = [
-    ...new Set(
-      [...bodyText.matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)].map(match => match[1])
-    ),
-  ];
-  if (names.length && template.parameter_format !== 'NAMED') return null;
-  if (names.some(name => !variables[name])) return null;
-  return {
-    name: template.name,
-    category: template.category,
-    language: template.language,
-    processed_params: {
-      body: Object.fromEntries(names.map(name => [name, variables[name]])),
-    },
-  };
-}
-
 function dueMessages(purchase, config, now, executionId) {
   if (!config.enabled || purchase.revision !== purchase.planned_revision)
     return [];
-  const variables = messageVariables(purchase);
   const ageLimit = config.delivery_timeout_hours * 60 * 60 * 1000;
   return purchase.follow_ups
     .filter(followUp => {
@@ -162,21 +101,8 @@ function dueMessages(purchase, config, now, executionId) {
       );
     })
     .map(followUp => {
-      const stage = config.stages[followUp.stage];
-      const content = stage.free_text.replace(
-        /\{\{\s*([^{}]+?)\s*\}\}/g,
-        (match, name) => {
-          if (!(name in variables))
-            throw new Error('Unsupported post-sale text variable: ' + name);
-          return variables[name];
-        }
-      );
-      const body = { revision: purchase.revision, content };
+      const body = { revision: purchase.revision };
       if (executionId) body.execution_id = executionId;
-      if (!purchase.can_reply) {
-        const template = approvedTemplate(purchase, stage, config, variables);
-        if (template) body.template_params = template;
-      }
       return {
         id: followUp.id,
         reference: purchase.reference,

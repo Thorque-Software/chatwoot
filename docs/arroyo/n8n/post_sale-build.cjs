@@ -1,5 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const {
+  buildCorrections,
+  correctClassifier,
+} = require('./commercial-followups-fix.cjs');
+const { templateClassifier } = require('./template-only-build.cjs');
 
 function buildOperations(baseline) {
   const helpers = fs
@@ -219,12 +224,15 @@ function buildOperations(baseline) {
   const commercialGuard =
     helpers +
     "\nconst activePostSaleConversations = new Set(activeConversationIds($('Compras para Coordinacion Comercial').all().map(item => item.json)));\n";
-  const commercialCode =
-    commercialGuard +
-    baseline.commercialClassifier.replace(
-      'for (const c of convs) {',
-      'for (const c of convs) {\n  // ARROYO: nueva compra registrada evita contacto comercial simultáneo.\n  if (activePostSaleConversations.has(String(c.id))) continue;'
-    );
+  const commercialCode = templateClassifier(
+    correctClassifier(
+      commercialGuard +
+        baseline.commercialClassifier.replace(
+          'for (const c of convs) {',
+          'for (const c of convs) {\n  // ARROYO: nueva compra registrada evita contacto comercial simultáneo.\n  if (activePostSaleConversations.has(String(c.id))) continue;'
+        )
+    )
+  );
   operations.push({
     type: 'setNodeParameter',
     nodeName: 'Clasificar Seguimiento Diario',
@@ -235,7 +243,9 @@ function buildOperations(baseline) {
     type: 'setNodeParameter',
     nodeName: 'Config Chatwoot',
     path: '/assignments/assignments',
-    value: baseline.commercialAssignments,
+    value: baseline.commercialAssignments.filter(
+      item => item.name !== 'max_seguimiento_por_corrida'
+    ),
   });
   operations.push({
     type: 'setNodeParameter',
@@ -280,6 +290,21 @@ function buildOperations(baseline) {
       nodeName: node.name,
       settings: { onError: 'stopWorkflow' },
     });
+  });
+  operations.push(
+    ...buildCorrections(commercialCode, baseline.commercialAssignments).filter(
+      operation =>
+        !['Clasificar Seguimiento Diario', 'Config Chatwoot'].includes(
+          operation.nodeName
+        )
+    )
+  );
+  operations.push({
+    type: 'setNodeParameter',
+    nodeName: 'Enviar Seguimiento Diario',
+    path: '/jsonBody',
+    value:
+      "={{ JSON.stringify({ content: $json.template_content, message_type: 'outgoing', private: false, template_params: { name: $json.template_name, category: $json.template_category, language: $json.template_language, processed_params: $json.processed_params } }) }}",
   });
   return { workflowId: baseline.workflowId, operations };
 }

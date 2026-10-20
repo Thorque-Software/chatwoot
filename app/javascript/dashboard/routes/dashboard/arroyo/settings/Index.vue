@@ -8,7 +8,6 @@ import BaseSettingsHeader from 'dashboard/routes/dashboard/settings/components/B
 import ArroyoSettingsAPI from '../api/settings';
 import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import GeneralSection from './components/GeneralSection.vue';
-import WindowKeeperSection from './components/WindowKeeperSection.vue';
 import PostSaleSection from './components/PostSaleSection.vue';
 import AgentPanelSection from './components/AgentPanelSection.vue';
 import EmailMarketingSection from './components/EmailMarketingSection.vue';
@@ -68,11 +67,6 @@ onMounted(() => {
           :timezone="config.timezone"
           :is-saving="savingSection === 'general'"
           @save="saveSection('general', $event)"
-        />
-        <WindowKeeperSection
-          :config="config.window_keeper"
-          :is-saving="savingSection === 'window_keeper'"
-          @save="saveSection('window_keeper', $event)"
         />
         <PostSaleSection
           :config="config.post_sale"
