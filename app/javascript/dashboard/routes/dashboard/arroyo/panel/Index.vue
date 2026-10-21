@@ -277,7 +277,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full min-w-0 px-4 md:px-6 overflow-auto bg-n-surface-1">
+  <!-- Keep absolutely positioned accessible captions inside the panel's scroll area. -->
+  <div
+    class="relative w-full min-w-0 px-4 md:px-6 overflow-auto bg-n-surface-1"
+  >
     <div
       class="mx-auto flex min-w-0 flex-col gap-5 pb-12"
       :class="
