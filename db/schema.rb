@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-# ARROYO: schema actualizado con las migraciones de postventa y comentarios públicos.
-ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
+# ARROYO: esquema con postventa y oportunidades comerciales independientes.
+ActiveRecord::Schema[7.1].define(version: 2026_10_20_153000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -194,6 +194,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
     t.text "resolution_note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "cancellation_reason"
     t.index ["account_id", "manual_status"], name: "index_arroyo_follow_ups_on_account_id_and_manual_status"
     t.index ["account_id"], name: "index_arroyo_follow_ups_on_account_id"
     t.index ["alert_assignee_id"], name: "index_arroyo_follow_ups_on_alert_assignee_id"
@@ -203,6 +204,60 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
     t.index ["purchase_id"], name: "index_arroyo_follow_ups_on_purchase_id"
     t.index ["resolved_by_id"], name: "index_arroyo_follow_ups_on_resolved_by_id"
     t.index ["status", "scheduled_at"], name: "index_arroyo_follow_ups_on_status_and_scheduled_at"
+  end
+
+  create_table "arroyo_opportunities", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "assignee_id"
+    t.bigint "first_assignee_id"
+    t.bigint "result_user_id"
+    t.string "reference", null: false
+    t.string "request_key"
+    t.string "state", default: "unassigned", null: false
+    t.string "coverage", default: "complete", null: false
+    t.string "product"
+    t.datetime "started_at", null: false
+    t.datetime "ownership_started_at"
+    t.datetime "first_human_at"
+    t.datetime "last_human_at"
+    t.datetime "last_client_at"
+    t.datetime "pending_since"
+    t.datetime "attention_due_at"
+    t.datetime "outcome_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "request_key"], name: "index_arroyo_opportunities_on_account_id_and_request_key", unique: true
+    t.index ["account_id", "started_at"], name: "index_arroyo_opportunities_on_account_id_and_started_at"
+    t.index ["account_id"], name: "index_arroyo_opportunities_on_account_id"
+    t.index ["assignee_id"], name: "index_arroyo_opportunities_on_assignee_id"
+    t.index ["contact_id"], name: "index_arroyo_opportunities_on_contact_id"
+    t.index ["conversation_id"], name: "index_arroyo_opportunities_on_conversation_id"
+    t.index ["conversation_id"], name: "unique_arroyo_active_opportunity", unique: true, where: "((state)::text <> ALL ((ARRAY['won'::character varying, 'lost'::character varying])::text[]))"
+    t.index ["first_assignee_id"], name: "index_arroyo_opportunities_on_first_assignee_id"
+    t.index ["inbox_id"], name: "index_arroyo_opportunities_on_inbox_id"
+    t.index ["reference"], name: "index_arroyo_opportunities_on_reference", unique: true
+    t.index ["result_user_id"], name: "index_arroyo_opportunities_on_result_user_id"
+  end
+
+  create_table "arroyo_opportunity_events", force: :cascade do |t|
+    t.bigint "opportunity_id", null: false
+    t.bigint "actor_id"
+    t.bigint "message_id"
+    t.string "kind", null: false
+    t.string "source_key", null: false
+    t.string "origin", null: false
+    t.datetime "occurred_at", null: false
+    t.jsonb "data", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_arroyo_opportunity_events_on_actor_id"
+    t.index ["kind", "occurred_at"], name: "index_arroyo_opportunity_events_on_kind_and_occurred_at"
+    t.index ["message_id"], name: "index_arroyo_opportunity_events_on_message_id"
+    t.index ["opportunity_id", "source_key"], name: "unique_arroyo_opportunity_event", unique: true
+    t.index ["opportunity_id"], name: "index_arroyo_opportunity_events_on_opportunity_id"
   end
 
   create_table "arroyo_post_sale_purchases", force: :cascade do |t|
@@ -222,11 +277,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
     t.jsonb "date_changes", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "opportunity_id"
     t.index ["account_id", "purchased_at"], name: "index_arroyo_purchases_on_account_and_date"
     t.index ["account_id"], name: "index_arroyo_post_sale_purchases_on_account_id"
     t.index ["contact_id"], name: "index_arroyo_post_sale_purchases_on_contact_id"
-    t.index ["conversation_id"], name: "index_arroyo_post_sale_purchases_on_conversation_id", unique: true
+    t.index ["conversation_id"], name: "index_arroyo_post_sale_purchases_on_conversation_id"
     t.index ["inbox_id"], name: "index_arroyo_post_sale_purchases_on_inbox_id"
+    t.index ["opportunity_id"], name: "index_arroyo_post_sale_purchases_on_opportunity_id", unique: true
     t.index ["reference"], name: "index_arroyo_post_sale_purchases_on_reference", unique: true
     t.index ["seller_id"], name: "index_arroyo_post_sale_purchases_on_seller_id"
   end
@@ -1473,7 +1530,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_14_120000) do
   add_foreign_key "arroyo_follow_ups", "messages", on_delete: :nullify
   add_foreign_key "arroyo_follow_ups", "users", column: "alert_assignee_id", on_delete: :nullify
   add_foreign_key "arroyo_follow_ups", "users", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "arroyo_opportunities", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_opportunities", "contacts", on_delete: :cascade
+  add_foreign_key "arroyo_opportunities", "conversations", on_delete: :cascade
+  add_foreign_key "arroyo_opportunities", "inboxes", on_delete: :cascade
+  add_foreign_key "arroyo_opportunities", "users", column: "assignee_id", on_delete: :nullify
+  add_foreign_key "arroyo_opportunities", "users", column: "first_assignee_id", on_delete: :nullify
+  add_foreign_key "arroyo_opportunities", "users", column: "result_user_id", on_delete: :nullify
+  add_foreign_key "arroyo_opportunity_events", "arroyo_opportunities", column: "opportunity_id", on_delete: :cascade
+  add_foreign_key "arroyo_opportunity_events", "messages", on_delete: :nullify
+  add_foreign_key "arroyo_opportunity_events", "users", column: "actor_id", on_delete: :nullify
   add_foreign_key "arroyo_post_sale_purchases", "accounts", on_delete: :cascade
+  add_foreign_key "arroyo_post_sale_purchases", "arroyo_opportunities", column: "opportunity_id", on_delete: :nullify
   add_foreign_key "arroyo_post_sale_purchases", "contacts", on_delete: :cascade
   add_foreign_key "arroyo_post_sale_purchases", "conversations", on_delete: :cascade
   add_foreign_key "arroyo_post_sale_purchases", "inboxes", on_delete: :cascade

@@ -1,0 +1,1450 @@
+[
+  {
+    "workflowId": "SAGFyESTLZLDdaNo",
+    "baseVersionId": "4cb9c56a-acc9-45e7-b636-9ee0e0aa8929",
+    "activeVersionId": "4cb9c56a-acc9-45e7-b636-9ee0e0aa8929",
+    "nodes": [
+      {
+        "name": "Preparar Datos",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "parameters": {
+          "jsCode": "// ===== arroyo v3 (30/09) =====\n// Horario del local: la MISMA regla que \"Modo Atencion\" de arroyo v2.\n//   lun a sab 8:30-12:00 y 16:30-20:30 -> hay gente en el local\n// Solo se usa para elegir el texto de derivacion (derivar-humano-sw).\nconst TZ = 'America/Argentina/Buenos_Aires';\nconst ahora = $now.setZone(TZ);\nconst FRANJAS = [[8 * 60 + 30, 12 * 60], [16 * 60 + 30, 20 * 60 + 30]];\nconst HABILES = [1, 2, 3, 4, 5, 6];   // luxon: 1 lunes ... 7 domingo\nconst min = ahora.hour * 60 + ahora.minute;\nconst enLocal = HABILES.indexOf(ahora.weekday) >= 0 && FRANJAS.some((f) => min >= f[0] && min < f[1]);\n\n// Clave interna del atributo \"Localidad\" del contacto en Chatwoot. Para LEER se\n// acepta cualquier atributo cuyo nombre contenga \"localidad\"; para ESCRIBIR se usa esta.\nconst LOC_KEY = 'localidad';\n\n// NOMBRE LIMPIO: la misma funcion de arroyo v2 (TB-30), probada con 30 perfiles reales.\nfunction nombreLimpio(raw) {\n  const rawNombre = String(raw ?? '').trim();\n  const digitos = rawNombre.replace(/[^0-9]/g, '');\n  const letras = rawNombre.replace(/[^\\p{L}]/gu, '');\n  if (letras.length < 2 || digitos.length >= 6) return '';\n  const sinTildes = rawNombre.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\n  const palabras = sinTildes.replace(/[^a-z\\s]/g, ' ').split(/\\s+/).filter(Boolean);\n  const NO_ES_PERSONA = new Set([\n    'estudio', 'juridico', 'juridica', 'abogado', 'abogada', 'abogados', 'consultorio', 'dr', 'dra',\n    'lic', 'ing', 'arq', 'prof', 'taller', 'negocio', 'empresa', 'srl', 'sa', 'shop', 'store',\n    'tienda', 'local', 'ventas', 'servicio', 'servicios', 'distribuidora', 'inmobiliaria',\n    'amo', 'amor', 'bebe', 'nada', 'test', 'prueba', 'hola', 'info', 'leproso',\n  ]);\n  if (palabras.some((p) => NO_ES_PERSONA.has(p))) return '';\n  let primero = rawNombre.split(/\\s+/)[0];\n  if (/[0-9_]/.test(primero)) return '';\n  const camel = primero.match(/^(\\p{Lu}?\\p{Ll}+)\\p{Lu}/u);\n  if (camel) primero = camel[1];\n  primero = primero.replace(/[^\\p{L}\\p{M}'-]/gu, '');\n  const plano = primero.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\n  if (plano.length < 3) return '';\n  if (!/[aeiou]/.test(plano)) return '';\n  if (/(.)\\1\\1/.test(plano)) return '';\n  return primero.charAt(0).toUpperCase() + primero.slice(1).toLowerCase();\n}\n\nconst body = $('Input').first().json.body || {};\nconst conv = body.conversation || {};\nconst msg0 = (conv.messages || [])[0] || {};\n\nconst aMs = (v) => { const t = new Date(v).getTime(); return t < 1e12 ? t * 1000 : t; };\nconst esPrimerMensaje = Math.abs(aMs(conv.created_at) - aMs(msg0.updated_at)) < 1500;\n\n// Atributos del contacto: Chatwoot los manda en el webhook (sender y meta.sender).\nconst attrs = Object.assign({}, (body.sender && body.sender.custom_attributes) || {},\n  (((conv.meta || {}).sender) || {}).custom_attributes || {});\nlet localidad = '';\nfor (const k of Object.keys(attrs)) {\n  if (k.toLowerCase().indexOf('localidad') >= 0 && String(attrs[k] || '').trim()) { localidad = String(attrs[k]).trim(); break; }\n}\n\nreturn [{ json: {\n  conversation_id: String(msg0.conversation_id || conv.id || ''),\n  contact_id: String((conv.contact_inbox || {}).contact_id || ''),\n  nombre_limpio: nombreLimpio(msg0.sender && msg0.sender.name),\n  es_primer_mensaje: esPrimerMensaje,\n  en_local: enLocal,\n  fuera_de_horario: enLocal ? 'no' : 'si',\n  localidad_actual: localidad,\n  attrs_contacto: attrs,\n  loc_key: LOC_KEY,\n  texto: String(msg0.content || '').trim(),\n  etiquetas: (conv.labels || []).join(','),\n  hora: ahora.toFormat('ccc HH:mm'),\n} }];"
+        }
+      },
+      {
+        "name": "Enviar Saludo",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://chatarroyo.thorque.com.ar/api/v1/accounts/1/conversations/' + $json.conversation_id + '/messages' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "content",
+                "value": "={{ '¡Hola' + ($json.nombre_limpio ? ', ' + $json.nombre_limpio : '') + '! Gracias por escribirnos a Arroyo Fitness 😊' + ($json.paso === 'preguntar' ? ' ¿De qué localidad nos escribís?' : '') }}"
+              },
+              {
+                "name": "message_type",
+                "value": "outgoing"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "name": "Leer Estado Conversacion",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "url": "={{ 'https://chatarroyo.thorque.com.ar/api/v1/accounts/1/conversations/' + $('Preparar Datos').item.json.conversation_id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        }
+      }
+    ],
+    "nodeNames": [
+      "Input",
+      "Nota arroyo v3",
+      "incoming?",
+      "Tiene contenido?",
+      "Sin Contenido",
+      "Fecha actual",
+      "Calcular Demora",
+      "Menos de 30 segundos?",
+      "Registrar Descarte Tardio",
+      "status pending",
+      "Marcar Turno Debounce",
+      "Esperar Debounce",
+      "Leer Turno Debounce",
+      "Soy El Ultimo Mensaje?",
+      "Descartado Por Debounce",
+      "Preparar Datos",
+      "Etiquetar Conversacion",
+      "Leer Pregunta Localidad",
+      "Decidir Paso",
+      "Paso",
+      "Enviar Saludo",
+      "Despues del Saludo?",
+      "Marcar Pregunta Localidad",
+      "Esperar Respuesta",
+      "Leer Estado Conversacion",
+      "Sigue Sin Asesor?",
+      "Horario Al Despertar",
+      "Derivar Sin Respuesta",
+      "Guardar Localidad?",
+      "Guardar Localidad",
+      "Derivar"
+    ],
+    "connections": {
+      "Input": {
+        "main": [
+          [
+            {
+              "node": "incoming?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "incoming?": {
+        "main": [
+          [
+            {
+              "node": "Tiene contenido?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tiene contenido?": {
+        "main": [
+          [
+            {
+              "node": "Fecha actual",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Sin Contenido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fecha actual": {
+        "main": [
+          [
+            {
+              "node": "Calcular Demora",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calcular Demora": {
+        "main": [
+          [
+            {
+              "node": "Menos de 30 segundos?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Menos de 30 segundos?": {
+        "main": [
+          [
+            {
+              "node": "status pending",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Registrar Descarte Tardio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "status pending": {
+        "main": [
+          [
+            {
+              "node": "Marcar Turno Debounce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Marcar Turno Debounce": {
+        "main": [
+          [
+            {
+              "node": "Esperar Debounce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Esperar Debounce": {
+        "main": [
+          [
+            {
+              "node": "Leer Turno Debounce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Leer Turno Debounce": {
+        "main": [
+          [
+            {
+              "node": "Soy El Ultimo Mensaje?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Soy El Ultimo Mensaje?": {
+        "main": [
+          [
+            {
+              "node": "Preparar Datos",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Descartado Por Debounce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Datos": {
+        "main": [
+          [
+            {
+              "node": "Etiquetar Conversacion",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Leer Pregunta Localidad",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Leer Pregunta Localidad": {
+        "main": [
+          [
+            {
+              "node": "Decidir Paso",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Decidir Paso": {
+        "main": [
+          [
+            {
+              "node": "Paso",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Paso": {
+        "main": [
+          [
+            {
+              "node": "Enviar Saludo",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Guardar Localidad?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Enviar Saludo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Saludo": {
+        "main": [
+          [
+            {
+              "node": "Despues del Saludo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Despues del Saludo?": {
+        "main": [
+          [
+            {
+              "node": "Marcar Pregunta Localidad",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Derivar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Marcar Pregunta Localidad": {
+        "main": [
+          [
+            {
+              "node": "Esperar Respuesta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Esperar Respuesta": {
+        "main": [
+          [
+            {
+              "node": "Leer Estado Conversacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Leer Estado Conversacion": {
+        "main": [
+          [
+            {
+              "node": "Sigue Sin Asesor?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sigue Sin Asesor?": {
+        "main": [
+          [
+            {
+              "node": "Horario Al Despertar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Horario Al Despertar": {
+        "main": [
+          [
+            {
+              "node": "Derivar Sin Respuesta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Guardar Localidad?": {
+        "main": [
+          [
+            {
+              "node": "Guardar Localidad",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Derivar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Guardar Localidad": {
+        "main": [
+          [
+            {
+              "node": "Derivar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "workflowId": "B5YmsSniVco8DT6Y",
+    "baseVersionId": "45100a85-4f3c-474d-a029-08e6ea6f8857",
+    "activeVersionId": "45100a85-4f3c-474d-a029-08e6ea6f8857",
+    "nodes": [
+      {
+        "name": "Asignar agente1",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('DatosWSP').item.json.url_chatwoot }}api/v1/accounts/{{ $('DatosWSP').item.json.account_number }}/conversations/{{ $('DatosWSP').item.json.conversation_id }}/assignments",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"assignee_id\": {{$json.agent_id}}\n}",
+          "options": {}
+        }
+      },
+      {
+        "name": "agents1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "parameters": {
+          "jsCode": "// Round-robin entre los agentes de Chatwoot: 4 = Julieta, 5 = Marcos.\nconst agents = [4, 5];\n\n// 13/10/2026: el turno sale de un INCR ATOMICO de Redis (nodo \"Tomar Turno\").\n// Antes se LEIA el contador, se asignaba y recien despues se GUARDABA el siguiente:\n// si dos derivaciones caian en el mismo segundo, las dos leian el mismo turno y\n// las dos iban a la misma persona. Con INCR cada derivacion recibe un numero\n// distinto aunque lleguen juntas, y no hace falta guardar nada despues.\n//\n// INCR devuelve el valor YA incrementado: se resta 1 para seguir exactamente la\n// misma secuencia que el codigo anterior (probado: misma persona para el mismo\n// contador).\nconst raw = ($input.first().json || {})['rr:counter'];\nlet turno = parseInt(String(raw ?? '').replace(/[^0-9]/g, ''), 10);\n\n// Si Redis fallo, se asigna igual, al azar: mejor asignar a cualquiera que dejar\n// la conversacion sin asesor.\nif (!Number.isFinite(turno)) {\n  turno = Math.floor(Math.random() * agents.length) + 1;\n  console.log('Tomar Turno fallo: se asigna al azar');\n}\n\nconst agent = agents[(turno - 1) % agents.length];\n\nreturn [{ json: { agent_id: agent, turno } }];"
+        }
+      },
+      {
+        "name": "DatosWSP",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "af6683ab-966b-4270-ac5b-3e74824214cb",
+                "name": "conversation_id",
+                "type": "string",
+                "value": "={{ $json.conv_id }}"
+              },
+              {
+                "id": "2ba6fd76-7d05-4586-a5db-766b10b86201",
+                "name": "url_chatwoot",
+                "type": "string",
+                "value": "https://chatarroyo.thorque.com.ar/"
+              },
+              {
+                "id": "4d5f3089-4f5b-4f2a-8be1-8519936d7aaf",
+                "name": "account_number",
+                "type": "string",
+                "value": "1"
+              },
+              {
+                "id": "f1094564-8f02-4105-ab02-56b4e7cc2030",
+                "name": "nombre",
+                "type": "string",
+                "value": "={{ $json.nombre }}"
+              },
+              {
+                "id": "b7c21d40-3f55-4e91-9a02-0c6b1a7e4d11",
+                "name": "fuera_de_horario",
+                "type": "string",
+                "value": "={{ $json.fuera_de_horario || 'no' }}"
+              },
+              {
+                "id": "c3e5a7b9-1d2f-4a6c-8e0b-2f4d6a8c0e11",
+                "name": "con_genial",
+                "type": "string",
+                "value": "={{ $json.con_genial === 'no' ? 'no' : 'si' }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "name": "If",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "a75b6e43-77cb-4446-ae41-e6a5885bb54f",
+                "leftValue": "={{ $('agents1').item.json.agent_id }}",
+                "rightValue": 4,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "name": "juli",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('DatosWSP').item.json.url_chatwoot }}api/v1/accounts/{{ $('DatosWSP').item.json.account_number }}/conversations/{{ $('DatosWSP').item.json.conversation_id }}/messages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "content",
+                "value": "={{ $('DatosWSP').item.json.fuera_de_horario === 'si' ? 'Hola, soy Julieta, asesora de Arroyo Fitness 😊 Apenas esté en el local me pongo al tanto de tu consulta y te escribo para asesorarte.' : (($now.setZone('America/Argentina/Buenos_Aires').hour < 12 ? 'Buenos días' : ($now.setZone('America/Argentina/Buenos_Aires').hour < 20 ? 'Buenas tardes' : 'Buenas noches')) + (($('DatosWSP').item.json.nombre || '').trim() ? ', ' + $('DatosWSP').item.json.nombre.trim() : '') + ' 😊 Soy Julieta, asesora de Arroyo Fitness, y estoy acá para asesorarte. Dame un minuto para ponerme al tanto y te respondo.') }}"
+              },
+              {
+                "name": "message_type",
+                "value": "outgoing"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "name": "marcos",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('DatosWSP').item.json.url_chatwoot }}api/v1/accounts/{{ $('DatosWSP').item.json.account_number }}/conversations/{{ $('DatosWSP').item.json.conversation_id }}/messages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "content",
+                "value": "={{ $('DatosWSP').item.json.fuera_de_horario === 'si' ? 'Hola, soy Marcos, asesor de Arroyo Fitness 😊 Apenas esté en el local me pongo al tanto de tu consulta y te escribo para asesorarte.' : (($now.setZone('America/Argentina/Buenos_Aires').hour < 12 ? 'Buenos días' : ($now.setZone('America/Argentina/Buenos_Aires').hour < 20 ? 'Buenas tardes' : 'Buenas noches')) + (($('DatosWSP').item.json.nombre || '').trim() ? ', ' + $('DatosWSP').item.json.nombre.trim() : '') + '.\\nSoy Marcos, asesor de Arroyo Fitness, y estoy acá para asesorarte. Dame un minuto para ponerme al tanto y te respondo.') }}"
+              },
+              {
+                "name": "message_type",
+                "value": "outgoing"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "name": "Tomar Candado",
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1,
+        "parameters": {
+          "operation": "incr",
+          "key": "=v2:derivado:{{ $('DatosWSP').item.json.conversation_id }}",
+          "expire": true,
+          "ttl": 120
+        }
+      },
+      {
+        "name": "Aviso Derivacion",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('DatosWSP').item.json.url_chatwoot }}api/v1/accounts/{{ $('DatosWSP').item.json.account_number }}/conversations/{{ $('DatosWSP').item.json.conversation_id }}/messages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "content",
+                "value": "={{ $('DatosWSP').item.json.con_genial === 'no' ? 'Te voy a derivar con el sector especializado para que puedan asesorarte.' : '¡Genial! Te voy a derivar con el sector especializado para que puedan asesorarte.' }}"
+              },
+              {
+                "name": "message_type",
+                "value": "outgoing"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "nodeNames": [
+      "When Executed by Another Workflow",
+      "StatusOpen1",
+      "Asignar agente1",
+      "agents1",
+      "Tomar Turno",
+      "DatosWSP",
+      "If",
+      "juli",
+      "marcos",
+      "Tomar Candado",
+      "Duplicado?",
+      "Ya Derivado",
+      "Nota Error Derivacion",
+      "Fuera de Horario?",
+      "Aviso Derivacion"
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "DatosWSP",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Asignar agente1": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Nota Error Derivacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "agents1": {
+        "main": [
+          [
+            {
+              "node": "Asignar agente1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "juli",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "marcos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tomar Candado": {
+        "main": [
+          [
+            {
+              "node": "Duplicado?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Duplicado?": {
+        "main": [
+          [
+            {
+              "node": "Ya Derivado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Fuera de Horario?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DatosWSP": {
+        "main": [
+          [
+            {
+              "node": "Tomar Candado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "StatusOpen1": {
+        "main": [
+          [
+            {
+              "node": "Tomar Turno",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "juli": {
+        "main": [
+          null,
+          [
+            {
+              "node": "Nota Error Derivacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "marcos": {
+        "main": [
+          null,
+          [
+            {
+              "node": "Nota Error Derivacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fuera de Horario?": {
+        "main": [
+          [
+            {
+              "node": "Aviso Derivacion",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "StatusOpen1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aviso Derivacion": {
+        "main": [
+          [
+            {
+              "node": "StatusOpen1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tomar Turno": {
+        "main": [
+          [
+            {
+              "node": "agents1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "workflowId": "fF0LK453uWJdBHsR",
+    "baseVersionId": "e67dc3de-e883-41ec-b93c-21c0459775df",
+    "activeVersionId": "e67dc3de-e883-41ec-b93c-21c0459775df",
+    "nodes": [
+      {
+        "name": "Config Chatwoot",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "url",
+                "name": "url_chatwoot",
+                "type": "string",
+                "value": "https://chatarroyo.thorque.com.ar/"
+              },
+              {
+                "id": "acc",
+                "name": "account_number",
+                "type": "string",
+                "value": "1"
+              },
+              {
+                "id": "lang",
+                "name": "template_language",
+                "type": "string",
+                "value": "es_AR"
+              },
+              {
+                "id": "lblseg",
+                "name": "label_seguimiento",
+                "type": "string",
+                "value": "seguimiento"
+              },
+              {
+                "id": "lblinact",
+                "name": "label_inactivo",
+                "type": "string",
+                "value": "inactivo"
+              },
+              {
+                "id": "espinact",
+                "name": "dias_espera_inactivo",
+                "type": "number",
+                "value": 2
+              },
+              {
+                "id": "catseg",
+                "name": "categoria_seguimiento",
+                "type": "string",
+                "value": "MARKETING"
+              },
+              {
+                "id": "aljuli",
+                "name": "alias_juli",
+                "type": "string",
+                "value": "juli,julieta"
+              },
+              {
+                "id": "almarcos",
+                "name": "alias_marcos",
+                "type": "string",
+                "value": "marcos"
+              },
+              {
+                "id": "diasoff",
+                "name": "dias_sin_envio",
+                "type": "string",
+                "value": "7"
+              },
+              {
+                "id": "soloconv",
+                "name": "solo_conversaciones",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "id": "tplseg1",
+                "name": "template_seg_dia_1",
+                "type": "string",
+                "value": "seg_dia_1"
+              },
+              {
+                "id": "tplseg3",
+                "name": "template_seg_dia_3",
+                "type": "string",
+                "value": "seg_dia_3"
+              },
+              {
+                "id": "tplseg5",
+                "name": "template_seg_dia_5",
+                "type": "string",
+                "value": "seg_dia_5"
+              },
+              {
+                "id": "maxenvseg",
+                "name": "max_envios_seguimiento",
+                "type": "number",
+                "value": 3
+              },
+              {
+                "id": "lblbici",
+                "name": "label_bici",
+                "type": "string",
+                "value": "bici"
+              },
+              {
+                "id": "lblapar",
+                "name": "label_aparatos",
+                "type": "string",
+                "value": "aparatosgim"
+              },
+              {
+                "id": "prodbici",
+                "name": "producto_bici",
+                "type": "string",
+                "value": "una bicicleta"
+              },
+              {
+                "id": "prodapar",
+                "name": "producto_aparatos",
+                "type": "string",
+                "value": "equipamiento de gimnasio"
+              },
+              {
+                "id": "prodgen",
+                "name": "producto_generico",
+                "type": "string",
+                "value": "lo que estabas viendo"
+              },
+              {
+                "id": "inactsalt",
+                "name": "dias_inactividad_saltear",
+                "type": "number",
+                "value": 45
+              },
+              {
+                "id": "inactcerrar",
+                "name": "dias_inactividad_cerrar",
+                "type": "number",
+                "value": 60
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        }
+      },
+      {
+        "name": "Buscar Chats con Seguimiento",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot }}api/v1/accounts/{{ $('Config Chatwoot').first().json.account_number }}/conversations/filter",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ payload: [ { attribute_key: 'labels', filter_operator: 'equal_to', values: [$('Config Chatwoot').first().json.label_seguimiento] } ] }) }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "pagination": {
+              "pagination": {
+                "parameters": {
+                  "parameters": [
+                    {
+                      "type": "qs",
+                      "name": "page",
+                      "value": "={{ $pageCount + 1 }}"
+                    }
+                  ]
+                },
+                "paginationCompleteWhen": "other",
+                "completeExpression": "={{ ((typeof $response.body === 'string' ? JSON.parse($response.body) : $response.body).payload || []).length < 25 }}",
+                "limitPagesFetched": false,
+                "maxRequests": 40,
+                "requestInterval": 300,
+                "paginationMode": "updateAParameterInEachRequest"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Clasificar Seguimiento Diario",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "parameters": {
+          "jsCode": "function commercialTemplate(templates, name, language, variables) {\n  const template = (templates || []).find(\n    item =>\n      item.name === name &&\n      item.language?.toLowerCase() === language?.toLowerCase() &&\n      item.status?.toLowerCase() === 'approved'\n  );\n  const body = template?.components?.find(item => item.type === 'BODY')?.text;\n  const names = [\n    ...new Set(\n      [...(body || '').matchAll(/\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g)].map(\n        match => match[1]\n      )\n    ),\n  ];\n  const unsupported = template?.components?.some(\n    item =>\n      (item.type === 'HEADER' && item.format !== 'TEXT') ||\n      (item.type !== 'BODY' && JSON.stringify(item).includes('{{'))\n  );\n  if (\n    !body ||\n    unsupported ||\n    (names.length && template.parameter_format !== 'NAMED') ||\n    names.some(key => !variables[key]?.trim())\n  ) {\n    throw new Error(\n      'Plantilla Meta no disponible o parametros incompletos: ' + name\n    );\n  }\n  return {\n    name: template.name,\n    category: template.category,\n    language: template.language,\n    processed_params: {\n      body: Object.fromEntries(names.map(key => [key, variables[key]])),\n    },\n    content: body.replace(\n      /\\{\\{\\s*([^{}]+?)\\s*\\}\\}/g,\n      (match, key) => variables[key]\n    ),\n  };\n}\n// Pure functions embedded verbatim in n8n Code nodes by post_sale-build.cjs.\nfunction zonedParts(value, timezone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hourCycle: 'h23',\n  }).formatToParts(new Date(value));\n  return Object.fromEntries(\n    parts\n      .filter(part => part.type !== 'literal')\n      .map(part => [part.type, Number(part.value)])\n  );\n}\n\nfunction localInstant(day, hour, timezone) {\n  const wanted = Date.UTC(\n    day.getUTCFullYear(),\n    day.getUTCMonth(),\n    day.getUTCDate(),\n    hour\n  );\n  let instant = wanted;\n  for (let attempt = 0; attempt < 3; attempt += 1) {\n    const parts = zonedParts(instant, timezone);\n    const actual = Date.UTC(\n      parts.year,\n      parts.month - 1,\n      parts.day,\n      parts.hour,\n      parts.minute,\n      parts.second\n    );\n    instant += wanted - actual;\n  }\n  return new Date(instant).toISOString();\n}\n\nfunction planPurchase(purchase, config) {\n  const local = zonedParts(purchase.purchased_at, config.timezone);\n  const stages = Object.fromEntries(\n    ['d1', 'd7', 'd30'].map(stage => {\n      const day = new Date(\n        Date.UTC(\n          local.year,\n          local.month - 1,\n          local.day + config.stages[stage].days\n        )\n      );\n      if (config.skip_sundays && day.getUTCDay() === 0)\n        day.setUTCDate(day.getUTCDate() + 1);\n      return [\n        stage,\n        localInstant(day, config.send_hour_local, config.timezone),\n      ];\n    })\n  );\n  return { revision: purchase.revision, stages };\n}\n\nfunction purchaseItems(pages) {\n  const seen = new Set();\n  return pages.flatMap(page => {\n    if (!page.config.enabled) return [];\n    return page.purchases\n      .filter(purchase => {\n        if (seen.has(purchase.reference)) return false;\n        seen.add(purchase.reference);\n        return true;\n      })\n      .map(purchase => ({ purchase, config: page.config }));\n  });\n}\n\nfunction activeConversationIds(pages) {\n  return [\n    ...new Set(\n      purchaseItems(pages).map(item => String(item.purchase.conversation_id))\n    ),\n  ];\n}\n\nfunction dueMessages(purchase, config, now, executionId) {\n  if (!config.enabled || purchase.revision !== purchase.planned_revision)\n    return [];\n  const ageLimit = config.delivery_timeout_hours * 60 * 60 * 1000;\n  return purchase.follow_ups\n    .filter(followUp => {\n      const age =\n        new Date(now).getTime() - new Date(followUp.scheduled_at).getTime();\n      return (\n        followUp.status === 'scheduled' &&\n        !followUp.message_id &&\n        !followUp.attempted_at &&\n        age >= 0 &&\n        age < ageLimit\n      );\n    })\n    .map(followUp => {\n      const body = { revision: purchase.revision };\n      if (executionId) body.execution_id = executionId;\n      return {\n        id: followUp.id,\n        reference: purchase.reference,\n        conversation_id: purchase.conversation_id,\n        stage: followUp.stage,\n        body,\n      };\n    });\n}\n\n\nconst activePostSaleConversations = new Set(activeConversationIds($('Compras para Coordinacion Comercial').all().map(item => item.json)));\nconst cfg = $('Config Chatwoot').first().json;\nconst TZ = 'America/Argentina/Buenos_Aires';\n\nconst MAX_ENVIOS = Number(cfg.max_envios_seguimiento ?? 3);\nconst DIAS_SALTEAR = Number(cfg.dias_inactividad_saltear ?? 45);\nconst DIAS_CERRAR = Number(cfg.dias_inactividad_cerrar ?? 60);\n\n// Espera despues del ultimo mensaje de la secuencia antes de dar por inactivo.\nconst ESPERA_INACTIVO = Number(cfg.dias_espera_inactivo ?? 2);\n// Margen para no confundir nuestra propia actividad (el mensaje, la etiqueta,\n// el atributo) con una respuesta del cliente.\nconst MARGEN_SEG = 600;\n\nconst ahora = $now.setZone(TZ);\nconst HOY = ahora.toFormat('yyyy-MM-dd');\n\nconst norm = (s) => String(s || '').toLowerCase().trim();\nconst L_SEG = norm(cfg.label_seguimiento);\nconst L_INACT = norm(cfg.label_inactivo);\nconst L_BICI = norm(cfg.label_bici);\nconst L_APAR = norm(cfg.label_aparatos);\n\n// Luxon: 1 = lunes ... 7 = domingo. Por defecto se apaga el domingo.\n// Este chequeo tambien vive en el nodo Hoy Se Manda?, antes de la busqueda.\n// Queda aca como segunda red por si alguien reconecta la rama directo.\nconst apagados = String(cfg.dias_sin_envio || '')\n  .split(',')\n  .map((s) => Number(String(s).trim()))\n  .filter((n) => n >= 1 && n <= 7);\n\nif (apagados.includes(ahora.weekday)) {\n  console.log('Hoy (weekday ' + ahora.weekday + ') esta en dias_sin_envio. No sale el seguimiento diario.');\n  return [];\n}\n\nconst alias = (v) => String(v || '').split(',').map(norm).filter(Boolean);\nconst ALIAS_JULI = alias(cfg.alias_juli);\nconst ALIAS_MARCOS = alias(cfg.alias_marcos);\n\n// SECUENCIA DE 3 PASOS. Lo que elige la plantilla es el NUMERO DE ENVIO, no la\n// fecha: envio 1 -> seg_dia_1, envio 2 -> seg_dia_3, envio 3 -> seg_dia_5.\n// Por eso si un domingo no sale, el paso siguiente cae el lunes y la cadencia\n// no se rompe.\nconst SECUENCIA = ['seg_dia_1', 'seg_dia_3', 'seg_dia_5'];\n\nconst cap = (s) => {\n  const t = String(s || '').trim();\n  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;\n};\n\n// El nodo de busqueda pagina: llega un item por pagina de Chatwoot.\nconst convs = $input.all().flatMap((i) => i.json.payload ?? i.json.data?.payload ?? []);\n\nconst vistos = new Set();\nconst salida = [];\nlet conEtiqueta = 0;\nlet sinEtiqueta = 0;\nlet sinVendedor = 0;\nlet yaHoy = 0;\nlet aInactivar = 0;\nlet aTerminar = 0;\nlet esperandoCierre = 0;\nlet salteadasPorViejas = 0;\nlet cerradasPorViejas = 0;\nlet cerradasPorViejasSinEnvios = 0;\n\nfor (const c of convs) {\n  // ARROYO: nueva compra registrada evita contacto comercial simultáneo.\n  if (activePostSaleConversations.has(String(c.id))) continue;\n  if (vistos.has(c.id)) continue;\n  vistos.add(c.id);\n\n  const labels = (c.labels ?? []).map(norm).filter(Boolean);\n  if (!labels.includes(L_SEG)) { sinEtiqueta++; continue; }\n  conEtiqueta++;\n\n  // Marca del ultimo envio. Evita el segundo mensaje si el flujo corre dos\n  // veces el mismo dia (prueba manual, reintento, doble activacion).\n  const attrs = c.custom_attributes ?? {};\n  const ultimoEnvio = String(attrs.seguimiento_ultimo_envio || '');\n  if (ultimoEnvio === HOY) { yaHoy++; continue; }\n\n  const enviados = Number(attrs.seguimiento_envios ?? 0);\n  const envioNumero = enviados + 1;\n\n  // FILTRO DE ANTIGUEDAD. La etiqueta seguimiento no caduca sola: un vendedor\n  // la pone, la charla se enfria y nadie la saca. Al conectar esta rama el\n  // 12/09 entraron de golpe conversaciones de hace meses y les salio un\n  // \"retomo tu consulta\" fuera de contexto.\n  //   mas de DIAS_CERRAR sin actividad  -> se cierra sacandole seguimiento\n  //   mas de DIAS_SALTEAR sin actividad -> no se le manda, pero la etiqueta\n  //                                        queda por si el vendedor la retoma\n  // Si Chatwoot no informa la fecha, se sigue de largo: preferimos mandar de\n  // mas antes que frenar todo por un dato que falta.\n  const ultimaActividad = Number(c.last_activity_at ?? c.timestamp ?? 0);\n  const diasInactivo = ultimaActividad > 0\n    ? Math.floor((ahora.toSeconds() - ultimaActividad) / 86400)\n    : null;\n\n  if (diasInactivo !== null && diasInactivo > DIAS_CERRAR) {\n    // Solo se marca inactivo al que efectivamente recibio algun mensaje de la\n    // secuencia. Si la etiqueta quedo puesta pero nunca salio nada, se cierra\n    // sin marcar: no hubo seguimiento del cual no contestar.\n    const marcarInactivo = enviados > 0;\n    if (marcarInactivo) cerradasPorViejas++; else cerradasPorViejasSinEnvios++;\n\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: 'inactiva hace ' + diasInactivo + ' dias' + (marcarInactivo ? ' -> inactivo' : ' (nunca recibio seguimiento)'),\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labels.filter((l) => l !== L_SEG),\n    } });\n    continue;\n  }\n\n  if (diasInactivo !== null && diasInactivo > DIAS_SALTEAR) {\n    salteadasPorViejas++;\n    continue;\n  }\n\n  // SECUENCIA COMPLETA. Ya recibio los 3 pasos. Antes se cerraba en la corrida\n  // del dia siguiente. Ahora se le dan ESPERA_INACTIVO dias mas de aire:\n  //   sin respuesta -> se le saca seguimiento y se le pone inactivo\n  //   contesto      -> se le saca seguimiento nomas (la secuencia ya termino),\n  //                    sin inactivo: respondio y la sigue el vendedor\n  // Se cierra aunque no tenga vendedor asignado: si no, quedaria reciclando\n  // para siempre en el filtro.\n  if (envioNumero > MAX_ENVIOS) {\n    const diasDesdeUltimo = ultimoEnvio\n      ? Math.floor(ahora.startOf('day').diff(DateTime.fromISO(ultimoEnvio, { zone: TZ }).startOf('day'), 'days').days)\n      : null;\n\n    // Todavia dentro de la ventana de espera: no se toca, se mira manana.\n    if (diasDesdeUltimo !== null && diasDesdeUltimo < ESPERA_INACTIVO) {\n      esperandoCierre++;\n      continue;\n    }\n\n    // Timestamp exacto del ultimo envio. Las conversaciones que venian de antes\n    // de este cambio no lo tienen: se aproxima con la fecha a las 10hs, que es\n    // la hora del cron.\n    const tsUltimoEnvio = Number(attrs.seguimiento_ultimo_envio_ts ?? 0) ||\n      (ultimoEnvio ? DateTime.fromISO(ultimoEnvio + 'T10:00', { zone: TZ }).toSeconds() : 0);\n\n    // Cualquier actividad posterior al ultimo mensaje cuenta como respuesta: en\n    // esos dias el flujo no le escribe nada, asi que si algo se movio fue el\n    // cliente o el vendedor.\n    const contesto = tsUltimoEnvio > 0 && ultimaActividad > tsUltimoEnvio + MARGEN_SEG;\n\n    // Sin fecha del ultimo envio no hay forma de saber si paso la espera: se\n    // cierra como siempre, sin marcarlo inactivo.\n    const marcarInactivo = !contesto && diasDesdeUltimo !== null;\n\n    // POST /labels reemplaza el set entero, asi que se manda la lista completa\n    // MENOS seguimiento (y con inactivo agregado si corresponde). Sin esto se\n    // pisarian vendido, bici, cotizado y las demas.\n    const labelsBase = labels.filter((l) => l !== L_SEG && l !== L_INACT);\n\n    if (marcarInactivo) aInactivar++; else aTerminar++;\n\n    salida.push({ json: {\n      conversation_id: c.id,\n      accion: 'terminar',\n      motivo: marcarInactivo\n        ? 'secuencia completa y ' + diasDesdeUltimo + ' dias sin respuesta -> inactivo'\n        : 'secuencia completa (' + enviados + ' envios), hubo actividad despues del ultimo mensaje',\n      marcar_inactivo: marcarInactivo,\n      ultimo_envio_previo: ultimoEnvio,\n      envios_previos: enviados,\n      dias_inactivo: diasInactivo,\n      dias_desde_ultimo_envio: diasDesdeUltimo,\n      labels_finales: marcarInactivo ? [...labelsBase, L_INACT] : labelsBase,\n    } });\n    continue;\n  }\n\n  // ARROYO: dos días calendario entre mensajes; el cron sigue siendo diario.\n  // No recuperar todos los pasos atrasados ni adivinar fechas faltantes.\n  const DIAS_ENTRE_ENVIOS = 2;\n  const diaAnterior = Date.parse(ultimoEnvio + 'T00:00:00Z');\n  const diasDesdeEnvio = (Date.parse(HOY + 'T00:00:00Z') - diaAnterior) / 86400000;\n  if (enviados > 0 && (!Number.isFinite(diasDesdeEnvio) || diasDesdeEnvio < DIAS_ENTRE_ENVIOS)) continue;\n\n  const asignado = norm(c.meta?.assignee?.available_name ?? c.meta?.assignee?.name ?? '');\n\n  let quien = '';\n  if (ALIAS_JULI.some((a) => asignado.includes(a))) quien = 'juli';\n  else if (ALIAS_MARCOS.some((a) => asignado.includes(a))) quien = 'marcos';\n\n  // Sin Juli ni Marcos asignado no se manda: la plantilla la firma una persona\n  // y no corresponde que salga de un chat que atendio otro.\n  if (!quien) { sinVendedor++; continue; }\n\n  // Las tres plantillas nuevas NO usan el nombre del cliente, solo asesor y\n  // producto. Por eso ya no se descarta a quien Chatwoot guardo con el\n  // telefono en vez del nombre: ese saludo feo no existe mas.\n  const asesor = cap(quien);\n\n  // El producto sale de las etiquetas de rubro que pone el sub-flujo\n  // \"arroyo v2 - etiquetar conversacion\". Sin rubro va el texto generico:\n  // la frase de la plantilla es fija y Meta RECHAZA una variable vacia.\n  let producto;\n  if (labels.includes(L_BICI)) producto = cfg.producto_bici;\n  else if (labels.includes(L_APAR)) producto = cfg.producto_aparatos;\n  else producto = cfg.producto_generico;\n\n  const templateMessage = commercialTemplate($('Compras para Coordinacion Comercial').first().json.config.commercial_templates?.[String(c.inbox_id)], SECUENCIA[envioNumero - 1], cfg.template_language, { asesor, producto });\n  salida.push({ json: {\n    conversation_id: c.id,\n    accion: 'enviar',\n    nombre: String(c.meta?.sender?.name ?? '').trim().split(' ')[0],\n    vendedor: quien,\n    asesor: asesor,\n    producto: producto,\n    asignado_a: asignado,\n    ultimo_envio_previo: ultimoEnvio,\n    dias_inactivo: diasInactivo,\n    paso: envioNumero,\n    template_name: SECUENCIA[envioNumero - 1],\n    template_category: templateMessage.category,\n    template_language: templateMessage.language,\n    // Las claves tienen que coincidir EXACTO con las variables de la plantilla\n    // aprobada en Meta, o el envio se rechaza.\n    processed_params: templateMessage.processed_params,\n    template_content: templateMessage.content,\n    envio_numero: envioNumero,\n    fecha_envio: HOY\n  } });\n}\n\n// ARROYO: procesar todos los elegibles, uno por vez en el bucle de envío.\nsalida.sort((a, b) => String(a.json.ultimo_envio_previo).localeCompare(String(b.json.ultimo_envio_previo)));\nconsole.log('Conversaciones evaluadas: ' + vistos.size + ' | acciones elegibles: ' + salida.length + ' | ya enviadas hoy: ' + yaHoy + ' | sin vendedor: ' + sinVendedor);\nreturn salida;"
+        }
+      },
+      {
+        "name": "Enviar Seguimiento Diario",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot }}api/v1/accounts/{{ $('Config Chatwoot').first().json.account_number }}/conversations/{{ $json.conversation_id }}/messages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ content: $json.template_content, message_type: 'outgoing', private: false, template_params: { name: $json.template_name, category: $json.template_category, language: $json.template_language, processed_params: $json.processed_params } }) }}",
+          "options": {}
+        }
+      },
+      {
+        "name": "Marcar Envio Del Dia",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number + '/arroyo/post_sale' + '/conversations/' + $('Armar Seguimiento').item.json.conversation_id + '/attributes' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ custom_attributes: { seguimiento_ultimo_envio: $('Armar Seguimiento').item.json.fecha_envio, seguimiento_envios: $('Armar Seguimiento').item.json.envio_numero, seguimiento_ultimo_envio_ts: $('Armar Seguimiento').item.json.fecha_envio_ts } }) }}",
+          "options": {}
+        }
+      },
+      {
+        "name": "Cerrar Secuencia",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot }}api/v1/accounts/{{ $('Config Chatwoot').first().json.account_number }}/conversations/{{ $('Armar Seguimiento').item.json.conversation_id }}/labels",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ labels: $('Armar Seguimiento').item.json.labels_finales }) }}",
+          "options": {}
+        }
+      },
+      {
+        "name": "Resetear Contador",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number + '/arroyo/post_sale' + '/conversations/' + $('Armar Seguimiento').item.json.conversation_id + '/attributes' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ custom_attributes: { seguimiento_ultimo_envio: '', seguimiento_envios: 0, seguimiento_ultimo_envio_ts: 0 } }) }}",
+          "options": {}
+        }
+      }
+    ],
+    "nodeNames": [
+      "Diario 10hs ART",
+      "Config Chatwoot",
+      "Buscar Chats con Seguimiento",
+      "Clasificar Seguimiento Diario",
+      "Uno Por Uno Seguimiento",
+      "Resumen Seguimiento Diario",
+      "Armar Seguimiento",
+      "Enviar Seguimiento Diario",
+      "Marcar Envio Del Dia",
+      "Sticky Seguimiento Diario",
+      "Se Mando?",
+      "Sticky Se Mando",
+      "Solo Prueba Seguimiento",
+      "Sticky Modo Prueba",
+      "Terminar Secuencia?",
+      "Cerrar Secuencia",
+      "Resetear Contador",
+      "Hoy Se Manda?",
+      "Domingo Sin Envio",
+      "Postventa Cada 15 Minutos",
+      "Config Postventa",
+      "Leer Compras Postventa",
+      "Preparar Compras Postventa",
+      "Requiere Plan Postventa?",
+      "Registrar Plan Postventa",
+      "Seleccionar Etapas Postventa",
+      "Crear Mensaje Postventa",
+      "Compras para Coordinacion Comercial",
+      "Postventa Arroyo Borrador"
+    ],
+    "connections": {
+      "Diario 10hs ART": {
+        "main": [
+          [
+            {
+              "node": "Config Chatwoot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Chats con Seguimiento": {
+        "main": [
+          [
+            {
+              "node": "Clasificar Seguimiento Diario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Uno Por Uno Seguimiento": {
+        "main": [
+          [
+            {
+              "node": "Resumen Seguimiento Diario",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Armar Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Marcar Envio Del Dia": {
+        "main": [
+          [
+            {
+              "node": "Uno Por Uno Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Seguimiento Diario": {
+        "main": [
+          [
+            {
+              "node": "Se Mando?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Se Mando?": {
+        "main": [
+          [
+            {
+              "node": "Marcar Envio Del Dia",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Uno Por Uno Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Clasificar Seguimiento Diario": {
+        "main": [
+          [
+            {
+              "node": "Solo Prueba Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Solo Prueba Seguimiento": {
+        "main": [
+          [
+            {
+              "node": "Uno Por Uno Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Armar Seguimiento": {
+        "main": [
+          [
+            {
+              "node": "Terminar Secuencia?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Terminar Secuencia?": {
+        "main": [
+          [
+            {
+              "node": "Cerrar Secuencia",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Enviar Seguimiento Diario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cerrar Secuencia": {
+        "main": [
+          [
+            {
+              "node": "Resetear Contador",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Resetear Contador": {
+        "main": [
+          [
+            {
+              "node": "Uno Por Uno Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Hoy Se Manda?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Chats con Seguimiento",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Domingo Sin Envio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postventa Cada 15 Minutos": {
+        "main": [
+          [
+            {
+              "node": "Config Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Config Postventa": {
+        "main": [
+          [
+            {
+              "node": "Leer Compras Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Config Chatwoot": {
+        "main": [
+          [
+            {
+              "node": "Compras para Coordinacion Comercial",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compras para Coordinacion Comercial": {
+        "main": [
+          [
+            {
+              "node": "Hoy Se Manda?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Leer Compras Postventa": {
+        "main": [
+          [
+            {
+              "node": "Preparar Compras Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Compras Postventa": {
+        "main": [
+          [
+            {
+              "node": "Requiere Plan Postventa?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Requiere Plan Postventa?": {
+        "main": [
+          [
+            {
+              "node": "Registrar Plan Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Seleccionar Etapas Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Registrar Plan Postventa": {
+        "main": [
+          [
+            {
+              "node": "Seleccionar Etapas Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Seleccionar Etapas Postventa": {
+        "main": [
+          [
+            {
+              "node": "Crear Mensaje Postventa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  }
+]

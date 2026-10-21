@@ -30,7 +30,8 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
       :timezone,
       post_sale: [:enabled, :trigger_label, :send_hour_local, :skip_sundays, :delivery_timeout_hours, :alert_email,
                   { alert_user_ids: [], stages: ::Arroyo::Setting::STAGES.index_with { STAGE_PARAMS } }],
-      agent_panel: %i[enabled agents_see_only_own hide_native_reports],
+      agent_panel: [:enabled, :agents_see_only_own, :hide_native_reports, :funnel_enabled, :balanced_assignment_enabled,
+                    :response_hours, :lookback_days, { seller_ids: [] }],
       email_marketing: %i[enabled max_per_hour max_per_day footer_html]
     )
   end

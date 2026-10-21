@@ -102,7 +102,23 @@
         },
         "HIDE_NATIVE_REPORTS": {
           "LABEL": "Ocultar los reportes nativos del menú"
-        }
+        },
+        "FUNNEL_ENABLED": {
+          "LABEL": "Embudo comercial"
+        },
+        "BALANCED_ASSIGNMENT_ENABLED": {
+          "LABEL": "Reparto equilibrado con historial"
+        },
+        "SELLER_IDS": {
+          "LABEL": "Vendedores del reparto"
+        },
+        "RESPONSE_HOURS": {
+          "LABEL": "Plazo de respuesta (horas laborables)"
+        },
+        "LOOKBACK_DAYS": {
+          "LABEL": "Ventana de reparto (días)"
+        },
+        "COMMERCIAL_HELP": "El plazo cuenta de lunes a sábado, de 08:30 a 12:00 y de 16:30 a 20:30. El reparto contempla derivaciones, tomas manuales y traspasos en la ventana configurada."
       },
       "EMAIL_MARKETING": {
         "TITLE": "Email marketing",
@@ -138,6 +154,7 @@
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n programa y envía los seguimientos. Acá verificás su entrega y registrás el contacto manual cuando hace falta.",
+        "NEW_OPPORTUNITY_CANCELLATION": "Etapa interrumpida al confirmar otra intención de compra. La venta anterior y sus mensajes se conservan.",
         "DISABLED_HISTORY": "La integración está desactivada; el historial sigue disponible y podés resolver las tareas manuales pendientes.",
         "STATUS_FILTER": "Estado exacto",
         "ALL_STATUSES": "Todos",
@@ -318,6 +335,92 @@
         "POST_SALE": {
           "TITLE": "Postventa",
           "DESCRIPTION": "Revisá los seguimientos de cada compra, comprobá su entrega y atendé las tareas manuales pendientes."
+        }
+      },
+      "FUNNEL": {
+        "DESCRIPTION": "Consultas, atención y resultados comerciales. Seleccioná una cifra para ver su detalle.",
+        "METRICS": {
+          "RECEIVED": "Consultas ingresadas",
+          "BOT": "En el bot",
+          "UNASSIGNED": "Sin asignar",
+          "PENDING": "Sin primera atención humana",
+          "ATTENDED": "Tuvieron atención humana",
+          "IN_PROGRESS": "En gestión",
+          "WON": "Exitosas",
+          "LOST": "Perdidas",
+          "INACTIVE": "Cliente dejó de responder",
+          "UNKNOWN": "Sin información suficiente",
+          "OVERDUE": "Sin respuesta del vendedor",
+          "ASSIGNED": "Derivadas",
+          "REPEAT_SALES": "Recompras exitosas",
+          "POST_SALE_REPLIES": "Retomaron contacto tras postventa",
+          "POST_SALE_ISSUES": "Postventas que requieren intervención"
+        },
+        "CURRENT_STATE": "Estado actual",
+        "AS_OF": "Actualizado {date}",
+        "COHORT_TITLE": "Recorrido de las consultas ingresadas",
+        "COHORT_HELP_TITLE": "¿Cómo se cuentan estas consultas?",
+        "COHORT_HELP": "Usa la fecha de inicio de la consulta. Cada consulta tiene un estado actual. Derivación y atención son hitos; los atrasos son incidencias separadas. Una venta puede no tener atención humana registrada.",
+        "MILESTONES": "Hitos alcanzados",
+        "COVERAGE": "Cobertura: {complete} completa · {partial} parcial",
+        "PARTIAL": "Histórico con cobertura parcial",
+        "AGENT_SUMMARY": "Estado actual por vendedor",
+        "ACTIVITY_TITLE": "Actividad realizada",
+        "METRIC": "Métrica",
+        "ACTIVITY_HELP_TITLE": "¿Qué fecha se usa acá?",
+        "ACTIVITY_HELP": "Los totales cuentan consultas distintas. Una consulta puede aparecer en varios vendedores o días: no sumes filas ni días para calcular el total único del período.",
+        "PERIOD_TOTAL": "{metric} en el período: {count}",
+        "REPURCHASE_TITLE": "Recompra y postventa",
+        "EMPTY": "No ingresaron consultas en este período. La actividad puede incluir consultas anteriores.",
+        "LOAD_ERROR": "No se pudo cargar el reporte comercial. Volvé a intentar.",
+        "UPDATING": "Actualizando resultados…",
+        "PREVIOUS_RESULTS": "Se conservan los resultados anteriores. Reintentá para aplicar los filtros seleccionados.",
+        "LIST_ERROR": "No se pudieron cargar las consultas. Volvé a intentar.",
+        "ACTION_ERROR": "No se pudo guardar el cambio. Volvé a intentar.",
+        "EXPORT_ERROR": "No se pudieron exportar las consultas. Volvé a intentar.",
+        "RETRY": "Reintentar",
+        "LIST_COUNT": "Consultas: {count}",
+        "PREVIOUS": "Anterior",
+        "NEXT": "Siguiente",
+        "PAGE": "Página {page}",
+        "OWNER": "Responsable comercial: {name}",
+        "MANAGE": "Gestionar consulta",
+        "PRODUCT": "Producto (opcional)",
+        "NEW_CONFIRMATION": "Confirmá una nueva intención de compra. Las consultas de garantía, soporte y agradecimientos no crean otra oportunidad. La venta anterior se conserva.",
+        "ACTIONS": {
+          "WON": "Registrar venta",
+          "LOST": "Marcar perdida",
+          "RESUME": "Retomar consulta",
+          "NEW": "Nueva oportunidad",
+          "CONFIRM": "Confirmar nueva oportunidad",
+          "CANCEL": "Cancelar"
+        },
+        "MILESTONE_COUNT": "{metric}: {count}",
+        "DATE_RANGE": "{since} – {until}",
+        "OPEN_POST_SALE": "Abrir tareas de postventa",
+        "ALL_STATES": "Ver todos los estados",
+        "OVERDUE_ALERT": "{count} consulta sin respuesta del vendedor | {count} consultas sin respuesta del vendedor",
+        "REVIEW": "Revisar consultas",
+        "SHOW_DAILY": "Ver detalle por vendedor y período",
+        "HIDE_DAILY": "Ocultar detalle del período",
+        "TOTAL_SERIES": "Total general",
+        "FLOW": {
+          "INGRESS": "Ingreso",
+          "HANDOFF": "Derivación",
+          "TEAM_RESULTS": "Atención y resultados",
+          "PERIOD": "Ingresadas en el período seleccionado",
+          "WON": "exitosas",
+          "PENDING": "sin atender",
+          "LOST": "perdidas",
+          "IN_PROGRESS": "en gestión",
+          "INACTIVE": "cliente sin respuesta",
+          "NO_SELLERS": "No hay vendedores con consultas para estos filtros."
+        },
+        "ACTIVITY_METRIC_HELP": {
+          "RECEIVED": "Usa la fecha de inicio de la consulta y su responsable comercial en el reporte.",
+          "ASSIGNED": "Usa la fecha de derivación o reasignación. El vendedor es quien recibió la consulta.",
+          "ATTENDED": "Usa la fecha de la respuesta humana y el vendedor que respondió. Los envíos automáticos no cuentan.",
+          "WON": "Usa la fecha de registro de la venta y el vendedor conservado en el resultado, aunque otra persona registre la venta."
         }
       }
     }

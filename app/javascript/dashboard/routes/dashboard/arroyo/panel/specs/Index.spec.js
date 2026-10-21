@@ -8,6 +8,7 @@ import ArroyoAgentPanelAPI from '../../api/agentPanel';
 import ArroyoFeaturesAPI from '../../api/features';
 import PostSaleAPI from '../../api/postSale';
 import PostSaleTab from '../components/PostSaleTab.vue';
+import FunnelTab from '../components/FunnelTab.vue';
 import { useArroyoFeatures } from '../../composables/useArroyoFeatures';
 
 enableAutoUnmount(afterEach);
@@ -83,7 +84,7 @@ const mountPanel = async (query, name = 'arroyo_agent_panel') => {
   const wrapper = mount(Index, {
     global: {
       plugins: [router, store],
-      stubs: { BarChart: true, TabBar: true },
+      stubs: { BarChart: true, TabBar: true, FunnelTab: true },
     },
   });
   await flushPromises();
@@ -130,6 +131,35 @@ describe('Arroyo agent panel', () => {
       user_ids: [7],
       inbox_ids: [3],
     });
+  });
+
+  it('uses the commercial funnel only when enabled and clears shared filters', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, funnel_enabled: true },
+      },
+    });
+    const { wrapper, router } = await mountPanel({
+      preset: 'custom',
+      since: '2026-10-01',
+      until: '2026-10-02',
+      user_ids: '7',
+      inbox_ids: '3',
+    });
+    expect(wrapper.findComponent(FunnelTab).props('params')).toEqual({
+      since: '2026-10-01',
+      until: '2026-10-02',
+      group_by: 'day',
+      user_ids: [7],
+      inbox_ids: [3],
+    });
+    expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="clear-funnel-filters"]').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.query.user_ids).toBeUndefined();
+    expect(router.currentRoute.value.query.inbox_ids).toBeUndefined();
+    expect(router.currentRoute.value.query.preset).toBe('last_7_days');
   });
 
   it('shows enabled post-sale and keeps the shared date and inbox filters', async () => {
@@ -348,6 +378,30 @@ describe('Arroyo agent panel', () => {
       })
     );
   });
+  it('uses compact funnel filters only on the approved activity surface', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, funnel_enabled: true, seller_ids: [7] },
+        post_sale: { enabled: true },
+      },
+    });
+    const { wrapper, router } = await mountPanel({
+      user_ids: '7',
+      inbox_ids: '3',
+    });
+    expect(wrapper.get('[data-testid="commercial-filters"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-testid="activity-group-filter"]').exists()).toBe(
+      false
+    );
+    await wrapper.get('[data-testid="clear-funnel-filters"]').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.query.user_ids).toBeUndefined();
+    expect(router.currentRoute.value.query.inbox_ids).toBeUndefined();
+  });
+
   it('keeps default purchase filters compact without field explanations or a repeated scope panel', async () => {
     ArroyoFeaturesAPI.get.mockResolvedValue({
       data: {

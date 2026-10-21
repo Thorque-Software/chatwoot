@@ -431,4 +431,14 @@ El diseño en [SALES_FUNNEL_DESIGN.md](SALES_FUNNEL_DESIGN.md) parte de diferenc
 - El clasificador comercial publicado compara actividad del chat para decidir inactividad al completar la secuencia. Eso no demuestra una respuesta del cliente.
 - No hay emisor de recordatorios 23–24 h implementado en el código Arroyo ni en los workflows v3 revisados. Auditar automatizaciones nativas antes de atribuir un supuesto envío; no reinstalar el formulario retirado ni generar eventos ficticios.
 
-Alternativa propuesta y aceptada a nivel conversacional: registro de oportunidades y eventos Arroyo, atención humana identificada por origen, venta atribuida al momento del resultado y reparto transaccional alimentado por asignaciones efectivas. El diseño escrito está pendiente de revisión; no se implementa ni publica como parte de esta documentación.
+Alternativa aprobada e implementada en local: registro de oportunidades y eventos Arroyo, atención humana identificada por origen, venta atribuida al momento del resultado y reparto transaccional alimentado por asignaciones efectivas. Ver [SALES_FUNNEL_RUNBOOK.md](SALES_FUNNEL_RUNBOOK.md). Publicación pendiente.
+
+### Registro comercial implementado en local
+
+- `arroyo_opportunities` y `arroyo_opportunity_events` conservan referencias, origen, actor y deduplicación. Una restricción parcial permite una sola oportunidad activa por conversación. Compras vinculadas a oportunidades permiten recompra sin borrar la anterior.
+- El único hook core nuevo es el registro de `Arroyo::CommercialListener` en `SyncDispatcher`, marcado `ARROYO:`. Captura el contexto de origen antes de perderlo en procesos asíncronos; no se modifica Enterprise.
+- En n8n, bot/saludos/plantillas reciben marcadores explícitos. El 21/10 se guardó el parche como borrador remoto; se requiere publicarlo después del despliegue antes de considerar fiables todos los mensajes automáticos nuevos de producción.
+- El reparto bloquea cuenta/conversación y usa asignaciones efectivas recientes. Su contexto de automatización usa una cuenta serializable: un objeto de servicio en `Current.executed_by` no es serializable por los jobs nativos posteriores al commit.
+- Las entregas antiguas se asocian por referencia o por el evento ya registrado del mensaje, para evitar atribuirlas a una recompra posterior. Conservar `vendido` mientras se cambia otra etiqueta no confirma otra venta.
+- El nuevo reporte/version 2 y sus listados paginados son independientes del reporte legado. Los permisos se aplican a consultas, resultados, CSV y acciones. Los datos históricos inciertos se mantienen parciales.
+- La inactividad del cliente exige entrega/lectura confirmada de los tres seguimientos. `sent` no acredita recepción. Sin un emisor real de recordatorio 23–24 h no se crea un evento ficticio de ese tipo.

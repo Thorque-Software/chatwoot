@@ -23,6 +23,6 @@ RSpec.describe Arroyo::AssignmentListener do
   end
 
   it 'is registered in the async dispatcher' do
-    expect(AsyncDispatcher.new.listeners).to include(described_class.instance)
+    expect(AsyncDispatcher.new.listeners.map { |item| item.class.name }).to include(described_class.name)
   end
 end

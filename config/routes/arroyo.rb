@@ -1,6 +1,16 @@
 # Rutas del fork Arroyo. Se cargan con `draw :arroyo` dentro del scope de cuenta
 # en config/routes.rb: /api/v1/accounts/:account_id/arroyo/...
 namespace :arroyo do
+  scope :commercial, controller: 'commercial' do
+    get 'report', action: :report
+    get 'opportunities', action: :opportunities
+    post 'opportunities', action: :create
+    patch 'opportunities/:id', action: :update
+    get 'export', action: :export
+    get 'contexts', action: :contexts
+    post 'assign', action: :assign
+    post 'follow_up/message', action: :follow_up_message
+  end
   scope :post_sale, controller: 'post_sale' do
     get 'purchases', action: :purchases
     put 'purchases/:reference/plan', action: :plan

@@ -5,7 +5,11 @@ class Arroyo::PostSale::RegisterPurchaseService
     return unless eligible?
 
     conversation.with_lock do
-      purchase = Arroyo::PostSalePurchase.find_by(conversation: conversation)
+      purchase = if opportunity
+                   Arroyo::PostSalePurchase.find_by(opportunity: opportunity)
+                 else
+                   Arroyo::PostSalePurchase.where(conversation: conversation).order(id: :desc).first
+                 end
       purchase || create_purchase
     end
   end
@@ -20,8 +24,8 @@ class Arroyo::PostSale::RegisterPurchaseService
   def create_purchase
     purchase = Arroyo::PostSalePurchase.create!(
       account: conversation.account, conversation: conversation, contact: conversation.contact,
-      inbox: conversation.inbox, seller: conversation.assignee, purchased_at: timestamp, recorded_at: timestamp,
-      product: product, rubro: rubro
+      inbox: conversation.inbox, seller: opportunity&.result_user || conversation.assignee, purchased_at: timestamp, recorded_at: timestamp,
+      product: opportunity&.product.presence || product, rubro: rubro, opportunity: opportunity
     )
     Arroyo::FollowUp::STAGES.each { |stage| purchase.follow_ups.create!(account: purchase.account, stage: stage) }
     purchase
@@ -30,6 +34,12 @@ class Arroyo::PostSale::RegisterPurchaseService
   def product
     value = conversation.custom_attributes['producto_comprado'].presence || conversation.contact.custom_attributes['producto_comprado'].presence
     value || I18n.t("arroyo.post_sale.products.#{rubro.presence || 'generic'}", locale: conversation.account.locale)
+  end
+
+  def opportunity
+    return unless Arroyo::Commercial::Lifecycle.enabled?(conversation.account)
+
+    @opportunity ||= Arroyo::Opportunity.where(conversation: conversation, state: 'won').order(id: :desc).first
   end
 
   def rubro

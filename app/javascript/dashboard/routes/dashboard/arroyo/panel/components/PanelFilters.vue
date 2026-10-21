@@ -14,6 +14,7 @@ const props = defineProps({
   showAllDates: { type: Boolean, default: false },
   showDateFilters: { type: Boolean, default: true },
   showGroupBy: { type: Boolean, default: true },
+  compact: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['change', 'clear']);
@@ -102,8 +103,14 @@ const onPresetChange = preset => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-3">
-    <div class="flex flex-wrap items-start gap-4">
+  <section
+    class="flex flex-col gap-3"
+    :data-testid="compact ? 'commercial-filters' : undefined"
+  >
+    <div
+      class="flex flex-wrap gap-3"
+      :class="compact ? 'items-end' : 'items-start'"
+    >
       <template v-if="showDateFilters">
         <label class="flex flex-col gap-1 text-label-small text-n-slate-11">
           {{ periodLabel }}
@@ -135,6 +142,7 @@ const onPresetChange = preset => {
         </template>
         <label
           v-if="showGroupBy"
+          data-testid="activity-group-filter"
           class="flex flex-col gap-1 text-label-small text-n-slate-11"
         >
           {{ t('ARROYO.PANEL.FILTERS.GROUP_BY.LABEL') }}
@@ -154,7 +162,11 @@ const onPresetChange = preset => {
             ? t('ARROYO.PANEL.FILTERS.PURCHASE_SELLER')
             : t('ARROYO.PANEL.FILTERS.AGENTS')
         }}
-        <MultiSelect v-model="selectedAgents" :options="agentOptions" />
+        <MultiSelect
+          v-model="selectedAgents"
+          :options="agentOptions"
+          :max-chips="compact ? 1 : 3"
+        />
       </div>
       <div class="flex flex-col gap-1 text-label-small text-n-slate-11">
         {{
@@ -162,8 +174,21 @@ const onPresetChange = preset => {
             ? t('ARROYO.PANEL.FILTERS.PURCHASE_INBOX')
             : t('ARROYO.PANEL.FILTERS.INBOXES')
         }}
-        <MultiSelect v-model="selectedInboxes" :options="inboxOptions" />
+        <MultiSelect
+          v-model="selectedInboxes"
+          :options="inboxOptions"
+          :max-chips="compact ? 1 : 3"
+        />
       </div>
+      <button
+        v-if="compact"
+        type="button"
+        class="mb-1 rounded px-2 py-1.5 text-label-small text-n-blue-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
+        data-testid="clear-funnel-filters"
+        @click="emit('clear')"
+      >
+        {{ t('ARROYO.PANEL.FILTERS.SCOPE.CLEAR') }}
+      </button>
     </div>
     <div v-if="showAllDates" class="flex flex-wrap items-center gap-2 text-sm">
       <div

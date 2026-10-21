@@ -12,6 +12,7 @@ import ArroyoAgentPanelAPI from '../api/agentPanel';
 import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import PanelFilters from './components/PanelFilters.vue';
 import ActivityTab from './components/ActivityTab.vue';
+import FunnelTab from './components/FunnelTab.vue';
 import WindowsTab from './components/WindowsTab.vue';
 import PostSaleTab from './components/PostSaleTab.vue';
 import ConversationsDrawer from './components/ConversationsDrawer.vue';
@@ -39,6 +40,7 @@ const report = ref(null);
 const windows = ref(null);
 const isLoading = ref(false);
 const filterResetKey = ref(0);
+const funnelTab = ref(null);
 const drawer = ref({
   open: false,
   title: '',
@@ -88,6 +90,10 @@ const showPostSale = computed(() =>
   )
 );
 
+const showFunnel = computed(() =>
+  Boolean(features.value?.agent_panel?.funnel_enabled)
+);
+
 const activeTab = computed(() => {
   // Los enlaces anteriores con ?tab= siguen funcionando.
   const tab =
@@ -101,7 +107,9 @@ const activeTab = computed(() => {
 const pageHeadings = computed(() => ({
   activity: {
     title: t('ARROYO.PANEL.TITLE'),
-    description: t('ARROYO.PANEL.DESCRIPTION'),
+    description: showFunnel.value
+      ? t('ARROYO.PANEL.FUNNEL.DESCRIPTION')
+      : t('ARROYO.PANEL.DESCRIPTION'),
   },
   windows: {
     title: t('ARROYO.PANEL.PAGES.WINDOWS.TITLE'),
@@ -189,6 +197,7 @@ const alertError = error => {
 
 const fetchActiveTab = async () => {
   if (activeTab.value === 'post_sale') return;
+  if (activeTab.value === 'activity' && showFunnel.value) return;
   isLoading.value = true;
   try {
     if (activeTab.value === 'windows') {
@@ -241,6 +250,10 @@ const openDrillDown = async ({ metric, userId, period }) => {
 };
 
 const exportCsv = async () => {
+  if (showFunnel.value) {
+    await funnelTab.value?.exportCsv?.();
+    return;
+  }
   try {
     const { data } = await ArroyoAgentPanelAPI.exportReport(apiParams.value);
     downloadCsvFile(
@@ -252,7 +265,7 @@ const exportCsv = async () => {
   }
 };
 
-watch([apiParams, activeTab], () => {
+watch([apiParams, activeTab, showFunnel], () => {
   if (timezone.value) fetchActiveTab();
 });
 
@@ -265,7 +278,12 @@ onMounted(async () => {
 
 <template>
   <div class="w-full min-w-0 px-4 md:px-6 overflow-auto bg-n-surface-1">
-    <div class="flex flex-col gap-5 pb-12 mx-auto max-w-6xl">
+    <div
+      class="mx-auto flex min-w-0 flex-col gap-5 pb-12"
+      :class="
+        activeTab === 'activity' && showFunnel ? 'max-w-7xl' : 'max-w-6xl'
+      "
+    >
       <header class="flex flex-wrap items-start justify-between gap-4 pt-6">
         <div class="flex flex-col gap-2">
           <h1 class="text-heading-1 text-n-slate-12">
@@ -282,8 +300,14 @@ onMounted(async () => {
           faded
           sm
           :label="t('ARROYO.PANEL.EXPORT')"
+          :aria-label="t('ARROYO.PANEL.EXPORT')"
+          :disabled="showFunnel && (!funnelTab?.ready || funnelTab.exporting)"
           @click="exportCsv"
-        />
+        >
+          <span class="sr-only sm:not-sr-only">{{
+            t('ARROYO.PANEL.EXPORT')
+          }}</span>
+        </Button>
       </header>
 
       <TabBar
@@ -303,13 +327,31 @@ onMounted(async () => {
         "
         :show-date-filters="activeTab !== 'windows'"
         :show-all-dates="activeTab === 'post_sale'"
-        :show-group-by="activeTab === 'activity'"
+        :show-group-by="activeTab === 'activity' && !showFunnel"
+        :compact="activeTab === 'activity' && showFunnel"
         @change="onFiltersChange"
-        @clear="clearPurchaseFilters"
+        @clear="
+          activeTab === 'activity'
+            ? onFiltersChange({
+                preset: DEFAULT_PRESET,
+                userIds: [],
+                inboxIds: [],
+              })
+            : clearPurchaseFilters()
+        "
       />
 
       <template v-if="activeTab === 'activity'">
-        <div v-if="!report" class="flex justify-center py-10">
+        <FunnelTab
+          v-if="showFunnel"
+          ref="funnelTab"
+          :params="apiParams"
+          :show-post-sale="showPostSale"
+          :show-export="false"
+          :seller-ids="features?.agent_panel?.seller_ids || []"
+          @group-changed="groupBy => onFiltersChange({ groupBy })"
+        />
+        <div v-else-if="!report" class="flex justify-center py-10">
           <Spinner />
         </div>
         <ActivityTab

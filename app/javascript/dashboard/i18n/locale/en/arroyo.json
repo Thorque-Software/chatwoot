@@ -102,7 +102,23 @@
         },
         "HIDE_NATIVE_REPORTS": {
           "LABEL": "Hide native reports from the sidebar"
-        }
+        },
+        "FUNNEL_ENABLED": {
+          "LABEL": "Commercial funnel"
+        },
+        "BALANCED_ASSIGNMENT_ENABLED": {
+          "LABEL": "Balanced assignment with history"
+        },
+        "SELLER_IDS": {
+          "LABEL": "Sellers for assignment"
+        },
+        "RESPONSE_HOURS": {
+          "LABEL": "Response deadline (business hours)"
+        },
+        "LOOKBACK_DAYS": {
+          "LABEL": "Assignment lookback (days)"
+        },
+        "COMMERCIAL_HELP": "The deadline counts Monday–Saturday, 08:30–12:00 and 16:30–20:30. Assignment includes automatic assignments, manual claims and transfers within the configured lookback."
       },
       "EMAIL_MARKETING": {
         "TITLE": "Email marketing",
@@ -138,6 +154,7 @@
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n schedules and sends follow-ups. Check their delivery here and record manual contact when needed.",
+        "NEW_OPPORTUNITY_CANCELLATION": "Stage interrupted after confirming a new purchase intent. The previous sale and its messages are preserved.",
         "DISABLED_HISTORY": "The integration is disabled; history remains available and you can resolve pending manual tasks.",
         "STATUS_FILTER": "Exact status",
         "ALL_STATUSES": "All",
@@ -318,6 +335,92 @@
         "POST_SALE": {
           "TITLE": "Post-sale",
           "DESCRIPTION": "Review purchase follow-ups, check delivery and complete pending manual tasks."
+        }
+      },
+      "FUNNEL": {
+        "DESCRIPTION": "Inquiries, human attention and sales outcomes. Select a number to see its details.",
+        "METRICS": {
+          "RECEIVED": "Inquiries received",
+          "BOT": "With the bot",
+          "UNASSIGNED": "Unassigned",
+          "PENDING": "Awaiting first human response",
+          "ATTENDED": "Received human attention",
+          "IN_PROGRESS": "In progress",
+          "WON": "Won",
+          "LOST": "Lost",
+          "INACTIVE": "Customer stopped replying",
+          "UNKNOWN": "Insufficient information",
+          "OVERDUE": "Seller response overdue",
+          "ASSIGNED": "Assigned",
+          "REPEAT_SALES": "Repeat purchases won",
+          "POST_SALE_REPLIES": "Returned after post-sale",
+          "POST_SALE_ISSUES": "Post-sale needs intervention"
+        },
+        "CURRENT_STATE": "Current state",
+        "AS_OF": "Updated {date}",
+        "COHORT_TITLE": "Journey of inquiries received",
+        "COHORT_HELP_TITLE": "How are these inquiries counted?",
+        "COHORT_HELP": "Uses the inquiry start date. Each inquiry has one current state. Assignment and attention are milestones; overdue replies are separate incidents. A sale may have no recorded human attention.",
+        "MILESTONES": "Milestones reached",
+        "COVERAGE": "Coverage: {complete} complete · {partial} partial",
+        "PARTIAL": "Partial historical coverage",
+        "AGENT_SUMMARY": "Current state by seller",
+        "ACTIVITY_TITLE": "Activity performed",
+        "METRIC": "Metric",
+        "ACTIVITY_HELP_TITLE": "Which date is used here?",
+        "ACTIVITY_HELP": "Totals count distinct inquiries. An inquiry may appear under several sellers or dates: do not add rows or dates to calculate the unique period total.",
+        "PERIOD_TOTAL": "{metric} in the period: {count}",
+        "REPURCHASE_TITLE": "Repeat purchases and post-sale",
+        "EMPTY": "No inquiries started in this period. Activity may include earlier inquiries.",
+        "LOAD_ERROR": "Could not load the commercial report. Try again.",
+        "UPDATING": "Updating results…",
+        "PREVIOUS_RESULTS": "The previous results are still displayed. Retry to apply the selected filters.",
+        "LIST_ERROR": "Could not load the inquiries. Try again.",
+        "ACTION_ERROR": "Could not save the change. Try again.",
+        "EXPORT_ERROR": "Could not export the inquiries. Try again.",
+        "RETRY": "Try again",
+        "LIST_COUNT": "Inquiries: {count}",
+        "PREVIOUS": "Previous",
+        "NEXT": "Next",
+        "PAGE": "Page {page}",
+        "OWNER": "Commercial owner: {name}",
+        "MANAGE": "Manage inquiry",
+        "PRODUCT": "Product (optional)",
+        "NEW_CONFIRMATION": "Confirm a new buying intention. Warranty questions, support and thank-you messages do not create a new opportunity. The previous sale is preserved.",
+        "ACTIONS": {
+          "WON": "Register sale",
+          "LOST": "Mark as lost",
+          "RESUME": "Resume inquiry",
+          "NEW": "New opportunity",
+          "CONFIRM": "Confirm new opportunity",
+          "CANCEL": "Cancel"
+        },
+        "MILESTONE_COUNT": "{metric}: {count}",
+        "DATE_RANGE": "{since} – {until}",
+        "OPEN_POST_SALE": "Open post-sale tasks",
+        "ALL_STATES": "View all statuses",
+        "OVERDUE_ALERT": "{count} inquiry awaiting a seller reply | {count} inquiries awaiting a seller reply",
+        "REVIEW": "Review inquiries",
+        "SHOW_DAILY": "View details by seller and period",
+        "HIDE_DAILY": "Hide period details",
+        "TOTAL_SERIES": "Overall total",
+        "FLOW": {
+          "INGRESS": "Intake",
+          "HANDOFF": "Assignment",
+          "TEAM_RESULTS": "Attention and outcomes",
+          "PERIOD": "Inquiries received in the selected period",
+          "WON": "won",
+          "PENDING": "awaiting attention",
+          "LOST": "lost",
+          "IN_PROGRESS": "in progress",
+          "INACTIVE": "customer stopped replying",
+          "NO_SELLERS": "No sellers with inquiries match these filters."
+        },
+        "ACTIVITY_METRIC_HELP": {
+          "RECEIVED": "Uses the inquiry start date and its commercial owner in the report.",
+          "ASSIGNED": "Uses the assignment or reassignment date and the seller who received the inquiry.",
+          "ATTENDED": "Uses the human reply date and the seller who replied. Automated messages do not count.",
+          "WON": "Uses the date the sale was recorded and the seller preserved in its outcome, even when another person records the sale."
         }
       }
     }

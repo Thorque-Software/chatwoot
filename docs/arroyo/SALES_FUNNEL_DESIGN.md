@@ -1,7 +1,7 @@
 # Panel comercial Arroyo: embudo, atención y recompra
 
 Fecha: 20/10/2026. Rama: `arroyo/dev`.
-Estado: propuesta conversacional aprobada por Mauro; especificación escrita para revisión. Implementación y publicación pendientes.
+Estado: diseño aprobado e implementado en local sobre `arroyo/dev`. Verificación y habilitación: [SALES_FUNNEL_RUNBOOK.md](SALES_FUNNEL_RUNBOOK.md). Publicación pendiente.
 
 ## Objetivo y alcance acordado
 
@@ -195,4 +195,4 @@ Casos mínimos de validación en local:
 - Un usuario limitado a lo propio no puede consultar cifras o conversaciones ajenas por API, CSV o enlaces directos.
 - Importación histórica, flags apagados y pruebas de fixtures no disparan mensajes. Comparar rendimiento con el panel actual usando el mismo volumen y rango antes de activar.
 
-La siguiente etapa es revisar esta especificación y convertirla en un plan de implementación con cambios pequeños y verificables. Este documento no publica workflows ni habilita nuevas reglas de producción.
+La implementación sigue [SALES_FUNNEL_IMPLEMENTATION.md](SALES_FUNNEL_IMPLEMENTATION.md). Este documento no publica workflows ni habilita nuevas reglas de producción.

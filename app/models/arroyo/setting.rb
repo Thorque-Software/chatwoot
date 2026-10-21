@@ -55,7 +55,9 @@ class Arroyo::Setting < ApplicationRecord
       'alert_user_ids' => [],
       'alert_email' => false
     },
-    'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false },
+    'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false,
+                       'funnel_enabled' => false, 'balanced_assignment_enabled' => false, 'seller_ids' => [],
+                       'response_hours' => 4, 'lookback_days' => 7 },
     'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' }
   }.freeze
 
@@ -102,6 +104,11 @@ class Arroyo::Setting < ApplicationRecord
     'agent_panel.enabled' => [:boolean],
     'agent_panel.agents_see_only_own' => [:boolean],
     'agent_panel.hide_native_reports' => [:boolean],
+    'agent_panel.funnel_enabled' => [:boolean],
+    'agent_panel.balanced_assignment_enabled' => [:boolean],
+    'agent_panel.seller_ids' => [:integer_list],
+    'agent_panel.response_hours' => [:integer, 1, 24],
+    'agent_panel.lookback_days' => [:integer, 1, 366],
     'email_marketing.enabled' => [:boolean],
     'email_marketing.max_per_hour' => [:integer, 1, 10_000],
     'email_marketing.max_per_day' => [:integer, 1, 100_000],
@@ -149,6 +156,19 @@ class Arroyo::Setting < ApplicationRecord
     validate_email_limits(current['email_marketing'])
     validate_alert_users(current['post_sale']['alert_user_ids'])
     validate_post_sale_recipients(current['post_sale'])
+    validate_commercial_config(current['agent_panel'])
+  end
+
+  def validate_commercial_config(panel)
+    validate_commercial_sellers(panel['seller_ids'])
+    add_invalid_field('agent_panel.seller_ids') if panel['funnel_enabled'] && panel['seller_ids'].blank?
+    add_invalid_field('agent_panel.funnel_enabled') if panel['balanced_assignment_enabled'] && !panel['funnel_enabled']
+  end
+
+  def validate_commercial_sellers(ids)
+    return unless ids.is_a?(Array) && account
+
+    add_invalid_field('agent_panel.seller_ids') if (ids - account.account_users.pluck(:user_id)).any?
   end
 
   def validate_email_limits(email_marketing)

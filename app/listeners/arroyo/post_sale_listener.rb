@@ -4,8 +4,9 @@ class Arroyo::PostSaleListener < BaseListener
     return unless change
 
     conversation = event.data[:conversation]
-    purchase = Arroyo::PostSalePurchase.find_by(conversation: conversation)
-    purchase.cancel_pending! if purchase&.excluded?
+    Arroyo::PostSalePurchase.where(conversation: conversation).find_each do |purchase|
+      purchase.cancel_pending! if purchase.excluded?
+    end
     return unless newly_sold?(conversation, change)
 
     Arroyo::PostSale::RegisterPurchaseService.new(conversation: conversation, timestamp: event.timestamp).perform

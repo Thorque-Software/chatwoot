@@ -4,11 +4,13 @@ class Arroyo::PostSalePurchase < ApplicationRecord
   belongs_to :contact
   belongs_to :inbox
   belongs_to :seller, class_name: 'User', optional: true
+  belongs_to :opportunity, class_name: 'Arroyo::Opportunity', optional: true, inverse_of: :purchase
   has_many :follow_ups, class_name: 'Arroyo::FollowUp', foreign_key: :purchase_id, dependent: :destroy, inverse_of: :purchase
 
   before_validation :assign_reference, on: :create
   validates :reference, presence: true, uniqueness: true
-  validates :conversation_id, uniqueness: true
+  validates :conversation_id, uniqueness: true, if: -> { opportunity_id.nil? }
+  validates :opportunity_id, uniqueness: true, allow_nil: true
   validates :purchased_at, :recorded_at, presence: true
 
   scope :active, -> { where(cancelled_at: nil) }

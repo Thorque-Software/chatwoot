@@ -81,6 +81,29 @@ describe('Arroyo post-sale panel', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
+  it('explains a stage interrupted by a new commercial opportunity', async () => {
+    PostSaleAPI.getFollowUps.mockResolvedValue({
+      data: {
+        follow_ups: [
+          followUp({
+            status: 'cancelled',
+            cancellation_reason: 'new_opportunity',
+            manual_status: null,
+            error_message: null,
+            error_code: null,
+          }),
+        ],
+        totals: {},
+      },
+    });
+    const wrapper = await mountTab();
+    await wrapper.find('[data-testid="follow-up-12"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain(
+      'ARROYO.PANEL.POST_SALE.NEW_OPPORTUNITY_CANCELLATION'
+    );
+  });
+
   it('shows delivery evidence separately from manual work and links to the actual message', async () => {
     const wrapper = await mountTab();
     expect(wrapper.text()).toContain('Cliente Arroyo');

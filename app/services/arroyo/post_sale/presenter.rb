@@ -39,7 +39,8 @@ class Arroyo::PostSale::Presenter
   end
 
   def stage(record)
-    { id: record.id, stage: record.stage, status: record.status, scheduled_at: record.scheduled_at&.iso8601, message_id: record.message_id }
+    { id: record.id, stage: record.stage, status: record.status, scheduled_at: record.scheduled_at&.iso8601,
+      message_id: record.message_id, cancellation_reason: record.cancellation_reason }
   end
 
   def contact(record)

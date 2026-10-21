@@ -161,6 +161,11 @@ const nextAction = item => {
     return t('ARROYO.PANEL.POST_SALE.NEXT_ACTION.PENDING');
   if (item.manual_status === 'resolved')
     return t('ARROYO.PANEL.POST_SALE.NEXT_ACTION.RESOLVED');
+  if (
+    item.status === 'cancelled' &&
+    item.cancellation_reason === 'new_opportunity'
+  )
+    return t('ARROYO.PANEL.POST_SALE.NEW_OPPORTUNITY_CANCELLATION');
   return stateHelp.value[item.status];
 };
 watch(

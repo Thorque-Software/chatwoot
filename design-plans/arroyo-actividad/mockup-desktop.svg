@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1152" viewBox="0 0 1440 1152" role="img" aria-labelledby="title desc"><title id="title">Mock-up de escritorio del Panel de vendedores de Arroyo</title><desc id="desc">Propuesta visual, datos de demostración. No es una captura de la aplicación ni un cambio publicado.</desc>
+<rect x="0" y="0" width="1440" height="1152" rx="0" fill="rgb(17,17,19)" stroke="none" stroke-width="1"/>
+<rect x="0" y="0" width="224" height="1152" rx="0" fill="rgb(24,25,27)" stroke="none" stroke-width="1"/>
+<path d="M223.5 0L223.5 1152" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<circle cx="28" cy="34" r="10" fill="rgb(39,129,246)"/>
+<rect x="24" y="29" width="8" height="9" rx="3" fill="white" stroke="none" stroke-width="1"/>
+<text x="49" y="39" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Arroyo Fitness</text>
+<svg x="193" y="27" width="15" height="15" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m7 15l5 5l5-5M7 9l5-5l5 5"/></svg>
+<rect x="14" y="65" width="196" height="34" rx="8" fill="rgb(33,34,37)" stroke="none" stroke-width="1"/>
+<svg x="25" y="74" width="16" height="16" viewBox="0 0 24 24" color="rgb(119,123,132)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="m21 21l-4.34-4.34"/><circle cx="11" cy="11" r="8"/></g></svg>
+<text x="49" y="87" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Buscar...</text>
+<svg x="22" y="132" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11"/></g></svg>
+<text x="51" y="146" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Mi bandeja de entrada</text>
+<svg x="22" y="174" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2zm4-1a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+<text x="51" y="188" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Conversaciones</text>
+<svg x="22" y="216" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M12 6v6h4"/><circle cx="12" cy="12" r="10"/></g></svg>
+<text x="51" y="230" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Seguimientos</text>
+<svg x="22" y="258" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M9 16l2 2l4-4"/></g></svg>
+<text x="51" y="272" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Postventa</text>
+<svg x="22" y="300" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M16 2v2m1.915 18a6 6 0 0 0-12 0M8 2v2"/><circle cx="12" cy="12" r="4"/><rect width="18" height="18" x="3" y="4" rx="2"/></g></svg>
+<text x="51" y="314" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Contactos</text>
+<rect x="10" y="334" width="204" height="36" rx="8" fill="rgb(53,57,66)" stroke="none" stroke-width="1"/>
+<svg x="22" y="342" width="18" height="18" viewBox="0 0 24 24" color="rgb(237,238,240)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></g></svg>
+<text x="51" y="356" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="start">Panel de vendedores</text>
+<svg x="22" y="384" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M12 16v5m4-7v7m4-11v11m2-18l-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15m2 3v3m4-7v7"/></svg>
+<text x="51" y="398" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Informes</text>
+<svg x="22" y="426" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2a2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14M8 6v8"/></g></svg>
+<text x="51" y="440" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Campañas</text>
+<svg x="22" y="468" width="18" height="18" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M12 7v14m-9-3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4a4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3a3 3 0 0 0-3-3z"/></svg>
+<text x="51" y="482" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Centro de ayuda</text>
+<path d="M16 1048H208" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="23" y="1066" width="17" height="17" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M14 17H5M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></g></svg>
+<text x="51" y="1080" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Ajustes</text>
+<circle cx="29" cy="1121" r="15" fill="rgb(48,32,8)"/>
+<text x="29" y="1126" fill="rgb(255,202,22)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">AL</text>
+<text x="51" y="1116" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="start">Administrador local</text>
+<text x="51" y="1134" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Arroyo Fitness</text>
+<text x="264" y="31" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" text-anchor="start">ARROYO  /  PANEL DE VENDEDORES</text>
+<rect x="1218" y="16" width="182" height="24" rx="6" fill="rgb(33,34,37)" stroke="none" stroke-width="1"/>
+<text x="1309" y="32" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">PROPUESTA · DATOS DEMO</text>
+<text x="264" y="75" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="600" text-anchor="start">Panel de vendedores</text>
+<text x="264" y="100" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="400" text-anchor="start">Consultas, atención y resultados del equipo.</text>
+<rect x="1260" y="58" width="140" height="36" rx="8" fill="rgb(33,34,37)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="1272" y="68" width="16" height="16" viewBox="0 0 24 24" color="rgb(237,238,240)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M12 15V3m9 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10l5 5l5-5"/></g></svg>
+<text x="1297" y="81" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Exportar CSV</text>
+<text x="280" y="144" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="start">Actividad</text>
+<text x="391" y="144" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Ventanas de 24 hs</text>
+<text x="562" y="144" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="start">Postventa</text>
+<path d="M264 159H1400" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<path d="M264 158H358" fill="none" stroke="rgb(39,129,246)" stroke-width="2"/>
+<rect x="264" y="179" width="195" height="36" rx="8" fill="rgb(33,34,37)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="276" y="189" width="16" height="16" viewBox="0 0 24 24" color="rgb(237,238,240)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></g></svg>
+<text x="301" y="202" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">14 – 20 oct 2026</text>
+<svg x="433" y="190" width="14" height="14" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m6 9l6 6l6-6"/></svg>
+<rect x="471" y="179" width="216" height="36" rx="8" fill="rgb(33,34,37)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="483" y="189" width="16" height="16" viewBox="0 0 24 24" color="rgb(237,238,240)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></g></svg>
+<text x="508" y="202" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Todos los vendedores</text>
+<svg x="661" y="190" width="14" height="14" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m6 9l6 6l6-6"/></svg>
+<rect x="699" y="179" width="204" height="36" rx="8" fill="rgb(33,34,37)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="711" y="189" width="16" height="16" viewBox="0 0 24 24" color="rgb(237,238,240)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11"/></g></svg>
+<text x="736" y="202" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Demo comercial</text>
+<svg x="877" y="190" width="14" height="14" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m6 9l6 6l6-6"/></svg>
+<text x="921" y="202" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Limpiar</text>
+<circle cx="1257" cy="198" r="3" fill="rgb(11,216,182)"/>
+<text x="1270" y="202" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Estado actual</text>
+<rect x="264" y="237" width="275" height="98" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="281" y="262" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Consultas ingresadas</text>
+<svg x="504" y="250" width="17" height="17" viewBox="0 0 24 24" color="rgb(126,182,255)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke" d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2zm4-1a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+<text x="281" y="308" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="600" text-anchor="start">11</text>
+<rect x="551" y="237" width="275" height="98" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="568" y="262" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Sin primera atención</text>
+<svg x="791" y="250" width="17" height="17" viewBox="0 0 24 24" color="rgb(255,202,22)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M12 6v6h4"/><circle cx="12" cy="12" r="10"/></g></svg>
+<text x="568" y="308" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="600" text-anchor="start">1</text>
+<rect x="838" y="237" width="275" height="98" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="855" y="262" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">En el bot</text>
+<svg x="1078" y="250" width="17" height="17" viewBox="0 0 24 24" color="rgb(169,153,236)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>
+<text x="855" y="308" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="600" text-anchor="start">1</text>
+<rect x="1125" y="237" width="275" height="98" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="1142" y="262" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Ventas ganadas</text>
+<svg x="1365" y="250" width="17" height="17" viewBox="0 0 24 24" color="rgb(11,216,182)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76"/><path d="m9 12l2 2l4-4"/></g></svg>
+<text x="1142" y="308" fill="rgb(11,216,182)" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="600" text-anchor="start">4</text>
+<rect x="264" y="351" width="1136" height="48" rx="8" fill="rgb(48,32,8)" stroke="none" stroke-width="1"/>
+<svg x="280" y="366" width="18" height="18" viewBox="0 0 24 24" color="rgb(255,202,22)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M12 6v6l4 2m4-2v5m0 4h.01"/><path d="M21.25 8.2A10 10 0 1 0 16 21.16"/></g></svg>
+<text x="310" y="380" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">1 consulta sin respuesta del vendedor</text>
+<text x="568" y="380" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">·  Más de 4 horas de atención</text>
+<text x="1246" y="380" fill="rgb(255,202,22)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Revisar consulta</text>
+<svg x="1370" y="366" width="16" height="16" viewBox="0 0 24 24" color="rgb(255,202,22)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M5 12h14m-7-7l7 7l-7 7"/></svg>
+<rect x="264" y="419" width="1136" height="324" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="288" y="451" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">Recorrido de las consultas</text>
+<svg x="494" y="438" width="16" height="16" viewBox="0 0 24 24" color="rgb(119,123,132)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></g></svg>
+<text x="1376" y="451" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="end">Ingresadas en el período seleccionado</text>
+<text x="299" y="480" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" text-anchor="start">INGRESO</text>
+<text x="551" y="480" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" text-anchor="start">DERIVACIÓN</text>
+<text x="800" y="480" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" text-anchor="start">ATENCIÓN Y RESULTADOS</text>
+<rect x="288" y="536" width="184" height="88" rx="10" fill="rgb(15,39,72)" stroke="rgb(40,89,156)" stroke-width="1"/>
+<text x="306" y="570" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="600" text-anchor="start">11</text>
+<text x="306" y="596" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="start">Consultas ingresadas</text>
+<path d="M472 580H496Q510 580 510 566V531Q510 517 524 517H542" fill="none" stroke="rgb(67,72,78)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M538 513l4 4-4 4" fill="none" stroke="rgb(67,72,78)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M472 580H542" fill="none" stroke="rgb(67,72,78)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M538 576l4 4-4 4" fill="none" stroke="rgb(67,72,78)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M472 580H496Q510 580 510 594V619Q510 633 524 633H542" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M538 629l4 4-4 4" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="542" y="493" width="174" height="48" rx="8" fill="rgb(24,25,27)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="555" y="508" width="17" height="17" viewBox="0 0 24 24" color="rgb(169,153,236)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>
+<text x="581" y="522" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">En el bot</text>
+<text x="700" y="523" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">1</text>
+<rect x="542" y="556" width="174" height="48" rx="8" fill="rgb(24,25,27)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="555" y="571" width="17" height="17" viewBox="0 0 24 24" color="rgb(176,180,186)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17l5 5m0-5l-5 5"/></g></svg>
+<text x="581" y="585" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Sin asignar</text>
+<text x="700" y="586" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">1</text>
+<rect x="542" y="609" width="174" height="48" rx="8" fill="rgb(24,25,27)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="555" y="624" width="17" height="17" viewBox="0 0 24 24" color="rgb(126,182,255)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></g></svg>
+<text x="581" y="638" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Con vendedor</text>
+<text x="700" y="639" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">9</text>
+<path d="M716 633H746V553Q746 539 760 539H790" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M786 535l4 4-4 4" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M716 633H746V644Q746 658 760 658H790" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M786 654l4 4-4 4" fill="none" stroke="rgb(40,89,156)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="790" y="493" width="586" height="98" rx="10" fill="rgb(24,25,27)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<circle cx="819" cy="522" r="15" fill="rgb(15,39,72)"/>
+<text x="819" y="526" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">JP</text>
+<text x="843" y="518" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start">Julieta Peralta</text>
+<text x="843" y="538" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">5 derivadas · 3 con atención</text>
+<svg x="1348" y="517" width="16" height="16" viewBox="0 0 24 24" color="rgb(119,123,132)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m9 18l6-6l-6-6"/></svg>
+<path d="M806 552H1360" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="807" y="575" fill="rgb(11,216,182)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">3</text>
+<text x="824" y="574" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">ganadas</text>
+<text x="1007" y="575" fill="rgb(255,202,22)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">1</text>
+<text x="1024" y="574" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">sin atender</text>
+<text x="1200" y="575" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">1</text>
+<text x="1217" y="574" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">cliente sin respuesta</text>
+<rect x="790" y="609" width="586" height="98" rx="10" fill="rgb(24,25,27)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<circle cx="819" cy="638" r="15" fill="rgb(41,31,67)"/>
+<text x="819" y="642" fill="rgb(169,153,236)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">MP</text>
+<text x="843" y="634" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start">Marcos Peralta</text>
+<text x="843" y="654" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">4 derivadas · 4 con atención</text>
+<svg x="1348" y="633" width="16" height="16" viewBox="0 0 24 24" color="rgb(119,123,132)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m9 18l6-6l-6-6"/></svg>
+<path d="M806 668H1360" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="807" y="691" fill="rgb(11,216,182)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">1</text>
+<text x="824" y="690" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">ganada</text>
+<text x="1007" y="691" fill="rgb(255,148,157)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">1</text>
+<text x="1024" y="690" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">perdida</text>
+<text x="1200" y="691" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">2</text>
+<text x="1217" y="690" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">en gestión</text>
+<text x="288" y="723" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Atención y derivación son hitos; los resultados muestran el estado actual.</text>
+<rect x="264" y="763" width="792" height="331" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="286" y="795" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">Actividad realizada</text>
+<svg x="441" y="782" width="16" height="16" viewBox="0 0 24 24" color="rgb(119,123,132)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></g></svg>
+<rect x="875" y="778" width="159" height="32" rx="8" fill="rgb(33,34,37)" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="887" y="786" width="16" height="16" viewBox="0 0 24 24" color="rgb(237,238,240)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke" d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2zm4-1a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+<text x="912" y="799" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Atendidas</text>
+<svg x="1012" y="788" width="12" height="12" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m6 9l6 6l6-6"/></svg>
+<circle cx="292" cy="824" r="3.5" fill="rgb(39,129,246)"/>
+<text x="303" y="828" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Julieta</text>
+<circle cx="376" cy="824" r="3.5" fill="rgb(169,153,236)"/>
+<text x="387" y="828" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Marcos</text>
+<text x="1034" y="828" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="end">7 consultas con atención en el período</text>
+<path d="M308 962H1032" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="293" y="966" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">0</text>
+<path d="M308 907.5H1032" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="293" y="911.5" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">1</text>
+<path d="M308 853H1032" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="293" y="857" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">2</text>
+<rect x="342.42857142857144" y="853" width="13" height="109" rx="3" fill="rgb(39,129,246)" stroke="none" stroke-width="1"/>
+<rect x="362.42857142857144" y="853" width="13" height="109" rx="3" fill="rgb(169,153,236)" stroke="none" stroke-width="1"/>
+<text x="359.42857142857144" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">14 oct</text>
+<rect x="445.28571428571433" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<rect x="465.28571428571433" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<text x="462.28571428571433" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">15 oct</text>
+<rect x="548.1428571428572" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<rect x="568.1428571428572" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<text x="565.1428571428572" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">16 oct</text>
+<rect x="651" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<rect x="671" y="907.5" width="13" height="54.5" rx="3" fill="rgb(169,153,236)" stroke="none" stroke-width="1"/>
+<text x="668" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">17 oct</text>
+<rect x="753.8571428571429" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<rect x="773.8571428571429" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<text x="770.8571428571429" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">18 oct</text>
+<rect x="856.7142857142858" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<rect x="876.7142857142858" y="907.5" width="13" height="54.5" rx="3" fill="rgb(169,153,236)" stroke="none" stroke-width="1"/>
+<text x="873.7142857142858" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">19 oct</text>
+<rect x="959.5714285714286" y="907.5" width="13" height="54.5" rx="3" fill="rgb(39,129,246)" stroke="none" stroke-width="1"/>
+<rect x="979.5714285714286" y="960" width="13" height="2" rx="3" fill="rgb(67,72,78)" stroke="none" stroke-width="1"/>
+<text x="976.5714285714286" y="982" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" text-anchor="middle">20 oct</text>
+<path d="M284 992H1036" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="285" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="500" text-anchor="start">Vendedor</text>
+<text x="491" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">14 oct</text>
+<text x="563" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">15 oct</text>
+<text x="635" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">16 oct</text>
+<text x="707" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">17 oct</text>
+<text x="779" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">18 oct</text>
+<text x="851" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">19 oct</text>
+<text x="923" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">20 oct</text>
+<text x="995" y="1014" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" text-anchor="middle">Total</text>
+<circle cx="290" cy="1036" r="3" fill="rgb(126,182,255)"/>
+<text x="302" y="1040" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Julieta</text>
+<text x="491" y="1040" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">2</text>
+<text x="563" y="1040" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="635" y="1040" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="707" y="1040" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="779" y="1040" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="851" y="1040" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="923" y="1040" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">1</text>
+<text x="995" y="1040" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">3</text>
+<circle cx="290" cy="1065" r="3" fill="rgb(169,153,236)"/>
+<text x="302" y="1069" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Marcos</text>
+<text x="491" y="1069" fill="rgb(169,153,236)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">2</text>
+<text x="563" y="1069" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="635" y="1069" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="707" y="1069" fill="rgb(169,153,236)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">1</text>
+<text x="779" y="1069" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="851" y="1069" fill="rgb(169,153,236)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">1</text>
+<text x="923" y="1069" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="995" y="1069" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">4</text>
+<rect x="1076" y="763" width="324" height="266" rx="12" fill="rgb(29,30,36)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="1096" y="792" fill="rgb(237,238,240)" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Recompra y postventa</text>
+<svg x="1097" y="822" width="17" height="17" viewBox="0 0 24 24" color="rgb(11,216,182)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="m2 9l3-3l3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6m17 9l-3 3l-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></g></svg>
+<text x="1125" y="836" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Recompra ganada</text>
+<text x="1376" y="837" fill="rgb(11,216,182)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">1</text>
+<path d="M1096 853H1380" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="1097" y="872" width="17" height="17" viewBox="0 0 24 24" color="rgb(176,180,186)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092a10 10 0 1 0-4.777-4.719"/></svg>
+<text x="1125" y="886" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Retomaron contacto</text>
+<text x="1376" y="887" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">0</text>
+<path d="M1096 903H1380" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<svg x="1097" y="922" width="17" height="17" viewBox="0 0 24 24" color="rgb(255,202,22)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"/></svg>
+<text x="1125" y="936" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" text-anchor="start">Consulta con incidencias</text>
+<text x="1376" y="937" fill="rgb(255,202,22)" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">1</text>
+<path d="M1096 979H1380" fill="none" stroke="rgb(46,49,53)" stroke-width="1"/>
+<text x="1097" y="1007" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Abrir postventa</text>
+<svg x="1363" y="992" width="17" height="17" viewBox="0 0 24 24" color="rgb(126,182,255)"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M7 7h10v10M7 17L17 7"/></svg>
+<svg x="1097" y="1050" width="15" height="15" viewBox="0 0 24 24" color="rgb(119,123,132)"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" vector-effect="non-scaling-stroke"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12l2 2l4-4"/></g></svg>
+<text x="1120" y="1062" fill="rgb(176,180,186)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">11 consultas con cobertura completa</text>
+<text x="1097" y="1087" fill="rgb(126,182,255)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start">Cómo se cuentan los datos</text>
+<text x="264" y="1125" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="start">Datos de demostración · 14–20 de octubre de 2026</text>
+<text x="1400" y="1125" fill="rgb(119,123,132)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="end">Diseño propuesto · sin cambios en la aplicación</text>
+</svg>

@@ -5,6 +5,43 @@ es:
         arroyo/setting:
           invalid_field: 'Valor inválido para %{field}'
   arroyo:
+    commercial:
+      csv:
+        reference: 'Referencia'
+        conversation: 'Conversación'
+        contact: 'Cliente'
+        seller: 'Vendedor'
+        state: 'Estado'
+      total: 'Total'
+      follow_up_failed_note: 'El seguimiento comercial %{step} falló (mensaje %{message}). No se reenvió automáticamente. Revisá el error y realizá el contacto manual; quitá la etiqueta de seguimiento si no corresponde continuar.'
+      errors:
+        disabled: 'El embudo comercial está desactivado para esta cuenta.'
+        request_key: 'La confirmación necesita una referencia única válida.'
+        outcome: 'Elegí un resultado comercial válido.'
+        superseded: 'Esta oportunidad ya fue reemplazada por una nueva.'
+        sellers: 'Configurá vendedores con acceso a esta bandeja.'
+        metric: 'La métrica solicitada no es válida.'
+        step: 'La etapa de seguimiento no corresponde al siguiente envío.'
+        template: 'No hay una plantilla aprobada compatible con este seguimiento.'
+        not_eligible: 'La consulta no está habilitada para un seguimiento automático.'
+        not_due: 'Todavía no se cumplió el plazo entre seguimientos.'
+        delivery_failed: 'El mensaje de esta etapa falló. Se registró un aviso privado para revisión manual; no se reenvió automáticamente.'
+      metrics:
+        received: 'Ingresadas'
+        bot: 'En el bot'
+        unassigned: 'Sin asignar'
+        pending: 'Sin primera atención'
+        assigned: 'Derivadas'
+        attended: 'Atendidas'
+        in_progress: 'En gestión'
+        won: 'Exitosas'
+        lost: 'Perdidas'
+        inactive: 'Cliente dejó de responder'
+        unknown: 'Sin información suficiente'
+        overdue: 'Sin respuesta del vendedor'
+        repeat_sales: 'Recompras exitosas'
+        post_sale_replies: 'Retomaron contacto tras postventa'
+        post_sale_issues: 'Consultas con incidencias de postventa'
     post_sale:
       products:
         bike: 'tu bicicleta'

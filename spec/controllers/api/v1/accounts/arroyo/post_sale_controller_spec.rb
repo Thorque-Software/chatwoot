@@ -71,6 +71,15 @@ RSpec.describe 'Arroyo post-sale API', type: :request do
     expect(response).to have_http_status(:conflict)
   end
 
+  it 'explains a stage interrupted by a new commercial opportunity' do
+    purchase = Arroyo::PostSalePurchase.find_by!(conversation: conversation)
+    stage = purchase.follow_ups.find_by!(stage: 'd7')
+    stage.update!(status: 'cancelled', cancellation_reason: 'new_opportunity')
+    get "#{url}/follow_ups", headers: agent.create_new_auth_token
+    result = response.parsed_body['follow_ups'].find { |item| item['id'] == stage.id }
+    expect(result['cancellation_reason']).to eq('new_opportunity')
+  end
+
   it 'never returns or mutates a purchase from another account' do
     foreign_account = create(:account)
     foreign_channel = create(:channel_whatsapp, account: foreign_account, provider: 'whatsapp_cloud',

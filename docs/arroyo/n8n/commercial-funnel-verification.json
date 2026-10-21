@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-10-20",
+  "mode": "read_only_schema_validation",
+  "live_mutations": false,
+  "workflow_executions": false,
+  "node_tests": 11,
+  "eslint": "passed",
+  "valid": true,
+  "valid_nodes": [
+    "Contexto Comercial Bot",
+    "Enviar Saludo",
+    "Contexto Comercial Derivacion",
+    "Reparto con Historial?",
+    "Asignar en Chatwoot Arroyo",
+    "Responsable Efectivo",
+    "If",
+    "Tomar Candado",
+    "juli",
+    "marcos",
+    "Aviso Derivacion",
+    "Contextos Comerciales",
+    "Enviar Seguimiento Arroyo",
+    "Envio Comercial Controlado?",
+    "Continuar Comercial Una Vez",
+    "Clasificar Seguimiento Diario",
+    "Enviar Seguimiento Diario"
+  ]
+}
