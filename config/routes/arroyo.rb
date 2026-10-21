@@ -10,6 +10,7 @@ namespace :arroyo do
     get 'contexts', action: :contexts
     post 'assign', action: :assign
     post 'follow_up/message', action: :follow_up_message
+    post 'follow_up/complete', action: :complete_follow_up
   end
   scope :post_sale, controller: 'post_sale' do
     get 'purchases', action: :purchases

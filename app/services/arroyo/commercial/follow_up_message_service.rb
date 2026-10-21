@@ -43,10 +43,9 @@ class Arroyo::Commercial::FollowUpMessageService
     latest = Arroyo::Commercial::Lifecycle.new(conversation: conversation).current
     raise Arroyo::Commercial::Error, 'not_eligible' unless latest.id == opportunity.id && eligible_opportunity?(opportunity)
 
-    messages = opportunity.commercial_messages
-    raise Arroyo::Commercial::Error, 'step' unless step.to_i == messages.size + 1
-
-    validate_cadence(messages.map(&:created_at).max)
+    schedule = Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity)
+    raise Arroyo::Commercial::Error, 'step' unless step.to_i == schedule.sent_count + 1
+    raise Arroyo::Commercial::Error, 'not_due' unless schedule.due?
   end
 
   def eligible_channel?
@@ -54,19 +53,12 @@ class Arroyo::Commercial::FollowUpMessageService
   end
 
   def eligible_opportunity?(opportunity)
-    opportunity.waiting_for_customer? && eligible_channel? && contact_allowed? && opportunity.assignee_id == conversation.assignee_id
+    Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity).allowed? && eligible_channel? && contact_allowed?
   end
 
   def contact_allowed?
     labels = conversation.label_list + conversation.contact.label_list
     !conversation.contact.blocked? && !labels.intersect?(%w[no-contactar venta-cancelada venta-perdida])
-  end
-
-  def validate_cadence(last)
-    return unless last
-
-    zone = Arroyo::Setting.for(conversation.account).config['timezone']
-    raise Arroyo::Commercial::Error, 'not_due' if (Time.current.in_time_zone(zone).to_date - last.in_time_zone(zone).to_date).to_i < 2
   end
 
   def attributes(opportunity)

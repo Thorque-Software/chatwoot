@@ -31,13 +31,6 @@ function classifyCommercial(
     String(value || '')
       .split(',')
       .map(norm);
-  const day = value =>
-    new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date(value));
   conversations.forEach(c => {
     if (seen.has(String(c.id))) return;
     seen.add(String(c.id));
@@ -45,38 +38,32 @@ function classifyCommercial(
     if (!ctx?.commercial_allowed || !ctx.opportunity_reference) return;
     const labels = (c.labels || []).map(norm);
     if (!labels.includes(norm(cfg.label_seguimiento))) return;
-    // A client message still awaiting a human reply never becomes customer silence.
-    if (
-      !ctx.last_human_at ||
-      !ctx.last_client_at ||
-      Date.parse(ctx.last_client_at) >= Date.parse(ctx.last_human_at)
-    )
-      return;
+    // Enrollment and its calendar are independent of human attention metrics.
     const sent = Number(ctx.follow_up?.sent_count || 0);
     const last = ctx.follow_up?.last_sent_at;
-    if (ctx.state === 'inactive') {
+    if (ctx.follow_up?.finish_due === true) {
       output.push({
         json: {
           conversation_id: c.id,
           opportunity_reference: ctx.opportunity_reference,
           accion: 'terminar',
-          marcar_inactivo: true,
+          marcar_inactivo: ctx.state === 'inactive',
           labels_finales: [
             ...labels.filter(
               l =>
                 l !== norm(cfg.label_seguimiento) &&
                 l !== norm(cfg.label_inactivo)
             ),
-            norm(cfg.label_inactivo),
+            ...(ctx.state === 'inactive' ? [norm(cfg.label_inactivo)] : []),
           ],
         },
       });
       return;
     }
-    if (ctx.state !== 'in_progress' || sent >= 3) return;
     if (
-      sent > 0 &&
-      (!last || (Date.parse(today) - Date.parse(day(last))) / 86400000 < 2)
+      ctx.follow_up?.active !== true ||
+      ctx.follow_up?.due !== true ||
+      sent >= 3
     )
       return;
     const assigned = norm(
@@ -108,7 +95,7 @@ function classifyCommercial(
         paso: step,
         envio_numero: step,
         fecha_envio: today,
-        ultimo_envio_previo: last ? day(last) : '',
+        ultimo_envio_previo: last || '',
         vendedor: seller,
         asesor: advisor,
         producto: product,
@@ -129,6 +116,15 @@ const set = (nodeName, pointer, value) => ({
   path: pointer,
   value,
 });
+function completionParameters() {
+  const item = "$('Armar Seguimiento').item.json";
+  const baseUrl =
+    "$('Config Chatwoot').first().json.url_chatwoot.replace(/\\/$/, '') + '/api/v1/accounts/' + $('Config Chatwoot').first().json.account_number";
+  return {
+    url: `={{ ${baseUrl} + (${item}.opportunity_reference ? '/arroyo/commercial/follow_up/complete' : '/conversations/' + ${item}.conversation_id + '/labels') }}`,
+    jsonBody: `={{ JSON.stringify(${item}.opportunity_reference ? { conversation_id: ${item}.conversation_id, opportunity_reference: ${item}.opportunity_reference } : { labels: ${item}.labels_finales }) }}`,
+  };
+}
 const link = (type, source, target, sourceIndex = 0) => ({
   type,
   source,
@@ -433,6 +429,8 @@ function buildPatches(baselines) {
     link('addConnection', contexts.name, 'Continuar Comercial Una Vez'),
     link('addConnection', 'Continuar Comercial Una Vez', 'Hoy Se Manda?'),
     set('Clasificar Seguimiento Diario', '/jsCode', finalClassifier),
+    set('Cerrar Secuencia', '/url', completionParameters().url),
+    set('Cerrar Secuencia', '/jsonBody', completionParameters().jsonBody),
     set(
       'Enviar Seguimiento Diario',
       '/jsonBody',
@@ -458,4 +456,4 @@ if (require.main === module) {
     JSON.stringify(buildPatches(baseline), null, 2) + '\n'
   );
 }
-module.exports = { buildPatches };
+module.exports = { buildPatches, classifyCommercial, completionParameters };

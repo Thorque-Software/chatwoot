@@ -1,7 +1,7 @@
 require 'csv'
 
 class Api::V1::Accounts::Arroyo::CommercialController < Api::V1::Accounts::BaseController
-  before_action :require_admin, only: %i[contexts assign follow_up_message]
+  before_action :require_admin, only: %i[contexts assign follow_up_message complete_follow_up]
   before_action :require_funnel, except: :contexts
   before_action :load_query, only: %i[report opportunities export]
   rescue_from ::Arroyo::Commercial::Error, with: :render_error
@@ -53,6 +53,13 @@ class Api::V1::Accounts::Arroyo::CommercialController < Api::V1::Accounts::BaseC
     record = ::Arroyo::Commercial::FollowUpMessageService.new(conversation: allowed_conversation,
                                                               reference: params.require(:opportunity_reference), step: params.require(:step)).perform
     render json: record.slice(:id, :status, :source_id)
+  end
+
+  def complete_follow_up
+    conversation = allowed_conversation
+    record = ::Arroyo::Opportunity.find_by!(account: Current.account, conversation: conversation,
+                                            reference: params.require(:opportunity_reference))
+    render json: { completed: ::Arroyo::Commercial::FollowUpSchedule.new(opportunity: record).complete }
   end
 
   private
@@ -133,18 +140,11 @@ class Api::V1::Accounts::Arroyo::CommercialController < Api::V1::Accounts::BaseC
   end
 
   def integration_context(item)
-    messages = item.commercial_messages
     state = item.effective_state
+    schedule = ::Arroyo::Commercial::FollowUpSchedule.new(opportunity: item)
     { conversation_id: item.conversation.display_id, opportunity_reference: item.reference, state: state,
       last_client_at: item.last_client_at&.iso8601, last_human_at: item.last_human_at&.iso8601,
-      commercial_allowed: commercial_allowed?(item, state),
-      follow_up: { sent_count: messages.size, last_sent_at: messages.map(&:created_at).max&.iso8601 } }
-  end
-
-  def commercial_allowed?(item, state)
-    labels = item.conversation.label_list + item.contact.label_list
-    %w[in_progress inactive].include?(state) && item.pending_since.nil? && !item.contact.blocked? &&
-      !labels.intersect?(%w[no-contactar venta-cancelada venta-perdida])
+      commercial_allowed: schedule.allowed?, follow_up: schedule.as_json }
   end
 
   def page

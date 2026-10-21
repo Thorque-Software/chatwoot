@@ -7,6 +7,7 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
   let(:conversation) { create(:conversation, account: account, inbox: channel.inbox, assignee: seller) }
 
   before do
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-21 10:00')
     setting = Arroyo::Setting.for(account)
     setting.merge_config(agent_panel: { enabled: true, funnel_enabled: true, seller_ids: [seller.id] })
     setting.save!
@@ -14,8 +15,9 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
       { name: name, language: 'es_AR', status: 'APPROVED', category: 'MARKETING', parameter_format: 'NAMED',
         components: [{ type: 'BODY', text: 'Soy {{asesor}}. ¿Seguimos con {{producto}}?' }] }
     end)
-    create(:message, account: account, conversation: conversation, message_type: :incoming, created_at: 3.days.ago)
-    create(:message, account: account, conversation: conversation, message_type: :outgoing, sender: seller, created_at: 2.days.ago)
+    create(:message, account: account, conversation: conversation, message_type: :incoming, created_at: 1.day.ago)
+    conversation.reload
+    create(:message, account: account, conversation: conversation, message_type: :outgoing, sender: seller, created_at: 57.minutes.ago)
   end
 
   def send_step(step)
@@ -75,5 +77,31 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
     channel.update!(message_templates: [])
     expect { send_step(1) }.to raise_error(Arroyo::Commercial::Error)
     expect(opportunity.commercial_messages).to be_empty
+  end
+
+  it 'still sends when the client replies but refuses after manual label removal' do
+    create(:message, account: account, conversation: conversation.reload, message_type: :incoming)
+    expect(send_step(1)).to be_persisted
+    conversation.reload.update!(label_list: ['bici'])
+    travel_to 2.days.from_now do
+      expect { send_step(2) }.to raise_error(Arroyo::Commercial::Error)
+    end
+  end
+
+  it 'sends the three fixed templates and shifts a Sunday step to Monday without a human reply' do
+    first = send_step(1)
+    expect(first.additional_attributes.dig('template_params', 'name')).to eq('seg_dia_1')
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-23 10:00') do
+      second = send_step(2)
+      expect(second.additional_attributes.dig('template_params', 'name')).to eq('seg_dia_3')
+    end
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-25 10:00') do
+      expect { send_step(3) }.to raise_error(Arroyo::Commercial::Error) { |error| expect(error.code).to eq('not_due') }
+    end
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-26 10:00') do
+      third = send_step(3)
+      expect(third.additional_attributes.dig('template_params', 'name')).to eq('seg_dia_5')
+      expect(opportunity.commercial_messages.size).to eq(3)
+    end
   end
 end

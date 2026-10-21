@@ -77,9 +77,10 @@ class Arroyo::Commercial::Lifecycle
     end
   end
 
-  def labels(actor:, change:, **_context)
+  def labels(actor:, change:, at: Time.current, **_context)
     return unless self.class.enabled?(conversation.account)
 
+    Arroyo::Commercial::FollowUpEnrollment.new(conversation: conversation).labels(change: change, at: at, actor: actor)
     opportunity = current
     return if opportunity.nil? || opportunity.terminal?
 

@@ -42,7 +42,13 @@ const context = id => ({
   commercial_allowed: true,
   last_human_at: '2026-10-19T12:00:00Z',
   last_client_at: '2026-10-18T12:00:00Z',
-  follow_up: { sent_count: 0, last_sent_at: null },
+  follow_up: {
+    active: true,
+    sent_count: 0,
+    last_sent_at: null,
+    due: true,
+    finish_due: false,
+  },
 });
 test('incremental graph operations reference existing nodes and preserve error branches', () => {
   patches().forEach(p => {
@@ -155,7 +161,7 @@ test('new opportunity ignores old conversation counters and old activity timesta
   assert.equal(output[0].json.paso, 1);
   assert.equal(output[0].json.opportunity_reference, 'op-1');
 });
-test('pending human reply, missing evidence and won support do not imply customer inactivity', () => {
+test('a customer reply does not stop enrollment, but missing context and sold support remain excluded', () => {
   const pending = { ...context(1), last_client_at: '2026-10-20T12:00:00Z' };
   const won = { ...context(2), state: 'won', commercial_allowed: false };
   assert.equal(
@@ -163,6 +169,25 @@ test('pending human reply, missing evidence and won support do not imply custome
       [conversation(1), conversation(2), conversation(3)],
       [pending, won]
     ).length,
+    1
+  );
+});
+
+test('the first followup waits for the backend enrollment date, regardless of human messages', () => {
+  const ctx = { ...context(1), state: 'pending', last_human_at: null };
+  ctx.follow_up = {
+    ...ctx.follow_up,
+    due: false,
+    next_at: '2026-10-21T13:00:00Z',
+  };
+  assert.equal(classify([conversation(1)], [ctx]).length, 0);
+  ctx.follow_up.due = true;
+  assert.equal(classify([conversation(1)], [ctx])[0].json.paso, 1);
+});
+
+test('removing seguimiento stops dispatch even if a stale backend context says due', () => {
+  assert.equal(
+    classify([{ ...conversation(1), labels: [] }], [context(1)]).length,
     0
   );
 });
@@ -177,7 +202,12 @@ test('backend customer inactivity survives unrelated activity and uses backend c
       {
         ...context(1),
         state: 'inactive',
-        follow_up: { sent_count: 3, last_sent_at: '2026-10-17T13:00:00Z' },
+        follow_up: {
+          active: true,
+          sent_count: 3,
+          last_sent_at: '2026-10-17T13:00:00Z',
+          finish_due: true,
+        },
       },
     ]
   );
@@ -199,12 +229,22 @@ test('backend customer inactivity survives unrelated activity and uses backend c
 test('two calendar days between successful sends remain required', () => {
   const ctx = {
     ...context(1),
-    follow_up: { sent_count: 1, last_sent_at: '2026-10-19T13:00:00Z' },
+    follow_up: {
+      active: true,
+      sent_count: 1,
+      last_sent_at: '2026-10-19T13:00:00Z',
+      due: false,
+    },
   };
   assert.equal(classify([conversation(1)], [ctx]).length, 0);
   const due = {
     ...ctx,
-    follow_up: { sent_count: 1, last_sent_at: '2026-10-18T13:00:00Z' },
+    follow_up: {
+      active: true,
+      sent_count: 1,
+      last_sent_at: '2026-10-18T13:00:00Z',
+      due: true,
+    },
   };
   assert.equal(classify([conversation(1)], [due])[0].json.paso, 2);
 });

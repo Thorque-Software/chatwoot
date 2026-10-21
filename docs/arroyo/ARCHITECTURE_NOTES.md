@@ -1,5 +1,9 @@
 # Arroyo — Notas de arquitectura (Fase 0)
 
+## Ajuste aprobado de seguimiento comercial — 21/10/2026
+
+Se reemplaza el requisito de atención humana previa para programar seguimientos: el usuario aprobó inscripción automática desde el primer contacto, inscripción manual mediante `seguimiento` y continuidad aunque escriban cliente o vendedor. La programación se separa de las métricas de abandono; quitar la etiqueta persiste una pausa incluso sin oportunidad previa. Se conserva el calendario día siguiente / dos días entre mensajes, domingo al lunes, Meta exclusivo e idempotencia. Implementación y transición histórica documentadas en [FOLLOW_UP_ENROLLMENT.md](FOLLOW_UP_ENROLLMENT.md); todavía sin publicar.
+
 Relevamiento del código de Chatwoot **v4.14.2** (la versión que corre en prod) para validar las suposiciones de `PLAN.md`.
 Las rutas son relativas a la raíz del repo y los números de línea corresponden a ese tag.
 
