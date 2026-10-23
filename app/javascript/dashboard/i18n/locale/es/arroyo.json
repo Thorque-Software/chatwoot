@@ -4,8 +4,8 @@
       "SETTINGS": "Arroyo",
       "PANEL": "Panel de vendedores",
       "FOLLOW_UPS": "Seguimientos",
-      "POST_SALE": "Postventa",
-      "COMMERCIAL_FOLLOW_UPS": "Seguimiento comercial"
+      "WINDOWS": "Ventanas de 24 hs",
+      "POST_SALE": "Postventa"
     },
     "SETTINGS": {
       "HEADER": {
@@ -166,7 +166,7 @@
         "ACTIVITY": "Actividad",
         "WINDOWS": "Ventanas de 24 hs",
         "POST_SALE": "Postventa",
-        "FOLLOW_UPS": "Seguimiento comercial"
+        "FOLLOW_UPS": "Seguimientos"
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n programa y envía los seguimientos. Acá verificás su entrega y registrás el contacto manual cuando hace falta.",
@@ -345,7 +345,7 @@
       },
       "PAGES": {
         "WINDOWS": {
-          "TITLE": "Seguimientos",
+          "TITLE": "Ventanas de 24 hs",
           "DESCRIPTION": "Revisá las ventanas de WhatsApp y abrí cada conversación para continuar la atención."
         },
         "POST_SALE": {
@@ -353,7 +353,7 @@
           "DESCRIPTION": "Revisá los seguimientos de cada compra, comprobá su entrega y atendé las tareas manuales pendientes."
         },
         "FOLLOW_UPS": {
-          "TITLE": "Seguimiento comercial",
+          "TITLE": "Seguimientos",
           "DESCRIPTION": "Mirá quiénes están en seguimiento, a quiénes se les mandó cada paso y qué envíos están programados para cada día. Podés enviar o reprogramar un seguimiento cuando haga falta."
         }
       },

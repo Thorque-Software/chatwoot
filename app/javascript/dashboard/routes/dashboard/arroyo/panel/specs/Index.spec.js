@@ -342,8 +342,8 @@ describe('Arroyo agent panel', () => {
     vi.spyOn(ArroyoAgentPanelAPI, 'getWindows').mockResolvedValue({
       data: windows,
     });
-    const { wrapper } = await mountPanel({}, 'arroyo_follow_ups');
-    expect(wrapper.get('h1').text()).toBe('Follow-ups');
+    const { wrapper } = await mountPanel({}, 'arroyo_windows');
+    expect(wrapper.get('h1').text()).toBe('24-hour windows');
     expect(ArroyoAgentPanelAPI.getWindows).toHaveBeenCalled();
     expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
   });
@@ -439,8 +439,8 @@ describe('Arroyo agent panel', () => {
         agent_panel: { enabled: true, funnel_enabled: true },
       },
     });
-    const { wrapper } = await mountPanel({}, 'arroyo_commercial_follow_ups');
-    expect(wrapper.get('h1').text()).toBe('Commercial follow-up');
+    const { wrapper } = await mountPanel({}, 'arroyo_follow_ups');
+    expect(wrapper.get('h1').text()).toBe('Follow-ups');
     expect(wrapper.findComponent(CommercialFollowUpsTab).exists()).toBe(true);
     expect(wrapper.findComponent(PanelFilters).exists()).toBe(false);
     expect(CommercialFollowUpsAPI.getAll).toHaveBeenCalledTimes(1);
@@ -456,11 +456,11 @@ describe('Arroyo agent panel', () => {
     });
     const { wrapper } = await mountPanel(
       {},
-      'arroyo_commercial_follow_ups',
+      'arroyo_follow_ups',
       'agent'
     );
     expect(wrapper.findComponent(CommercialFollowUpsTab).exists()).toBe(false);
     expect(CommercialFollowUpsAPI.getAll).not.toHaveBeenCalled();
-    expect(wrapper.get('h1').text()).not.toBe('Commercial follow-up');
+    expect(wrapper.get('h1').text()).not.toBe('Follow-ups');
   });
 });

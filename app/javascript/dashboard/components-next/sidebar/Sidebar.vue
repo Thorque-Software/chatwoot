@@ -400,22 +400,22 @@ const menuItems = computed(() => {
     // ARROYO: accesos diarios para vendedores, con los mismos flags y permisos del panel.
     ...(isAgentPanelEnabled.value
       ? [
-          {
-            name: 'Arroyo Follow Ups',
-            label: t('ARROYO.SIDEBAR.FOLLOW_UPS'),
-            icon: 'i-lucide-clock-3',
-            to: accountScopedRoute('arroyo_follow_ups'),
-          },
           ...(isCommercialFollowUpsVisible.value
             ? [
                 {
-                  name: 'Arroyo Commercial Follow Ups',
-                  label: t('ARROYO.SIDEBAR.COMMERCIAL_FOLLOW_UPS'),
+                  name: 'Arroyo Follow Ups',
+                  label: t('ARROYO.SIDEBAR.FOLLOW_UPS'),
                   icon: 'i-lucide-calendar-clock',
-                  to: accountScopedRoute('arroyo_commercial_follow_ups'),
+                  to: accountScopedRoute('arroyo_follow_ups'),
                 },
               ]
             : []),
+          {
+            name: 'Arroyo Windows',
+            label: t('ARROYO.SIDEBAR.WINDOWS'),
+            icon: 'i-lucide-clock-3',
+            to: accountScopedRoute('arroyo_windows'),
+          },
           ...(isPostSaleVisible.value
             ? [
                 {

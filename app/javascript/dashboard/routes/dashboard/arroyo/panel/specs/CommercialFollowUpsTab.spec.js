@@ -118,13 +118,13 @@ const mountTab = async () => {
     history: createMemoryHistory(),
     routes: [
       {
-        path: '/app/accounts/:accountId/arroyo/seguimiento-comercial',
+        path: '/app/accounts/:accountId/arroyo/seguimientos',
         component: { template: '<div />' },
       },
       { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
     ],
   });
-  await router.push('/app/accounts/1/arroyo/seguimiento-comercial');
+  await router.push('/app/accounts/1/arroyo/seguimientos');
   const wrapper = mount(CommercialFollowUpsTab, {
     props: { timezone: 'America/Argentina/Buenos_Aires' },
     global: { plugins: [router] },

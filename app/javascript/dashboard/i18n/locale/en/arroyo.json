@@ -4,8 +4,8 @@
       "SETTINGS": "Arroyo",
       "PANEL": "Agent panel",
       "FOLLOW_UPS": "Follow-ups",
-      "POST_SALE": "Post-sale",
-      "COMMERCIAL_FOLLOW_UPS": "Commercial follow-up"
+      "WINDOWS": "24-hour windows",
+      "POST_SALE": "Post-sale"
     },
     "SETTINGS": {
       "HEADER": {
@@ -166,7 +166,7 @@
         "ACTIVITY": "Activity",
         "WINDOWS": "24-hour windows",
         "POST_SALE": "Post-sale",
-        "FOLLOW_UPS": "Commercial follow-up"
+        "FOLLOW_UPS": "Follow-ups"
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n schedules and sends follow-ups. Check their delivery here and record manual contact when needed.",
@@ -345,7 +345,7 @@
       },
       "PAGES": {
         "WINDOWS": {
-          "TITLE": "Follow-ups",
+          "TITLE": "24-hour windows",
           "DESCRIPTION": "Review WhatsApp messaging windows and open each conversation to continue helping the customer."
         },
         "POST_SALE": {
@@ -353,7 +353,7 @@
           "DESCRIPTION": "Review purchase follow-ups, check delivery and complete pending manual tasks."
         },
         "FOLLOW_UPS": {
-          "TITLE": "Commercial follow-up",
+          "TITLE": "Follow-ups",
           "DESCRIPTION": "See who is in follow-up, who received each step and what is scheduled for each day. You can send or reschedule a follow-up when needed."
         }
       },

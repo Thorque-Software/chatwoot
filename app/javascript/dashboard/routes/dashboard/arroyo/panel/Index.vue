@@ -137,9 +137,9 @@ const pageDescription = computed(
 const changeTab = tab => {
   const names = {
     activity: 'arroyo_agent_panel',
-    windows: 'arroyo_follow_ups',
+    follow_ups: 'arroyo_follow_ups',
+    windows: 'arroyo_windows',
     post_sale: 'arroyo_post_sale',
-    follow_ups: 'arroyo_commercial_follow_ups',
   };
   router.push({
     name: names[tab.key],
@@ -154,12 +154,12 @@ const changeTab = tab => {
 
 const tabs = computed(() => [
   { key: 'activity', label: t('ARROYO.PANEL.TABS.ACTIVITY') },
+  ...(showCommercialFollowUps.value
+    ? [{ key: 'follow_ups', label: t('ARROYO.PANEL.TABS.FOLLOW_UPS') }]
+    : []),
   { key: 'windows', label: t('ARROYO.PANEL.TABS.WINDOWS') },
   ...(showPostSale.value
     ? [{ key: 'post_sale', label: t('ARROYO.PANEL.TABS.POST_SALE') }]
-    : []),
-  ...(showCommercialFollowUps.value
-    ? [{ key: 'follow_ups', label: t('ARROYO.PANEL.TABS.FOLLOW_UPS') }]
     : []),
 ]);
 
