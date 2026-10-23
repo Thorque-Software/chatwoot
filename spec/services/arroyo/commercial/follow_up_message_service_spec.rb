@@ -7,7 +7,6 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
   let(:conversation) { create(:conversation, account: account, inbox: channel.inbox, assignee: seller) }
 
   before do
-    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-21 10:00')
     setting = Arroyo::Setting.for(account)
     setting.merge_config(agent_panel: { enabled: true, funnel_enabled: true, seller_ids: [seller.id] })
     setting.save!
@@ -15,7 +14,11 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
       { name: name, language: 'es_AR', status: 'APPROVED', category: 'MARKETING', parameter_format: 'NAMED',
         components: [{ type: 'BODY', text: 'Soy {{asesor}}. ¿Seguimos con {{producto}}?' }] }
     end)
-    create(:message, account: account, conversation: conversation, message_type: :incoming, created_at: 1.day.ago)
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-20 10:00') do
+      create(:message, account: account, conversation: conversation, message_type: :incoming)
+      conversation.reload.update!(label_list: ['seguimiento'])
+    end
+    travel_to Time.find_zone!('America/Argentina/Buenos_Aires').parse('2026-10-21 10:00')
     conversation.reload
     create(:message, account: account, conversation: conversation, message_type: :outgoing, sender: seller, created_at: 57.minutes.ago)
   end

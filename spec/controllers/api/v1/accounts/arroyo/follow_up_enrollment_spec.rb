@@ -10,11 +10,14 @@ RSpec.describe 'Arroyo follow-up enrollment API', type: :request do
   let(:zone) { ActiveSupport::TimeZone['America/Argentina/Buenos_Aires'] }
 
   before do
-    travel_to zone.parse('2026-10-21 10:00')
     setting = Arroyo::Setting.for(account)
     setting.merge_config(agent_panel: { enabled: true, funnel_enabled: true, seller_ids: [seller.id] })
     setting.save!
-    create(:message, account: account, conversation: conversation, message_type: :incoming, created_at: zone.parse('2026-10-20 18:30'))
+    travel_to(zone.parse('2026-10-20 18:30')) do
+      create(:message, account: account, conversation: conversation, message_type: :incoming)
+      conversation.reload.update!(label_list: ['seguimiento'])
+    end
+    travel_to zone.parse('2026-10-21 10:00')
     channel.update!(message_templates: %w[seg_dia_1 seg_dia_3 seg_dia_5].map do |name|
       { name: name, language: 'es_AR', status: 'APPROVED', category: 'MARKETING', parameter_format: 'NAMED',
         components: [{ type: 'BODY', text: 'Soy {{asesor}}. ¿Seguimos con {{producto}}?' }] }

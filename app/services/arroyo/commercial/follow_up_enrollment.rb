@@ -5,17 +5,6 @@ class Arroyo::Commercial::FollowUpEnrollment
     @conversation = Conversation.find(conversation.id)
   end
 
-  def automatic(message)
-    return unless message.incoming? && !message.private? && Arroyo::Commercial::Lifecycle.enabled?(conversation.account)
-
-    conversation.with_lock do
-      opportunity = current
-      next if opportunity.nil? || message.created_at < opportunity.started_at
-
-      Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity).enroll(at: opportunity.started_at)
-    end
-  end
-
   def labels(change:, at:, actor:)
     added = Array(change.last) - Array(change.first)
     removed = Array(change.first) - Array(change.last)
@@ -38,16 +27,12 @@ class Arroyo::Commercial::FollowUpEnrollment
   end
 
   def pause(at, opportunity, actor)
-    conversation.update!(custom_attributes: conversation.custom_attributes.merge('arroyo_follow_up_stopped_at' => at.iso8601))
     Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity).stop(at: at, actor: actor) if opportunity
   end
 
   def resume(at, opportunity, actor)
-    if conversation.custom_attributes.key?('arroyo_follow_up_stopped_at')
-      conversation.update!(custom_attributes: conversation.custom_attributes.except('arroyo_follow_up_stopped_at'))
-    end
     opportunity ||= historical_opportunity(at)
-    Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity).enroll(at: at, manual: true, actor: actor) if opportunity
+    Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity).enroll(at: at, actor: actor) if opportunity
   end
 
   def historical_opportunity(at)

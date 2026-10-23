@@ -2,7 +2,6 @@ class Arroyo::CommercialListener < BaseListener
   def message_created(event)
     message = event.data[:message]
     Arroyo::Commercial::Lifecycle.new(conversation: message.conversation).message(message)
-    Arroyo::Commercial::FollowUpEnrollment.new(conversation: message.conversation).automatic(message)
   end
 
   def message_updated(event)

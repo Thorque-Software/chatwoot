@@ -17,13 +17,18 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
     travel_to(zone.parse(at)) { create(:message, account: account, conversation: conversation, message_type: :incoming) }
   end
 
+  def enroll(at)
+    travel_to(zone.parse(at)) { conversation.reload.update!(label_list: ['seguimiento']) }
+  end
+
   def schedule
     Arroyo::Commercial::FollowUpSchedule.new(opportunity: Arroyo::Opportunity.find_by!(conversation: conversation))
   end
 
-  it 'enrolls a new contact without human attention or a manually added label, for the following day at ten' do
+  it 'does not enroll a new contact until seguimiento is added, then schedules the following day at ten without human attention' do
     incoming('2026-10-20 18:30')
-    expect(conversation.reload.label_list).to include('seguimiento')
+    expect(conversation.reload.label_list).not_to include('seguimiento')
+    enroll('2026-10-20 18:30')
     expect(schedule.next_at).to eq(zone.parse('2026-10-21 10:00'))
     travel_to(zone.parse('2026-10-20 19:00')) { expect(schedule.due?).to be(false) }
     travel_to(zone.parse('2026-10-21 10:00')) { expect(schedule.due?).to be(true) }
@@ -46,6 +51,7 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
 
   it 'keeps the calendar when either the seller or the client writes again' do
     incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
     travel_to(zone.parse('2026-10-21 09:03')) do
       conversation.reload
       create(:message, account: account, conversation: conversation, message_type: :outgoing, sender: seller)
@@ -57,6 +63,7 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
 
   it 'remembers manual cancellation despite subsequent incoming messages' do
     incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
     travel_to(zone.parse('2026-10-20 18:00')) { conversation.reload.update!(label_list: []) }
     incoming('2026-10-21 09:00')
     expect(conversation.reload.label_list).not_to include('seguimiento')
@@ -65,22 +72,26 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
 
   it 'does not restart enrollment when unrelated labels change' do
     incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
     travel_to(zone.parse('2026-10-21 09:00')) { conversation.reload.update!(label_list: %w[seguimiento bici]) }
     expect(schedule.next_at).to eq(zone.parse('2026-10-21 10:00'))
   end
 
   it 'moves Sunday to Monday' do
     incoming('2026-10-24 09:00')
+    enroll('2026-10-24 09:00')
     expect(schedule.next_at).to eq(zone.parse('2026-10-26 10:00'))
   end
 
   it 'does not recover a missed first date by sending it on a later day' do
     incoming('2026-10-19 09:00')
+    enroll('2026-10-19 09:00')
     travel_to(zone.parse('2026-10-21 10:00')) { expect(schedule.due?).to be(false) }
   end
 
   it 'starts the next day when a cancelled conversation is explicitly enrolled again' do
     incoming('2026-10-19 09:00')
+    enroll('2026-10-19 09:00')
     travel_to(zone.parse('2026-10-19 18:00')) { conversation.reload.update!(label_list: []) }
     travel_to(zone.parse('2026-10-20 18:00')) { conversation.reload.update!(label_list: ['seguimiento']) }
     expect(schedule.next_at).to eq(zone.parse('2026-10-21 10:00'))
@@ -99,19 +110,9 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
     expect(schedule.next_at).to eq(zone.parse('2026-10-21 10:00'))
   end
 
-  it 'does not turn a delayed old incoming update into automatic enrollment' do
-    setting = Arroyo::Setting.for(account)
-    setting.merge_config(agent_panel: { funnel_enabled: false })
-    setting.save!
-    message = incoming('2026-10-10 09:00')
-    setting.merge_config(agent_panel: { funnel_enabled: true })
-    setting.save!
-    travel_to(zone.parse('2026-10-21 09:00')) { message.update!(content: 'Updated incoming') }
-    expect(conversation.reload.label_list).not_to include('seguimiento')
-  end
-
   it 'finishes atomically after three delivered stages without losing unrelated labels' do
     incoming('2026-10-14 09:00')
+    enroll('2026-10-14 09:00')
     opportunity = Arroyo::Opportunity.find_by!(conversation: conversation)
     travel_to(zone.parse('2026-10-14 09:30')) do
       create(:message, account: account, conversation: conversation.reload, message_type: :outgoing, sender: seller)
@@ -153,27 +154,7 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
     setting.merge_config(agent_panel: { funnel_enabled: true })
     setting.save!
     incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
     expect(schedule.sent_count).to eq(2)
-  end
-
-  it 'anchors concurrent incoming callbacks to the first contact date across midnight' do
-    incoming('2026-10-20 23:59')
-    opportunity = Arroyo::Opportunity.find_by!(conversation: conversation)
-    opportunity.events.where(kind: 'follow_up_enrolled').delete_all
-    travel_to(zone.parse('2026-10-21 00:01')) do
-      create(:message, account: account, conversation: conversation.reload, message_type: :incoming)
-    end
-    expect(schedule.next_at).to eq(zone.parse('2026-10-21 10:00'))
-  end
-
-  it 'does not enroll a new opportunity from an older incoming callback' do
-    original = incoming('2026-10-20 09:00')
-    lifecycle = Arroyo::Commercial::Lifecycle.new(conversation: conversation)
-    lifecycle.outcome(Arroyo::Opportunity.find_by!(conversation: conversation), outcome: 'won', user: seller)
-    travel_to(zone.parse('2026-10-21 09:00')) do
-      latest = lifecycle.start!(request_key: 'new-confirmed-intent', user: seller)
-      Arroyo::Commercial::FollowUpEnrollment.new(conversation: conversation).automatic(original)
-      expect(latest.events.where(kind: 'follow_up_enrolled')).not_to exist
-    end
   end
 end

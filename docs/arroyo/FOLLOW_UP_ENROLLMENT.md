@@ -4,20 +4,19 @@
 
 ## Funcionamiento para vendedores
 
-- Un nuevo contacto comercial por WhatsApp se incorpora automáticamente. El sistema agrega `seguimiento` y programa el primer mensaje para el día siguiente a las 10:00 de Argentina. No exige atención humana previa.
-- Agregar `seguimiento` manualmente incorpora conversaciones anteriores y fija el primer envío al día siguiente de esa marca. Mantener una inscripción activa o cambiar otras etiquetas no reinicia las fechas ni los contadores.
+- La inscripción es siempre manual: un nuevo contacto no recibe `seguimiento` por sí solo. Al agregar la etiqueta se programa el primer mensaje para el día siguiente a las 10:00 de Argentina, también en conversaciones anteriores. No exige atención humana previa. Mantener una inscripción activa o cambiar otras etiquetas no reinicia las fechas ni los contadores.
 - Se usan exclusivamente las plantillas Meta `seg_dia_1`, `seg_dia_3` y `seg_dia_5`. Entre envíos hay dos días calendario. El domingo pasa al lunes y el siguiente paso conserva dos días desde el envío efectivo.
 - Las respuestas del cliente y los mensajes del vendedor no detienen, reinician ni reemplazan el seguimiento. Las métricas de atención se calculan de forma independiente.
-- Quitar `seguimiento` cancela los pasos pendientes y deja una pausa persistente. Otro mensaje del cliente no vuelve a activarlo. Volver a agregarla programa para el día siguiente los pasos todavía no realizados, sin repetir los enviados.
+- Quitar `seguimiento` cancela los pasos pendientes. Otro mensaje del cliente no vuelve a activarlo. Volver a agregarla programa para el día siguiente los pasos todavía no realizados, sin repetir los enviados.
 - Tras los tres mensajes y dos días adicionales se retira `seguimiento`. `inactivo` y «Cliente dejó de responder» siguen exigiendo entrega/lectura confirmada, atención humana previa y ausencia de respuesta posterior; completar una secuencia no demuestra abandono.
 - Se mantienen las exclusiones por venta/pérdida, contacto bloqueado o `no-contactar`, y los requisitos de WhatsApp Cloud y vendedor comercial válido. No cambia postventa D+1/D+7/D+30 ni el reparto.
 - No se recuperan automáticamente etapas vencidas de días anteriores. Se revisan explícitamente para evitar envíos masivos atrasados.
 
-Ejemplo: contacto martes 20/10 → envíos miércoles 21, viernes 23 y lunes 26 (el domingo 25 se omite).
+Ejemplo: etiqueta agregada el martes 20/10 → envíos miércoles 21, viernes 23 y lunes 26 (el domingo 25 se omite).
 
 ## Implementación
 
-`FollowUpEnrollment` captura mensajes entrantes nuevos y cambios de etiqueta; `FollowUpSchedule` centraliza inscripción, pausa, fecha elegible y cierre. Usa eventos `follow_up_enrolled`/`follow_up_stopped`; una cancelación anterior a cualquier oportunidad queda en el atributo `arroyo_follow_up_stopped_at`. Se reutilizan las tablas existentes: no hay migraciones nuevas.
+`FollowUpEnrollment` captura los cambios de etiqueta `seguimiento`; `FollowUpSchedule` centraliza inscripción, pausa, fecha elegible y cierre. Usa eventos `follow_up_enrolled`/`follow_up_stopped`; la inscripción solo ocurre al agregar la etiqueta. Se reutilizan las tablas existentes: no hay migraciones nuevas.
 
 Los contextos incluyen `follow_up.active`, `next_at`, `due` y `finish_due`. El endpoint idempotente de envío vuelve a validar elegibilidad bajo bloqueo para respetar cancelaciones posteriores a la lectura de n8n. El cierre usa `POST /arroyo/commercial/follow_up/complete` bajo bloqueo y conserva las etiquetas ajenas.
 

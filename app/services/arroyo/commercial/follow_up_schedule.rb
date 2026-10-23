@@ -1,13 +1,13 @@
 class Arroyo::Commercial::FollowUpSchedule
   pattr_initialize [:opportunity!]
 
-  def enroll(at:, manual: false, actor: nil)
-    return unless enrollable?(manual)
+  def enroll(at:, actor: nil)
+    return unless enrollable?
 
     number = opportunity.events.where(kind: 'follow_up_enrolled').count + 1
     import_legacy(at) if number == 1 && legacy_history?
     opportunity.events.create!(kind: 'follow_up_enrolled', source_key: "follow_up:enrolled:#{number}",
-                               occurred_at: at, origin: manual ? 'user' : 'system', actor: actor)
+                               occurred_at: at, origin: 'user', actor: actor)
     conversation.add_labels(['seguimiento']) unless conversation.label_list.include?('seguimiento')
   end
 
@@ -78,11 +78,8 @@ class Arroyo::Commercial::FollowUpSchedule
 
   private
 
-  def enrollable?(manual)
-    return false unless whatsapp? && !opportunity.terminal?
-    return false if !manual && conversation.custom_attributes['arroyo_follow_up_stopped_at'].present?
-
-    enrollment.nil? || (manual && !running?)
+  def enrollable?
+    whatsapp? && !opportunity.terminal? && !running?
   end
 
   def legacy_history?
