@@ -32,6 +32,7 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
                   { alert_user_ids: [], stages: ::Arroyo::Setting::STAGES.index_with { STAGE_PARAMS } }],
       agent_panel: [:enabled, :agents_see_only_own, :hide_native_reports, :funnel_enabled, :balanced_assignment_enabled,
                     :response_hours, :lookback_days, { seller_ids: [] }],
+      follow_up: [:enabled, { aliases: %i[name alias] }],
       email_marketing: %i[enabled max_per_hour max_per_day footer_html]
     )
   end

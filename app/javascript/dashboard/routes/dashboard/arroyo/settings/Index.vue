@@ -10,6 +10,7 @@ import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import GeneralSection from './components/GeneralSection.vue';
 import PostSaleSection from './components/PostSaleSection.vue';
 import AgentPanelSection from './components/AgentPanelSection.vue';
+import CommercialFollowUpSection from './components/CommercialFollowUpSection.vue';
 import EmailMarketingSection from './components/EmailMarketingSection.vue';
 
 const { t } = useI18n();
@@ -77,6 +78,11 @@ onMounted(() => {
           :config="config.agent_panel"
           :is-saving="savingSection === 'agent_panel'"
           @save="saveSection('agent_panel', $event)"
+        />
+        <CommercialFollowUpSection
+          :config="config.follow_up"
+          :is-saving="savingSection === 'follow_up'"
+          @save="saveSection('follow_up', $event)"
         />
         <EmailMarketingSection
           :config="config.email_marketing"

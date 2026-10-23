@@ -46,9 +46,14 @@ const { t } = useI18n();
 const {
   fetchFeatures: fetchArroyoFeatures,
   isAgentPanelEnabled,
+  isFunnelEnabled,
   isPostSaleVisible,
   hideNativeReports,
 } = useArroyoFeatures();
+const arroyoCurrentRole = useMapGetter('getCurrentRole');
+const isCommercialFollowUpsVisible = computed(
+  () => isFunnelEnabled.value && arroyoCurrentRole.value === 'administrator'
+);
 
 const isACustomBrandedInstance = useMapGetter(
   'globalConfig/isACustomBrandedInstance'
@@ -401,6 +406,16 @@ const menuItems = computed(() => {
             icon: 'i-lucide-clock-3',
             to: accountScopedRoute('arroyo_follow_ups'),
           },
+          ...(isCommercialFollowUpsVisible.value
+            ? [
+                {
+                  name: 'Arroyo Commercial Follow Ups',
+                  label: t('ARROYO.SIDEBAR.COMMERCIAL_FOLLOW_UPS'),
+                  icon: 'i-lucide-calendar-clock',
+                  to: accountScopedRoute('arroyo_commercial_follow_ups'),
+                },
+              ]
+            : []),
           ...(isPostSaleVisible.value
             ? [
                 {

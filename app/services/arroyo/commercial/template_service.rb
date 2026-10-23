@@ -6,12 +6,18 @@ class Arroyo::Commercial::TemplateService < Arroyo::PostSale::TemplateService
     rubro = 'generic'
     rubro = 'bike' if labels.include?('bici')
     rubro = 'gym' if labels.include?('aparatosgim')
-    product = opportunity.product.presence || I18n.t("arroyo.post_sale.products.#{rubro}", locale: opportunity.account.locale)
+    # Las plantillas seg_dia_* son es_AR: el producto va siempre en español.
+    product = opportunity.product.presence || I18n.t("arroyo.commercial.products.#{rubro}", locale: :es)
     purchase = Struct.new(:inbox, :seller, :product).new(opportunity.inbox, opportunity.assignee, product)
+    @setting = Arroyo::Setting.for(opportunity.account)
     super(purchase: purchase, stage: 'd1')
   end
 
   private
+
+  def variables
+    @variables ||= { 'asesor' => @setting.follow_up_signature(purchase.seller&.available_name), 'producto' => purchase.product }
+  end
 
   def template
     @template ||= Array(purchase.inbox.channel.message_templates).find do |item|

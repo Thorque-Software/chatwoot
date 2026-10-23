@@ -15,6 +15,7 @@ import ActivityTab from './components/ActivityTab.vue';
 import FunnelTab from './components/FunnelTab.vue';
 import WindowsTab from './components/WindowsTab.vue';
 import PostSaleTab from './components/PostSaleTab.vue';
+import CommercialFollowUpsTab from './components/CommercialFollowUpsTab.vue';
 import ConversationsDrawer from './components/ConversationsDrawer.vue';
 import {
   DATE_PRESETS,
@@ -94,15 +95,20 @@ const showFunnel = computed(() =>
   Boolean(features.value?.agent_panel?.funnel_enabled)
 );
 
+const showCommercialFollowUps = computed(
+  () => showFunnel.value && currentRole.value === 'administrator'
+);
+
 const activeTab = computed(() => {
   // Los enlaces anteriores con ?tab= siguen funcionando.
   const tab =
     route.name === 'arroyo_agent_panel'
       ? route.query.tab || 'activity'
       : route.meta.arroyoTab || 'activity';
-  return TABS.includes(tab) && (tab !== 'post_sale' || showPostSale.value)
-    ? tab
-    : 'activity';
+  const isAvailable =
+    (tab !== 'post_sale' || showPostSale.value) &&
+    (tab !== 'follow_ups' || showCommercialFollowUps.value);
+  return TABS.includes(tab) && isAvailable ? tab : 'activity';
 });
 const pageHeadings = computed(() => ({
   activity: {
@@ -119,6 +125,10 @@ const pageHeadings = computed(() => ({
     title: t('ARROYO.PANEL.PAGES.POST_SALE.TITLE'),
     description: t('ARROYO.PANEL.PAGES.POST_SALE.DESCRIPTION'),
   },
+  follow_ups: {
+    title: t('ARROYO.PANEL.PAGES.FOLLOW_UPS.TITLE'),
+    description: t('ARROYO.PANEL.PAGES.FOLLOW_UPS.DESCRIPTION'),
+  },
 }));
 const pageTitle = computed(() => pageHeadings.value[activeTab.value].title);
 const pageDescription = computed(
@@ -129,6 +139,7 @@ const changeTab = tab => {
     activity: 'arroyo_agent_panel',
     windows: 'arroyo_follow_ups',
     post_sale: 'arroyo_post_sale',
+    follow_ups: 'arroyo_commercial_follow_ups',
   };
   router.push({
     name: names[tab.key],
@@ -146,6 +157,9 @@ const tabs = computed(() => [
   { key: 'windows', label: t('ARROYO.PANEL.TABS.WINDOWS') },
   ...(showPostSale.value
     ? [{ key: 'post_sale', label: t('ARROYO.PANEL.TABS.POST_SALE') }]
+    : []),
+  ...(showCommercialFollowUps.value
+    ? [{ key: 'follow_ups', label: t('ARROYO.PANEL.TABS.FOLLOW_UPS') }]
     : []),
 ]);
 
@@ -196,7 +210,7 @@ const alertError = error => {
 };
 
 const fetchActiveTab = async () => {
-  if (activeTab.value === 'post_sale') return;
+  if (['post_sale', 'follow_ups'].includes(activeTab.value)) return;
   if (activeTab.value === 'activity' && showFunnel.value) return;
   isLoading.value = true;
   try {
@@ -320,6 +334,7 @@ onMounted(async () => {
       />
 
       <PanelFilters
+        v-if="activeTab !== 'follow_ups'"
         :filters="filters"
         :agent-options="agentOptions"
         :inbox-options="inboxOptions"
@@ -368,6 +383,10 @@ onMounted(async () => {
         v-else-if="activeTab === 'windows'"
         :windows="windows"
         :is-loading="isLoading"
+      />
+      <CommercialFollowUpsTab
+        v-else-if="activeTab === 'follow_ups'"
+        :timezone="timezone"
       />
       <template v-else>
         <p

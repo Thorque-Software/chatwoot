@@ -1,5 +1,5 @@
 class Arroyo::Commercial::FollowUpMessageService
-  pattr_initialize [:conversation!, :reference!, :step!]
+  pattr_initialize [:conversation!, :reference!, :step!, :immediate]
 
   def perform
     raise Arroyo::Commercial::Error, 'step' unless %w[1 2 3].include?(step.to_s)
@@ -45,7 +45,7 @@ class Arroyo::Commercial::FollowUpMessageService
 
     schedule = Arroyo::Commercial::FollowUpSchedule.new(opportunity: opportunity)
     raise Arroyo::Commercial::Error, 'step' unless step.to_i == schedule.sent_count + 1
-    raise Arroyo::Commercial::Error, 'not_due' unless schedule.due?
+    raise Arroyo::Commercial::Error, 'not_due' unless immediate || schedule.due?
   end
 
   def eligible_channel?

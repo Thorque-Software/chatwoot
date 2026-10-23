@@ -19,6 +19,8 @@ class Arroyo::Setting < ApplicationRecord
   MAX_NUDGE_BUTTONS = 3
   # Límite de Meta para el título de un botón de respuesta
   MAX_NUDGE_BUTTON_LENGTH = 20
+  MAX_FOLLOW_UP_ALIASES = 50
+  MAX_FOLLOW_UP_ALIAS_LENGTH = 60
 
   DEFAULTS = {
     'timezone' => 'America/Argentina/Buenos_Aires',
@@ -58,8 +60,15 @@ class Arroyo::Setting < ApplicationRecord
     'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false,
                        'funnel_enabled' => false, 'balanced_assignment_enabled' => false, 'seller_ids' => [],
                        'response_hours' => 4, 'lookback_days' => 7 },
+    'follow_up' => { 'enabled' => false,
+                     'aliases' => [{ 'name' => 'Julieta Peralta', 'alias' => 'Juli' },
+                                   { 'name' => 'Marcos Peralta', 'alias' => 'Marcos' }] },
     'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' }
   }.freeze
+
+  VALID_ALIAS = lambda { |item|
+    item.is_a?(Hash) && %w[name alias].all? { |key| item[key].is_a?(String) && item[key].strip.length.between?(1, MAX_FOLLOW_UP_ALIAS_LENGTH) }
+  }
 
   VALIDATORS = {
     boolean: ->(value) { [true, false].include?(value) },
@@ -71,6 +80,7 @@ class Arroyo::Setting < ApplicationRecord
     integer: ->(value, min, max) { value.is_a?(Integer) && value.between?(min, max) },
     number: ->(value, min, max) { value.is_a?(Numeric) && value.between?(min, max) },
     timezone: ->(value) { value.is_a?(String) && ActiveSupport::TimeZone[value].present? },
+    alias_list: ->(value) { value.is_a?(Array) && value.size <= MAX_FOLLOW_UP_ALIASES && value.all?(&VALID_ALIAS) },
     nudge_statuses: ->(value) { value.is_a?(Array) && value.present? && (value - NUDGE_STATUSES).empty? },
     nudge_buttons: lambda { |value|
       value.is_a?(Array) && value.size.between?(1, MAX_NUDGE_BUTTONS) &&
@@ -109,6 +119,8 @@ class Arroyo::Setting < ApplicationRecord
     'agent_panel.seller_ids' => [:integer_list],
     'agent_panel.response_hours' => [:integer, 1, 24],
     'agent_panel.lookback_days' => [:integer, 1, 366],
+    'follow_up.enabled' => [:boolean],
+    'follow_up.aliases' => [:alias_list],
     'email_marketing.enabled' => [:boolean],
     'email_marketing.max_per_hour' => [:integer, 1, 10_000],
     'email_marketing.max_per_day' => [:integer, 1, 100_000],
@@ -146,6 +158,12 @@ class Arroyo::Setting < ApplicationRecord
     section(name)['enabled']
   end
 
+  # Nombre con el que firma la plantilla de seguimiento: el alias configurado para el vendedor o su nombre completo.
+  def follow_up_signature(name)
+    match = section(:follow_up)['aliases'].find { |item| item['name'].strip.casecmp?(name.to_s.strip) }
+    match ? match['alias'].strip : name
+  end
+
   private
 
   def validate_config
@@ -157,6 +175,7 @@ class Arroyo::Setting < ApplicationRecord
     validate_alert_users(current['post_sale']['alert_user_ids'])
     validate_post_sale_recipients(current['post_sale'])
     validate_commercial_config(current['agent_panel'])
+    add_invalid_field('follow_up.enabled') if current['follow_up']['enabled'] == true && current['agent_panel']['funnel_enabled'] != true
   end
 
   def validate_commercial_config(panel)

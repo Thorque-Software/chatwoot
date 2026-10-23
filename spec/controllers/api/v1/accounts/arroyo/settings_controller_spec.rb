@@ -40,6 +40,21 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::SettingsController', type: :request d
       expect(Arroyo::Setting.for(account)[:config].to_json).not_to include('Custom body', 'Custom reminder', 'other')
     end
 
+    it 'replaces the follow-up aliases' do
+      patch url, headers: administrator.create_new_auth_token, as: :json,
+                 params: { config: { follow_up: { aliases: [{ name: 'Ana Gómez', alias: 'Ani' }] } } }
+
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body.dig('config', 'follow_up', 'aliases')).to eq([{ 'name' => 'Ana Gómez', 'alias' => 'Ani' }])
+    end
+
+    it 'rejects a blank follow-up alias' do
+      patch url, headers: administrator.create_new_auth_token, as: :json,
+                 params: { config: { follow_up: { aliases: [{ name: 'Ana Gómez', alias: ' ' }] } } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
     it 'returns unauthorized for agents' do
       patch url, headers: agent.create_new_auth_token, params: { config: { window_keeper: { enabled: true } } }, as: :json
 

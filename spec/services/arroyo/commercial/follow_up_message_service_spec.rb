@@ -107,4 +107,33 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
       expect(opportunity.commercial_messages.size).to eq(3)
     end
   end
+
+  it 'sends the next step right away when it is requested, without waiting for the interval' do
+    send_step(1)
+    second = described_class.new(conversation: conversation, reference: opportunity.reference, step: 2, immediate: true).perform
+    expect(second.additional_attributes.dig('template_params', 'name')).to eq('seg_dia_3')
+    expect(opportunity.commercial_messages.size).to eq(2)
+  end
+
+  it 'still refuses an immediate send when the chat is no longer in follow-up' do
+    conversation.reload.update!(label_list: ['bici'])
+    expect { described_class.new(conversation: conversation, reference: opportunity.reference, step: 1, immediate: true).perform }
+      .to raise_error(Arroyo::Commercial::Error) { |error| expect(error.code).to eq('not_eligible') }
+  end
+
+  context 'with the seller aliases' do
+    let(:seller) { create(:user, account: account, role: :administrator, name: 'Julieta Peralta') }
+
+    it 'signs with the alias and uses the commercial wording for the product' do
+      message = send_step(1)
+      expect(message.additional_attributes.dig('template_params', 'processed_params', 'body'))
+        .to eq('asesor' => 'Juli', 'producto' => 'lo que estabas viendo')
+      expect(message.content).to eq('Soy Juli. ¿Seguimos con lo que estabas viendo?')
+    end
+
+    it 'names the product from the chat label' do
+      conversation.reload.update!(label_list: %w[seguimiento bici])
+      expect(send_step(1).content).to eq('Soy Juli. ¿Seguimos con una bicicleta?')
+    end
+  end
 end

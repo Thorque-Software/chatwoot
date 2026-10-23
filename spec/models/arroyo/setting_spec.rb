@@ -40,6 +40,24 @@ RSpec.describe Arroyo::Setting do
     end
   end
 
+  describe '#follow_up_signature' do
+    it 'ships the Juli and Marcos aliases' do
+      expect(setting.follow_up_signature('Julieta Peralta')).to eq('Juli')
+      expect(setting.follow_up_signature(' marcos peralta ')).to eq('Marcos')
+    end
+
+    it 'signs with the full name when the seller has no alias' do
+      expect(setting.follow_up_signature('Ana Gómez')).to eq('Ana Gómez')
+    end
+
+    it 'uses the configured aliases instead of the defaults' do
+      setting.merge_config(follow_up: { aliases: [{ name: 'Ana Gómez', alias: 'Ani' }] })
+
+      expect(setting.follow_up_signature('Ana Gómez')).to eq('Ani')
+      expect(setting.follow_up_signature('Julieta Peralta')).to eq('Julieta Peralta')
+    end
+  end
+
   describe '#merge_config' do
     it 'stores only the changed values and keeps the defaults for the rest' do
       setting.merge_config(window_keeper: { enabled: true })
@@ -75,6 +93,9 @@ RSpec.describe Arroyo::Setting do
       'an unknown timezone' => [{ timezone: 'Mars/Olympus' }, 'timezone'],
       'a string where a boolean is expected' => [{ post_sale: { enabled: 'true' } }, 'post_sale.enabled'],
       'a send hour outside 0-23' => [{ post_sale: { send_hour_local: 24 } }, 'post_sale.send_hour_local'],
+      'a follow-up alias without a name' => [{ follow_up: { aliases: [{ name: '', alias: 'Ana' }] } }, 'follow_up.aliases'],
+      'a follow-up alias without a signature' => [{ follow_up: { aliases: [{ name: 'Ana Gómez', alias: ' ' }] } }, 'follow_up.aliases'],
+      'enabled follow-ups without the commercial funnel' => [{ follow_up: { enabled: true } }, 'follow_up.enabled'],
       'a daily email limit below the hourly one' => [{ email_marketing: { max_per_hour: 500, max_per_day: 400 } }, 'email_marketing.max_per_day']
     }.each do |description, (changes, field)|
       it "rejects #{description}" do

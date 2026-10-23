@@ -4,7 +4,8 @@
       "SETTINGS": "Arroyo",
       "PANEL": "Panel de vendedores",
       "FOLLOW_UPS": "Seguimientos",
-      "POST_SALE": "Postventa"
+      "POST_SALE": "Postventa",
+      "COMMERCIAL_FOLLOW_UPS": "Seguimiento comercial"
     },
     "SETTINGS": {
       "HEADER": {
@@ -133,6 +134,20 @@
           "LABEL": "Pie (HTML)",
           "HELP": "Razón social y dirección que se muestran al final de cada email de campaña. El link de baja se agrega solo."
         }
+      },
+      "FOLLOW_UP": {
+        "TITLE": "Seguimiento comercial automático",
+        "DESCRIPTION": "Envío automático de seguimientos desde Chatwoot. Se envía todos los días a las 10:00 (hora de Argentina) con las plantillas seg_dia_1, seg_dia_3 y seg_dia_5, y reemplaza al flujo de n8n. Requiere el embudo comercial activo.",
+        "ALIASES": {
+          "LABEL": "Alias de los asesores",
+          "HELP": "Con qué nombre firma cada asesor en la plantilla. Por ejemplo, Julieta Peralta firma como Juli.",
+          "EMPTY": "Todavía no hay alias. Sin alias, la plantilla firma con el nombre completo del agente.",
+          "NAME": "Nombre del agente en Chatwoot",
+          "ALIAS": "Firma en el mensaje",
+          "ADD": "Agregar alias",
+          "REMOVE": "Quitar alias",
+          "INVALID": "Completá el nombre y el alias de todas las filas o quitá las que sobren."
+        }
       }
     },
     "PANEL": {
@@ -150,7 +165,8 @@
       "TABS": {
         "ACTIVITY": "Actividad",
         "WINDOWS": "Ventanas de 24 hs",
-        "POST_SALE": "Postventa"
+        "POST_SALE": "Postventa",
+        "FOLLOW_UPS": "Seguimiento comercial"
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n programa y envía los seguimientos. Acá verificás su entrega y registrás el contacto manual cuando hace falta.",
@@ -335,6 +351,10 @@
         "POST_SALE": {
           "TITLE": "Postventa",
           "DESCRIPTION": "Revisá los seguimientos de cada compra, comprobá su entrega y atendé las tareas manuales pendientes."
+        },
+        "FOLLOW_UPS": {
+          "TITLE": "Seguimiento comercial",
+          "DESCRIPTION": "Mirá quiénes están en seguimiento, a quiénes se les mandó cada paso y qué envíos están programados para cada día. Podés enviar o reprogramar un seguimiento cuando haga falta."
         }
       },
       "FUNNEL": {
@@ -422,6 +442,82 @@
           "ATTENDED": "Usa la fecha de la respuesta humana y el vendedor que respondió. Los envíos automáticos no cuentan.",
           "WON": "Usa la fecha de registro de la venta y el vendedor conservado en el resultado, aunque otra persona registre la venta."
         }
+      },
+      "FOLLOW_UPS": {
+        "QUICK_FILTERS": "Filtrar por estado del seguimiento",
+        "ALL_STATUSES": "Todos",
+        "STATUSES": {
+          "SCHEDULED": "Programados",
+          "AWAITING_FINISH": "Por cerrar",
+          "FINISHED": "Terminados",
+          "PAUSED": "Pausados",
+          "UNENROLLED": "Sin inscribir"
+        },
+        "STATUS_HELP": {
+          "ALL": "Todos los chats con la etiqueta seguimiento o con una secuencia ya registrada.",
+          "SCHEDULED": "Inscriptos con mensajes pendientes. Cada paso sale a las 10:00 del día programado.",
+          "AWAITING_FINISH": "Recibieron los tres mensajes. La secuencia se cierra sola pasados dos días del último envío.",
+          "FINISHED": "La secuencia terminó: recibieron los tres mensajes y se les retiró la etiqueta.",
+          "PAUSED": "Alguien quitó la etiqueta seguimiento. No reciben nada hasta que se vuelva a agregar.",
+          "UNENROLLED": "Tienen la etiqueta pero nunca se inscribieron, por eso no reciben mensajes. Inscribilos para que el primero salga mañana a las 10:00."
+        },
+        "STEP": "Paso {step}",
+        "STEP_STATUSES": {
+          "PENDING": "Pendiente",
+          "SCHEDULED": "Programado",
+          "SENT": "Enviado",
+          "DELIVERED": "Entregado",
+          "READ": "Leído",
+          "FAILED": "Falló"
+        },
+        "BLOCKED": {
+          "NO_SELLER": "No sale: la conversación no está asignada a un vendedor del seguimiento.",
+          "CHANNEL": "No sale: el canal no es WhatsApp Cloud.",
+          "CONTACT_BLOCKED": "No sale: el contacto está bloqueado.",
+          "EXCLUDED_LABEL": "No sale: tiene una etiqueta de exclusión (no-contactar, venta-cancelada o venta-perdida).",
+          "TERMINAL": "No sale: la consulta ya terminó como venta o pérdida.",
+          "NOT_ENROLLED": "No sale: todavía no está inscripto en el seguimiento."
+        },
+        "AGENDA": {
+          "TITLE": "Agenda de envíos",
+          "HELP": "Cantidad de seguimientos programados para cada día. Los envíos salen a las 10:00 hora de Argentina.",
+          "EMPTY": "No hay envíos programados.",
+          "TODAY": "Hoy",
+          "COUNT": "Envíos: {count}"
+        },
+        "FIELDS": {
+          "SELLER": "Vendedor",
+          "SIGNS_AS": "Firma como",
+          "ENROLLED_AT": "Inscripto",
+          "FINISHED_AT": "Terminó"
+        },
+        "FIELD_VALUE": "{label}: {value}",
+        "NEXT_SEND": "Próximo envío: paso {step}, {date}",
+        "DUE_TODAY": "Sale hoy",
+        "SELECT_ALL": "Seleccionar todos los que se pueden inscribir",
+        "SELECT_ROW": "Seleccionar {name}",
+        "ACTIONS": {
+          "SEND_NOW": "Enviar ahora",
+          "RESCHEDULE": "Reprogramar",
+          "ENROLL": "Inscribir",
+          "ENROLL_SELECTED": "Inscribir seleccionados ({count})",
+          "SAVE_DATE": "Guardar fecha",
+          "CONFIRM": "Confirmar",
+          "CANCEL": "Cancelar"
+        },
+        "CONFIRM_SEND": "Se enviará ahora el paso {step} del seguimiento a {name}. ¿Confirmás?",
+        "CONFIRM_ENROLL": "Se inscribirá a {name}. El primer mensaje sale mañana a las 10:00 (hora de Argentina). ¿Confirmás?",
+        "CONFIRM_ENROLL_SELECTED": "Se inscribirán {count} chats. A cada uno le sale el primer mensaje mañana a las 10:00 (hora de Argentina). ¿Confirmás?",
+        "NEW_DATE": "Nueva fecha del próximo envío",
+        "RESCHEDULE_HELP": "Elegí una fecha posterior a hoy ({timezone}). El mensaje sale ese día a las 10:00.",
+        "SEND_SUCCESS": "Seguimiento enviado",
+        "RESCHEDULE_SUCCESS": "Seguimiento reprogramado",
+        "ENROLL_RESULT": "Inscriptos: {enrolled}. Omitidos: {skipped}.",
+        "ACTION_ERROR": "No se pudo completar la acción",
+        "LOAD_ERROR": "No se pudo cargar el seguimiento comercial",
+        "RETRY": "Reintentar",
+        "EMPTY": "Todavía no hay chats en seguimiento",
+        "EMPTY_FILTER": "No hay chats con este estado"
       }
     }
   }

@@ -27,6 +27,9 @@ export function useArroyoFeatures() {
           features.value?.post_sale?.has_records
       )
     ),
+    isFunnelEnabled: computed(() =>
+      Boolean(features.value?.agent_panel?.funnel_enabled)
+    ),
     hideNativeReports: computed(() =>
       Boolean(
         features.value?.agent_panel?.enabled &&

@@ -4,7 +4,8 @@
       "SETTINGS": "Arroyo",
       "PANEL": "Agent panel",
       "FOLLOW_UPS": "Follow-ups",
-      "POST_SALE": "Post-sale"
+      "POST_SALE": "Post-sale",
+      "COMMERCIAL_FOLLOW_UPS": "Commercial follow-up"
     },
     "SETTINGS": {
       "HEADER": {
@@ -133,6 +134,20 @@
           "LABEL": "Footer (HTML)",
           "HELP": "Company name and address shown at the bottom of every campaign email. The unsubscribe link is added automatically."
         }
+      },
+      "FOLLOW_UP": {
+        "TITLE": "Automatic commercial follow-up",
+        "DESCRIPTION": "Automatic follow-ups sent from Chatwoot. They go out every day at 10:00 (Argentina time) using the seg_dia_1, seg_dia_3 and seg_dia_5 templates, and replace the n8n flow. Requires the commercial funnel to be on.",
+        "ALIASES": {
+          "LABEL": "Advisor aliases",
+          "HELP": "The name each advisor signs with in the template. For example, Julieta Peralta signs as Juli.",
+          "EMPTY": "There are no aliases yet. Without an alias, the template is signed with the agent's full name.",
+          "NAME": "Agent name in Chatwoot",
+          "ALIAS": "Signature in the message",
+          "ADD": "Add alias",
+          "REMOVE": "Remove alias",
+          "INVALID": "Fill in the name and alias of every row or remove the extra ones."
+        }
       }
     },
     "PANEL": {
@@ -150,7 +165,8 @@
       "TABS": {
         "ACTIVITY": "Activity",
         "WINDOWS": "24-hour windows",
-        "POST_SALE": "Post-sale"
+        "POST_SALE": "Post-sale",
+        "FOLLOW_UPS": "Commercial follow-up"
       },
       "POST_SALE": {
         "DESCRIPTION": "n8n schedules and sends follow-ups. Check their delivery here and record manual contact when needed.",
@@ -335,6 +351,10 @@
         "POST_SALE": {
           "TITLE": "Post-sale",
           "DESCRIPTION": "Review purchase follow-ups, check delivery and complete pending manual tasks."
+        },
+        "FOLLOW_UPS": {
+          "TITLE": "Commercial follow-up",
+          "DESCRIPTION": "See who is in follow-up, who received each step and what is scheduled for each day. You can send or reschedule a follow-up when needed."
         }
       },
       "FUNNEL": {
@@ -422,6 +442,82 @@
           "ATTENDED": "Uses the human reply date and the seller who replied. Automated messages do not count.",
           "WON": "Uses the date the sale was recorded and the seller preserved in its outcome, even when another person records the sale."
         }
+      },
+      "FOLLOW_UPS": {
+        "QUICK_FILTERS": "Filter by follow-up status",
+        "ALL_STATUSES": "All",
+        "STATUSES": {
+          "SCHEDULED": "Scheduled",
+          "AWAITING_FINISH": "To close",
+          "FINISHED": "Finished",
+          "PAUSED": "Paused",
+          "UNENROLLED": "Not enrolled"
+        },
+        "STATUS_HELP": {
+          "ALL": "Every chat with the seguimiento label or with a recorded sequence.",
+          "SCHEDULED": "Enrolled with pending messages. Each step goes out at 10:00 on its scheduled day.",
+          "AWAITING_FINISH": "They received all three messages. The sequence closes by itself two days after the last one.",
+          "FINISHED": "The sequence is over: they received all three messages and the label was removed.",
+          "PAUSED": "Someone removed the seguimiento label. They receive nothing until it is added again.",
+          "UNENROLLED": "They have the label but were never enrolled, so they receive no messages. Enroll them so the first one goes out tomorrow at 10:00."
+        },
+        "STEP": "Step {step}",
+        "STEP_STATUSES": {
+          "PENDING": "Pending",
+          "SCHEDULED": "Scheduled",
+          "SENT": "Sent",
+          "DELIVERED": "Delivered",
+          "READ": "Read",
+          "FAILED": "Failed"
+        },
+        "BLOCKED": {
+          "NO_SELLER": "Will not go out: the conversation is not assigned to a follow-up seller.",
+          "CHANNEL": "Will not go out: the channel is not WhatsApp Cloud.",
+          "CONTACT_BLOCKED": "Will not go out: the contact is blocked.",
+          "EXCLUDED_LABEL": "Will not go out: it has an exclusion label (no-contactar, venta-cancelada or venta-perdida).",
+          "TERMINAL": "Will not go out: the inquiry already ended as a sale or a loss.",
+          "NOT_ENROLLED": "Will not go out: it is not enrolled in follow-up yet."
+        },
+        "AGENDA": {
+          "TITLE": "Send schedule",
+          "HELP": "Number of follow-ups scheduled for each day. Messages go out at 10:00 Argentina time.",
+          "EMPTY": "There are no scheduled sends.",
+          "TODAY": "Today",
+          "COUNT": "Sends: {count}"
+        },
+        "FIELDS": {
+          "SELLER": "Seller",
+          "SIGNS_AS": "Signs as",
+          "ENROLLED_AT": "Enrolled",
+          "FINISHED_AT": "Finished"
+        },
+        "FIELD_VALUE": "{label}: {value}",
+        "NEXT_SEND": "Next send: step {step}, {date}",
+        "DUE_TODAY": "Goes out today",
+        "SELECT_ALL": "Select all that can be enrolled",
+        "SELECT_ROW": "Select {name}",
+        "ACTIONS": {
+          "SEND_NOW": "Send now",
+          "RESCHEDULE": "Reschedule",
+          "ENROLL": "Enroll",
+          "ENROLL_SELECTED": "Enroll selected ({count})",
+          "SAVE_DATE": "Save date",
+          "CONFIRM": "Confirm",
+          "CANCEL": "Cancel"
+        },
+        "CONFIRM_SEND": "Step {step} of the follow-up will be sent to {name} now. Confirm?",
+        "CONFIRM_ENROLL": "{name} will be enrolled. The first message goes out tomorrow at 10:00 (Argentina time). Confirm?",
+        "CONFIRM_ENROLL_SELECTED": "{count} chats will be enrolled. Each one gets the first message tomorrow at 10:00 (Argentina time). Confirm?",
+        "NEW_DATE": "New date for the next send",
+        "RESCHEDULE_HELP": "Pick a date after today ({timezone}). The message goes out that day at 10:00.",
+        "SEND_SUCCESS": "Follow-up sent",
+        "RESCHEDULE_SUCCESS": "Follow-up rescheduled",
+        "ENROLL_RESULT": "Enrolled: {enrolled}. Skipped: {skipped}.",
+        "ACTION_ERROR": "Could not complete the action",
+        "LOAD_ERROR": "Could not load commercial follow-up",
+        "RETRY": "Retry",
+        "EMPTY": "There are no chats in follow-up yet",
+        "EMPTY_FILTER": "No chats have this status"
       }
     }
   }

@@ -19,7 +19,14 @@ export const DATE_PRESETS = [
 ];
 export const DEFAULT_PRESET = 'last_7_days';
 export const GROUP_BY_OPTIONS = ['day', 'week'];
-export const TABS = ['activity', 'windows', 'post_sale'];
+export const TABS = ['activity', 'windows', 'post_sale', 'follow_ups'];
+export const FOLLOW_UP_STATUSES = [
+  'scheduled',
+  'awaiting_finish',
+  'finished',
+  'paused',
+  'unenrolled',
+];
 export const POST_SALE_STATUSES = [
   'awaiting_plan',
   'scheduled',

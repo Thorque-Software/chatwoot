@@ -14,6 +14,7 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::FeaturesController', type: :request d
         'agent_panel' => { 'enabled' => false, 'agents_see_only_own' => true, 'hide_native_reports' => false,
                            'funnel_enabled' => false, 'balanced_assignment_enabled' => false, 'seller_ids' => [],
                            'response_hours' => 4, 'lookback_days' => 7 },
+        'follow_up' => { 'enabled' => false },
         'post_sale' => { 'enabled' => false, 'has_records' => false }
       )
     end

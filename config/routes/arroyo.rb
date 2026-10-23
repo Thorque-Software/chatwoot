@@ -12,6 +12,12 @@ namespace :arroyo do
     post 'follow_up/message', action: :follow_up_message
     post 'follow_up/complete', action: :complete_follow_up
   end
+  scope 'commercial/follow_ups', controller: 'follow_ups' do
+    get '/', action: :index
+    post 'send_now', action: :send_now
+    patch 'reschedule', action: :reschedule
+    post 'enroll', action: :enroll
+  end
   scope :post_sale, controller: 'post_sale' do
     get 'purchases', action: :purchases
     put 'purchases/:reference/plan', action: :plan

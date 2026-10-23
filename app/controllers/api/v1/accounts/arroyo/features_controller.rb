@@ -3,6 +3,7 @@ class Api::V1::Accounts::Arroyo::FeaturesController < Api::V1::Accounts::BaseCon
   def show
     setting = ::Arroyo::Setting.for(Current.account)
     render json: { timezone: setting.config['timezone'], agent_panel: setting.section(:agent_panel),
+                   follow_up: { enabled: setting.feature_enabled?(:follow_up) },
                    post_sale: { enabled: setting.feature_enabled?(:post_sale),
                                 has_records: ::Arroyo::PostSalePurchase.exists?(account: Current.account) } }
   end

@@ -15,6 +15,7 @@ es:
       total: 'Total'
       follow_up_failed_note: 'El seguimiento comercial %{step} falló (mensaje %{message}). No se reenvió automáticamente. Revisá el error y realizá el contacto manual; quitá la etiqueta de seguimiento si no corresponde continuar.'
       errors:
+        invalid_date: 'Elegí una fecha posterior a hoy.'
         disabled: 'El embudo comercial está desactivado para esta cuenta.'
         request_key: 'La confirmación necesita una referencia única válida.'
         outcome: 'Elegí un resultado comercial válido.'
@@ -26,6 +27,10 @@ es:
         not_eligible: 'La consulta no está habilitada para un seguimiento automático.'
         not_due: 'Todavía no se cumplió el plazo entre seguimientos.'
         delivery_failed: 'El mensaje de esta etapa falló. Se registró un aviso privado para revisión manual; no se reenvió automáticamente.'
+      products:
+        bike: 'una bicicleta'
+        gym: 'equipamiento de gimnasio'
+        generic: 'lo que estabas viendo'
       metrics:
         received: 'Ingresadas'
         bot: 'En el bot'

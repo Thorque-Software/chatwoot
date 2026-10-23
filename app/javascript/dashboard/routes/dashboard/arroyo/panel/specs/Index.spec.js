@@ -7,8 +7,10 @@ import PanelFilters from '../components/PanelFilters.vue';
 import ArroyoAgentPanelAPI from '../../api/agentPanel';
 import ArroyoFeaturesAPI from '../../api/features';
 import PostSaleAPI from '../../api/postSale';
+import CommercialFollowUpsAPI from '../../api/commercialFollowUps';
 import PostSaleTab from '../components/PostSaleTab.vue';
 import FunnelTab from '../components/FunnelTab.vue';
+import CommercialFollowUpsTab from '../components/CommercialFollowUpsTab.vue';
 import { useArroyoFeatures } from '../../composables/useArroyoFeatures';
 
 enableAutoUnmount(afterEach);
@@ -58,7 +60,11 @@ const conversation = {
   last_activity_at: 1,
 };
 
-const mountPanel = async (query, name = 'arroyo_agent_panel') => {
+const mountPanel = async (
+  query,
+  name = 'arroyo_agent_panel',
+  role = 'administrator'
+) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -68,7 +74,7 @@ const mountPanel = async (query, name = 'arroyo_agent_panel') => {
   });
   await router.push({ name, params: { accountId: '1' }, query });
   const store = createStore({
-    getters: { getCurrentRole: () => 'administrator' },
+    getters: { getCurrentRole: () => role },
     modules: {
       agents: {
         namespaced: true,
@@ -108,6 +114,9 @@ describe('Arroyo agent panel', () => {
     });
     vi.spyOn(PostSaleAPI, 'getFollowUps').mockResolvedValue({
       data: { follow_ups: [], totals: {} },
+    });
+    vi.spyOn(CommercialFollowUpsAPI, 'getAll').mockResolvedValue({
+      data: { follow_ups: [], totals: {}, agenda: [] },
     });
   });
 
@@ -421,5 +430,37 @@ describe('Arroyo agent panel', () => {
     expect(
       wrapper.find('[data-testid="clear-purchase-filters"]').exists()
     ).toBe(true);
+  });
+
+  it('opens commercial follow-up for administrators with the funnel on, without date filters or activity metrics', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, funnel_enabled: true },
+      },
+    });
+    const { wrapper } = await mountPanel({}, 'arroyo_commercial_follow_ups');
+    expect(wrapper.get('h1').text()).toBe('Commercial follow-up');
+    expect(wrapper.findComponent(CommercialFollowUpsTab).exists()).toBe(true);
+    expect(wrapper.findComponent(PanelFilters).exists()).toBe(false);
+    expect(CommercialFollowUpsAPI.getAll).toHaveBeenCalledTimes(1);
+    expect(ArroyoAgentPanelAPI.getReport).not.toHaveBeenCalled();
+  });
+
+  it('falls back to activity when commercial follow-up is opened by an agent or without the funnel', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, funnel_enabled: true },
+      },
+    });
+    const { wrapper } = await mountPanel(
+      {},
+      'arroyo_commercial_follow_ups',
+      'agent'
+    );
+    expect(wrapper.findComponent(CommercialFollowUpsTab).exists()).toBe(false);
+    expect(CommercialFollowUpsAPI.getAll).not.toHaveBeenCalled();
+    expect(wrapper.get('h1').text()).not.toBe('Commercial follow-up');
   });
 });

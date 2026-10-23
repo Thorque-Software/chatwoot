@@ -15,6 +15,7 @@ en:
       total: 'Total'
       follow_up_failed_note: 'Commercial follow-up %{step} failed (message %{message}). It was not resent automatically. Review the error and contact the customer manually; remove the follow-up label if the sequence should stop.'
       errors:
+        invalid_date: 'Choose a date after today.'
         delivery_failed: 'This follow-up message failed. A private note was recorded for manual review; it was not resent automatically.'
         disabled: 'The commercial funnel is disabled for this account.'
         request_key: 'Confirmation requires a valid unique reference.'
@@ -26,6 +27,10 @@ en:
         template: 'No compatible approved template is available.'
         not_eligible: 'This inquiry is not eligible for an automatic follow-up.'
         not_due: 'The interval between follow-ups has not elapsed.'
+      products:
+        bike: 'a bicycle'
+        gym: 'gym equipment'
+        generic: 'what you were looking at'
       metrics:
         received: 'Received'
         bot: 'With bot'

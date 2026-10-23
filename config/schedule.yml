@@ -2,6 +2,12 @@
 # use https://crontab.guru/ to validate
 # validations for this file exist in /spec/configs/schedule_spec.rb
 
+# ARROYO: envía los seguimientos comerciales todos los días a las 10:00 de Argentina
+arroyo_commercial_follow_up_job:
+  cron: '0 10 * * * America/Argentina/Buenos_Aires'
+  class: 'Arroyo::Commercial::FollowUpJob'
+  queue: scheduled_jobs
+
 # executed daily at 0000 UTC
 # ARROYO: supervisa entrega y programación; no envía postventa
 arroyo_post_sale_watchdog_job:

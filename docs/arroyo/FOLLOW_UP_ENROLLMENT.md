@@ -42,3 +42,19 @@ Solo después de revisar la salida y autorizar cambios sobre esos registros, `AP
 ## Verificación
 
 Validación final: 128 ejemplos Rails y 37 pruebas Node aprobados; RuboCop (12 archivos) y ESLint (4 archivos) sin infracciones. Pruebas locales con `arroyo_commercial_test`, datos sintéticos y WebMock: inscripción, calendario, plantillas, idempotencia, permisos, cancelación posterior a lectura de contextos, histórico, eliminación nativa y consulta previa. Los ensayos no certifican entrega Meta ni despliegue en producción.
+
+## Envío desde Chatwoot (reemplaza al cron diario de n8n)
+
+Con `follow_up.enabled` activo en la configuración de Arroyo, `Arroyo::Commercial::FollowUpJob` corre todos los días a las 10:00 de Argentina (`config/schedule.yml`, `0 10 * * * America/Argentina/Buenos_Aires`). Para cada cuenta con embudo y seguimiento activos, `FollowUpDispatchService` envía el paso que toca (`due?`) por el mismo `FollowUpMessageService` que usaba n8n y cierra las secuencias terminadas (`finish_due?`). Un fallo en un chat se registra y no frena a los demás. El envío es idempotente por paso: si n8n y el job corren a la vez no se duplica nada.
+
+- **Firma de la plantilla:** `follow_up.aliases` asocia el nombre del agente en Chatwoot con el nombre con el que firma (preconfigurado: Julieta Peralta → Juli, Marcos Peralta → Marcos). Sin alias se usa el nombre completo. El producto sale de las etiquetas (`bici` → «una bicicleta», `aparatosgim` → «equipamiento de gimnasio», sin rubro → «lo que estabas viendo»).
+- **Panel «Seguimiento comercial»** (administradores): estados (programados, por cerrar, terminados, pausados, con etiqueta sin inscribir), pasos enviados con su entrega, agenda por día y el motivo por el que un chat no sale. Acciones: enviar ahora, reprogramar el próximo envío (solo a días posteriores a hoy; vale hasta que sale ese mensaje) e inscribir chats con etiqueta que nunca se inscribieron (primer envío al día siguiente a las 10:00).
+- **Postventa no cambia:** sigue disparándose desde el cron de 15 minutos de n8n.
+
+### Corte de n8n
+
+1. Desplegar Chatwoot y probar el panel con `follow_up.enabled` apagado.
+2. Encender `follow_up.enabled` (Ajustes de Arroyo). Mientras n8n siga activo no hay duplicados, pero conviene apagar su rama diaria el mismo día.
+3. Desactivar en el workflow «arroyo v3 · seguimientos post-venta» el trigger «Diario 10hs ART» y su rama. No desactivar el workflow completo: contiene «Postventa Cada 15 Minutos».
+4. Inscribir desde el panel los chats que tienen la etiqueta `seguimiento` sin inscripción (la inscripción automática ya no existe).
+

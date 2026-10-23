@@ -157,4 +157,46 @@ RSpec.describe Arroyo::Commercial::FollowUpSchedule do
     enroll('2026-10-20 09:00')
     expect(schedule.sent_count).to eq(2)
   end
+
+  it 'moves the next send to a date chosen by hand' do
+    incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
+    travel_to(zone.parse('2026-10-20 12:00')) { schedule.reschedule(date: Date.new(2026, 10, 23), actor: seller) }
+    expect(schedule.next_at).to eq(zone.parse('2026-10-23 10:00'))
+    travel_to(zone.parse('2026-10-21 10:00')) { expect(schedule.due?).to be(false) }
+    travel_to(zone.parse('2026-10-23 10:00')) { expect(schedule.due?).to be(true) }
+  end
+
+  it 'rejects rescheduling to today or to a past date' do
+    incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
+    travel_to(zone.parse('2026-10-21 08:00')) do
+      expect { schedule.reschedule(date: Date.new(2026, 10, 21)) }.to raise_error(Arroyo::Commercial::Error) do |error|
+        expect(error.code).to eq('invalid_date')
+      end
+    end
+  end
+
+  it 'explains why an enrolled follow-up does not go out' do
+    incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
+    expect(schedule.blocked_reason).to be_nil
+    conversation.reload.update!(assignee: nil)
+    expect(schedule.blocked_reason).to eq('no_seller')
+  end
+
+  it 'reports every step with its delivery state' do
+    incoming('2026-10-20 09:00')
+    enroll('2026-10-20 09:00')
+    opportunity = Arroyo::Opportunity.find_by!(conversation: conversation)
+    travel_to(zone.parse('2026-10-21 10:00')) do
+      create(:message, account: account, conversation: conversation.reload, message_type: :outgoing, status: :delivered,
+                       content_attributes: { arroyo_kind: 'commercial_follow_up', arroyo_opportunity_reference: opportunity.reference,
+                                             arroyo_step: 1 })
+    end
+    steps = schedule.steps
+    expect(steps.map { |step| step[:status] }).to eq(%w[delivered scheduled pending])
+    expect(Time.iso8601(steps.first[:sent_at])).to eq(zone.parse('2026-10-21 10:00'))
+    expect(Time.iso8601(steps.second[:scheduled_for])).to eq(zone.parse('2026-10-23 10:00'))
+  end
 end
