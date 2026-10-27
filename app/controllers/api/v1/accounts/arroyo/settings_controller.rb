@@ -8,6 +8,7 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
 
   def update
     @setting.merge_config(config_params)
+    @setting.meta_ads_token = meta_ads_token if meta_ads_token.present?
     if @setting.save
       render :show
     else
@@ -25,6 +26,10 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
     @setting = ::Arroyo::Setting.for(Current.account)
   end
 
+  def meta_ads_token
+    params.dig(:config, :ads_attribution, :meta_ads_token)
+  end
+
   def config_params
     params.require(:config).permit(
       :timezone,
@@ -33,7 +38,8 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
       agent_panel: [:enabled, :agents_see_only_own, :hide_native_reports, :funnel_enabled, :balanced_assignment_enabled,
                     :response_hours, :lookback_days, { seller_ids: [] }],
       follow_up: [:enabled, { aliases: %i[name alias] }],
-      email_marketing: %i[enabled max_per_hour max_per_day footer_html]
+      email_marketing: %i[enabled max_per_hour max_per_day footer_html],
+      ads_attribution: %i[enabled]
     )
   end
 end

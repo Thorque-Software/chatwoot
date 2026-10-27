@@ -10,6 +10,8 @@ import { useUISettings } from 'dashboard/composables/useUISettings';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 import AccordionItem from 'dashboard/components/Accordion/AccordionItem.vue';
+// ARROYO: anuncio de Meta de origen de la conversación
+import AdSourceInfo from 'dashboard/routes/dashboard/arroyo/components/AdSourceInfo.vue';
 import ContactConversations from './ContactConversations.vue';
 import ConversationAction from './ConversationAction.vue';
 import ConversationParticipant from './ConversationParticipant.vue';
@@ -194,6 +196,10 @@ onMounted(() => {
                 value => toggleSidebarUIState('is_conv_details_open', value)
               "
             >
+              <!-- ARROYO: anuncio de Meta de origen -->
+              <AdSourceInfo
+                :conversation-attributes="conversationAdditionalAttributes"
+              />
               <ConversationInfo
                 :conversation-attributes="conversationAdditionalAttributes"
                 :contact-attributes="contactAdditionalAttributes"

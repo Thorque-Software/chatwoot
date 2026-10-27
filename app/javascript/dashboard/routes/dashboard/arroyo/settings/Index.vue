@@ -12,6 +12,7 @@ import PostSaleSection from './components/PostSaleSection.vue';
 import AgentPanelSection from './components/AgentPanelSection.vue';
 import CommercialFollowUpSection from './components/CommercialFollowUpSection.vue';
 import EmailMarketingSection from './components/EmailMarketingSection.vue';
+import AdsAttributionSection from './components/AdsAttributionSection.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -88,6 +89,11 @@ onMounted(() => {
           :config="config.email_marketing"
           :is-saving="savingSection === 'email_marketing'"
           @save="saveSection('email_marketing', $event)"
+        />
+        <AdsAttributionSection
+          :config="config.ads_attribution"
+          :is-saving="savingSection === 'ads_attribution'"
+          @save="saveSection('ads_attribution', $event)"
         />
       </div>
     </template>

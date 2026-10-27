@@ -63,7 +63,8 @@ class Arroyo::Setting < ApplicationRecord
     'follow_up' => { 'enabled' => false,
                      'aliases' => [{ 'name' => 'Julieta Peralta', 'alias' => 'Juli' },
                                    { 'name' => 'Marcos Peralta', 'alias' => 'Marcos' }] },
-    'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' }
+    'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' },
+    'ads_attribution' => { 'enabled' => false }
   }.freeze
 
   VALID_ALIAS = lambda { |item|
@@ -124,8 +125,11 @@ class Arroyo::Setting < ApplicationRecord
     'email_marketing.enabled' => [:boolean],
     'email_marketing.max_per_hour' => [:integer, 1, 10_000],
     'email_marketing.max_per_day' => [:integer, 1, 100_000],
-    'email_marketing.footer_html' => [:string]
+    'email_marketing.footer_html' => [:string],
+    'ads_attribution.enabled' => [:boolean]
   }.merge(STAGE_RULES).freeze
+
+  encrypts :meta_ads_token if Chatwoot.encryption_configured?
 
   belongs_to :account
 

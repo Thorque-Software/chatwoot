@@ -148,6 +148,16 @@
           "REMOVE": "Remove alias",
           "INVALID": "Fill in the name and alias of every row or remove the extra ones."
         }
+      },
+      "ADS_ATTRIBUTION": {
+        "TITLE": "Ad attribution",
+        "DESCRIPTION": "Saves which Meta ad (Click-to-WhatsApp) each lead comes from. With an access token, it also looks up the campaign, ad set and ad names.",
+        "TOKEN": {
+          "LABEL": "Meta access token",
+          "HELP": "System user token with the ads_read permission. Without it, only the ad ID is saved.",
+          "SET": "A token is already saved. Paste a new one only to replace it.",
+          "PLACEHOLDER": "Paste the token"
+        }
       }
     },
     "PANEL": {
@@ -519,6 +529,16 @@
         "EMPTY": "There are no chats in follow-up yet",
         "EMPTY_FILTER": "No chats have this status"
       }
+    },
+    "AD_SOURCE": {
+      "TITLE": "Meta ad",
+      "CAMPAIGN": "Campaign",
+      "ADSET": "Ad set",
+      "AD": "Ad",
+      "AD_ID": "Ad ID",
+      "HEADLINE": "Headline",
+      "BODY": "Ad text",
+      "OPEN_AD": "Open the ad"
     }
   }
 }

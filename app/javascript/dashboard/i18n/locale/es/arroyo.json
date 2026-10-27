@@ -148,6 +148,16 @@
           "REMOVE": "Quitar alias",
           "INVALID": "Completá el nombre y el alias de todas las filas o quitá las que sobren."
         }
+      },
+      "ADS_ATTRIBUTION": {
+        "TITLE": "Atribución de anuncios",
+        "DESCRIPTION": "Guarda de qué anuncio de Meta (Click-to-WhatsApp) viene cada lead. Con un token de acceso, además busca los nombres de la campaña, el conjunto y el anuncio.",
+        "TOKEN": {
+          "LABEL": "Token de acceso de Meta",
+          "HELP": "Token de un usuario del sistema con el permiso ads_read. Sin token, solo se guarda el ID del anuncio.",
+          "SET": "Ya hay un token guardado. Pegá uno nuevo solo para reemplazarlo.",
+          "PLACEHOLDER": "Pegá el token"
+        }
       }
     },
     "PANEL": {
@@ -519,6 +529,16 @@
         "EMPTY": "Todavía no hay chats en seguimiento",
         "EMPTY_FILTER": "No hay chats con este estado"
       }
+    },
+    "AD_SOURCE": {
+      "TITLE": "Anuncio de Meta",
+      "CAMPAIGN": "Campaña",
+      "ADSET": "Conjunto de anuncios",
+      "AD": "Anuncio",
+      "AD_ID": "ID del anuncio",
+      "HEADLINE": "Título",
+      "BODY": "Texto del anuncio",
+      "OPEN_AD": "Abrir el anuncio"
     }
   }
 }

@@ -23,7 +23,7 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::SettingsController', type: :request d
       get url, headers: administrator.create_new_auth_token, as: :json
 
       expect(response).to have_http_status(:success)
-      expect(response.parsed_body['config']).to eq(Arroyo::Setting::DEFAULTS)
+      expect(response.parsed_body['config']).to eq(Arroyo::Setting::DEFAULTS.merge('ads_attribution' => { 'enabled' => false, 'token_set' => false }))
       expect(Arroyo::Setting.count).to eq(0)
     end
   end
@@ -38,6 +38,28 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::SettingsController', type: :request d
       expect(config.dig('post_sale', 'stages', 'd1')).to eq('days' => 1, 'template' => 'postventa_d1')
       expect(config.dig('window_keeper', 'enabled')).to be(false)
       expect(Arroyo::Setting.for(account)[:config].to_json).not_to include('Custom body', 'Custom reminder', 'other')
+    end
+
+    it 'saves the Meta ads token without ever returning it' do
+      patch url, headers: administrator.create_new_auth_token, as: :json,
+                 params: { config: { ads_attribution: { enabled: true, meta_ads_token: 'secret-token' } } }
+
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body['config']['ads_attribution']).to eq('enabled' => true, 'token_set' => true)
+      expect(response.body).not_to include('secret-token')
+      expect(Arroyo::Setting.for(account).meta_ads_token).to eq('secret-token')
+      expect(Arroyo::Setting.for(account)[:config].to_json).not_to include('secret-token')
+    end
+
+    it 'keeps the saved Meta ads token when the field comes empty' do
+      setting = Arroyo::Setting.for(account)
+      setting.meta_ads_token = 'secret-token'
+      setting.save!
+
+      patch url, headers: administrator.create_new_auth_token, as: :json,
+                 params: { config: { ads_attribution: { enabled: true, meta_ads_token: '' } } }
+
+      expect(Arroyo::Setting.for(account).meta_ads_token).to eq('secret-token')
     end
 
     it 'replaces the follow-up aliases' do

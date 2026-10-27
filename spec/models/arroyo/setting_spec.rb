@@ -28,7 +28,7 @@ RSpec.describe Arroyo::Setting do
     end
 
     it 'ship every feature disabled' do
-      %w[window_keeper post_sale agent_panel email_marketing].each do |feature|
+      %w[window_keeper post_sale agent_panel email_marketing ads_attribution].each do |feature|
         expect(setting.feature_enabled?(feature)).to be(false)
       end
     end

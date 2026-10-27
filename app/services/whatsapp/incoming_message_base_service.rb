@@ -42,6 +42,7 @@ class Whatsapp::IncomingMessageBaseService
 
     ActiveRecord::Base.transaction do
       set_conversation
+      Arroyo::Ads::ReferralRecorderService.new(conversation: @conversation, message: messages_data.first).perform # ARROYO: atribución de anuncios
       create_messages
     end
   end
