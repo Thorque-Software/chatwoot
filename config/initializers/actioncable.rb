@@ -11,5 +11,8 @@ ActionCable::SubscriptionAdapter::Redis.redis_connector = lambda do |config|
   # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/75173
   # https://github.com/rails/rails/blob/4a23cb3415eac03d76623112576559a722d1f23d/actioncable/lib/action_cable/subscription_adapter/base.rb#L30
   config[:id] = nil if ENV['REDIS_DISABLE_CLIENT_COMMAND'].present?
-  Redis.new(config.except(:adapter, :channel_prefix))
+  # Excluimos `:reconnect_attempts` para que la conexión del publisher no
+  # quede bloqueada con todo el backoff durante un corte de Redis; el listener
+  # lo lee igual desde cable.yml.
+  Redis.new(config.except(:adapter, :channel_prefix, :reconnect_attempts))
 end

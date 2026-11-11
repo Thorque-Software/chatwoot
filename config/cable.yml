@@ -5,6 +5,11 @@ default: &default
   ssl_params: 
     verify_mode: <%= Chatwoot.redis_ssl_verify_mode %>
   channel_prefix: <%= "chatwoot_#{Rails.env}_action_cable"  %>
+  # Reintenta la conexión de suscripción a Redis con backoff exponencial para
+  # recuperarse de cortes temporales o reinicios del servicio. Sin esto Action
+  # Cable hace un solo intento y queda sordo hasta reiniciar el proceso.
+  # Ver https://github.com/chatwoot/chatwoot/issues/14705
+  reconnect_attempts: [0.25, 0.5, 1, 2, 3, 5, 5, 10, 10, 30, 30, 60]
 
 development:
   <<: *default
