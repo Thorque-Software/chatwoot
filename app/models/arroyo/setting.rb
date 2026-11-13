@@ -13,6 +13,8 @@
 #  index_arroyo_settings_on_account_id  (account_id) UNIQUE
 #
 class Arroyo::Setting < ApplicationRecord
+  include Arroyo::FunnelBoardConfig
+
   STAGES = %w[d1 d7 d30].freeze
   # pending queda afuera: el bot de n8n responde en conversaciones pending (ver docs/arroyo/ARCHITECTURE_NOTES.md §14)
   NUDGE_STATUSES = %w[open snoozed].freeze
@@ -64,7 +66,8 @@ class Arroyo::Setting < ApplicationRecord
                      'aliases' => [{ 'name' => 'Julieta Peralta', 'alias' => 'Juli' },
                                    { 'name' => 'Marcos Peralta', 'alias' => 'Marcos' }] },
     'email_marketing' => { 'enabled' => false, 'max_per_hour' => 100, 'max_per_day' => 400, 'footer_html' => '' },
-    'ads_attribution' => { 'enabled' => false }
+    'ads_attribution' => { 'enabled' => false },
+    'funnel_board' => Arroyo::FunnelBoardConfig::DEFAULTS
   }.freeze
 
   VALID_ALIAS = lambda { |item|
@@ -87,7 +90,7 @@ class Arroyo::Setting < ApplicationRecord
       value.is_a?(Array) && value.size.between?(1, MAX_NUDGE_BUTTONS) &&
         value.all? { |item| item.is_a?(String) && item.strip.length.between?(1, MAX_NUDGE_BUTTON_LENGTH) }
     }
-  }.freeze
+  }.merge(Arroyo::FunnelBoardConfig::VALIDATORS).freeze
 
   STAGE_RULES = STAGES.each_with_object({}) do |stage, rules|
     rules["post_sale.stages.#{stage}.days"] = [:integer, 1, 365]
@@ -127,7 +130,7 @@ class Arroyo::Setting < ApplicationRecord
     'email_marketing.max_per_day' => [:integer, 1, 100_000],
     'email_marketing.footer_html' => [:string],
     'ads_attribution.enabled' => [:boolean]
-  }.merge(STAGE_RULES).freeze
+  }.merge(STAGE_RULES).merge(Arroyo::FunnelBoardConfig::RULES).freeze
 
   encrypts :meta_ads_token if Chatwoot.encryption_configured?
 
@@ -180,6 +183,7 @@ class Arroyo::Setting < ApplicationRecord
     validate_post_sale_recipients(current['post_sale'])
     validate_commercial_config(current['agent_panel'])
     add_invalid_field('follow_up.enabled') if current['follow_up']['enabled'] == true && current['agent_panel']['funnel_enabled'] != true
+    validate_funnel_board(current)
   end
 
   def validate_commercial_config(panel)

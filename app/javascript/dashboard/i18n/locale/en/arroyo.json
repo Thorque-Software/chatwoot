@@ -158,6 +158,48 @@
           "SET": "A token is already saved. Paste a new one only to replace it.",
           "PLACEHOLDER": "Paste the token"
         }
+      },
+      "FUNNEL_BOARD": {
+        "TITLE": "Panel funnel",
+        "DESCRIPTION": "The whole sales panel funnel in one place: abandoned inquiries, labels, WhatsApp numbers and the reminder before the window closes. Requires the commercial funnel to be on.",
+        "ABANDON_HOURS": {
+          "LABEL": "Hours to consider an inquiry abandoned",
+          "HELP": "Calendar hours after the window reminder without a reply from the seller."
+        },
+        "LOST_LABEL": {
+          "LABEL": "Lost sale label",
+          "HELP": "Adding it marks the inquiry as lost."
+        },
+        "REPURCHASE_LABEL": {
+          "LABEL": "Repurchase label",
+          "HELP": "Added automatically when a customer who already bought buys again."
+        },
+        "INFO_LABELS": {
+          "LABEL": "Informative labels",
+          "HELP": "Shown next to the funnel for reference only. Turn off the ones you don't want to see.",
+          "NEW": "New label",
+          "ADD": "Add",
+          "REMOVE": "Remove {label}"
+        },
+        "INBOXES": {
+          "LABEL": "WhatsApp numbers",
+          "HELP": "Choose which inboxes appear in the number filter and their name. If none is selected, all are shown.",
+          "NAME": "Name in the panel"
+        },
+        "WINDOW_NUDGE": {
+          "TITLE": "Reminder before the window closes",
+          "HELP": "Sent once to customers who didn't reply to the seller, before the 24 h window closes. If the window lasts until the next morning it goes out at the morning time; otherwise it goes out before the evening limit. Conversations with excluded labels are skipped.",
+          "ENABLED": "Send the reminder",
+          "TEXT": "Message",
+          "VARIABLES": "Variables you can use:",
+          "MORNING_TIME": "Morning time",
+          "EVENING_TIME": "Evening limit",
+          "MARGIN": "Margin before closing (minutes)",
+          "SKIP_SUNDAYS": "Don't send on Sundays",
+          "SKIP_LABELS": "Excluded labels",
+          "SKIP_LABELS_HELP": "Comma separated. Example: seguimiento, cuota"
+        },
+        "INVALID": "Check the highlighted fields: hours must be between 1 and 720, labels and message can't be empty, each selected number needs a name and the morning time must be before the evening limit."
       }
     },
     "PANEL": {

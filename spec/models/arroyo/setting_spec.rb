@@ -28,7 +28,7 @@ RSpec.describe Arroyo::Setting do
     end
 
     it 'ship every feature disabled' do
-      %w[window_keeper post_sale agent_panel email_marketing ads_attribution].each do |feature|
+      %w[window_keeper post_sale agent_panel email_marketing ads_attribution funnel_board].each do |feature|
         expect(setting.feature_enabled?(feature)).to be(false)
       end
     end
@@ -139,6 +139,53 @@ RSpec.describe Arroyo::Setting do
       administrator = create(:user, account: account, role: :administrator)
       setting.merge_config(post_sale: { alert_user_ids: [administrator.id] })
       expect(setting).to be_valid
+    end
+  end
+
+  describe 'funnel board' do
+    let(:board) { setting.section(:funnel_board) }
+
+    it 'ships the agreed defaults with the window nudge off' do
+      expect(board).to include('enabled' => false, 'abandon_hours' => 24, 'lost_label' => 'noquierenada',
+                               'repurchase_label' => 'recompra', 'inboxes' => [])
+      expect(board['info_labels'].pluck('label')).to eq(%w[cotizado cuota turnotaller])
+      expect(board['window_nudge']).to include('enabled' => false, 'morning_time' => '08:30', 'evening_time' => '19:00',
+                                               'skip_sundays' => true, 'skip_labels' => ['seguimiento'])
+    end
+
+    it 'requires the commercial funnel before turning the board on' do
+      setting.merge_config(funnel_board: { enabled: true })
+      expect(setting).not_to be_valid
+      expect(setting.errors.full_messages).to eq(['Invalid value for funnel_board.enabled'])
+
+      seller = create(:user, account: account, role: :agent)
+      setting.merge_config(agent_panel: { funnel_enabled: true, seller_ids: [seller.id] })
+      expect(setting).to be_valid
+    end
+
+    it 'accepts inboxes of the account with a display name' do
+      channel = create(:channel_whatsapp, account: account, sync_templates: false, validate_provider_config: false)
+      setting.merge_config(funnel_board: { inboxes: [{ id: channel.inbox.id, name: 'Evolution' }] })
+
+      expect(setting).to be_valid
+    end
+
+    {
+      'an inbox from another account' => [{ funnel_board: { inboxes: [{ id: 0, name: 'Otro' }] } }, 'funnel_board.inboxes'],
+      'an inbox without a name' => [{ funnel_board: { inboxes: [{ id: 1, name: ' ' }] } }, 'funnel_board.inboxes'],
+      'abandonment after more than 30 days' => [{ funnel_board: { abandon_hours: 721 } }, 'funnel_board.abandon_hours'],
+      'an informative label without a switch' => [{ funnel_board: { info_labels: [{ label: 'cuota' }] } }, 'funnel_board.info_labels'],
+      'a malformed morning time' => [{ funnel_board: { window_nudge: { morning_time: '8:30' } } }, 'funnel_board.window_nudge.morning_time'],
+      'an evening limit before the morning' => [{ funnel_board: { window_nudge: { morning_time: '19:00', evening_time: '08:30' } } },
+                                                'funnel_board.window_nudge.evening_time'],
+      'an empty nudge text' => [{ funnel_board: { window_nudge: { text: ' ' } } }, 'funnel_board.window_nudge.text']
+    }.each do |description, (changes, field)|
+      it "rejects #{description}" do
+        setting.merge_config(changes)
+
+        expect(setting).not_to be_valid
+        expect(setting.errors.full_messages).to eq(["Invalid value for #{field}"])
+      end
     end
   end
 end
