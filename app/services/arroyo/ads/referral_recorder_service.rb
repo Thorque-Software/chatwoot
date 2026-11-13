@@ -39,6 +39,7 @@ class Arroyo::Ads::ReferralRecorderService
   end
 
   def attributes
-    FIELDS.transform_values { |key| referral[key] }.compact.merge('ad_source' => SOURCE)
+    # ad_referral_at: cuándo llegó este anuncio, para atribuirlo solo a la consulta que abrió (Arroyo::Commercial::Origin)
+    FIELDS.transform_values { |key| referral[key] }.compact.merge('ad_source' => SOURCE, 'ad_referral_at' => Time.current.iso8601)
   end
 end

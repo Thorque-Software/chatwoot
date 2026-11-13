@@ -23,6 +23,19 @@ RSpec.describe Arroyo::Ads::CampaignResolverJob do
     expect(conversation.reload.additional_attributes).to include('ad_id' => '123', 'ad_campaign_name' => 'Verano 2026')
   end
 
+  it 'completes the ad names on the inquiries that came from that ad' do
+    save_token('secret-token')
+    lookup = instance_double(Arroyo::Ads::CampaignLookupService, perform: names)
+    allow(Arroyo::Ads::CampaignLookupService).to receive(:new).and_return(lookup)
+    from_ad = create(:arroyo_opportunity, conversation: conversation, origin: { 'ad_id' => '123' })
+    organic = create(:arroyo_opportunity, conversation: conversation, state: 'won', origin: {})
+
+    described_class.perform_now(conversation.id)
+
+    expect(from_ad.reload.origin).to eq('ad_id' => '123', 'ad_name' => 'Video 1', 'ad_campaign_name' => 'Verano 2026')
+    expect(organic.reload.origin).to eq({})
+  end
+
   it 'does nothing without a token' do
     allow(Arroyo::Ads::CampaignLookupService).to receive(:new)
 

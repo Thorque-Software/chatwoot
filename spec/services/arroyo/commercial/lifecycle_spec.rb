@@ -84,6 +84,37 @@ RSpec.describe Arroyo::Commercial::Lifecycle do
     expect(Arroyo::Opportunity.find_by!(conversation: conversation).pending_since).to be_present
   end
 
+  describe 'panel funnel' do
+    def enable_board
+      setting = Arroyo::Setting.for(account)
+      setting.merge_config(funnel_board: { enabled: true })
+      setting.save!
+    end
+
+    it 'marks the inquiry lost with the configured label only when the panel funnel is on' do
+      message(:incoming)
+      opportunity = Arroyo::Opportunity.find_by!(conversation: conversation)
+      service.labels(actor: seller, change: [[], ['noquierenada']])
+      expect(opportunity.reload.state).to eq('pending')
+
+      enable_board
+      service.labels(actor: seller, change: [[], ['noquierenada']])
+      expect(opportunity.reload).to have_attributes(state: 'lost', result_user_id: seller.id)
+    end
+
+    it 'still accepts the historical venta-perdida label' do
+      message(:incoming)
+      service.labels(actor: seller, change: [[], ['venta-perdida']])
+      expect(Arroyo::Opportunity.find_by!(conversation: conversation).state).to eq('lost')
+    end
+
+    it 'stores the Meta ad that opened the inquiry' do
+      conversation.update!(additional_attributes: { 'ad_id' => '52615', 'ad_name' => 'Reel Bici', 'ad_referral_at' => Time.current.iso8601 })
+      message(:incoming)
+      expect(Arroyo::Opportunity.find_by!(conversation: conversation).origin).to eq('ad_id' => '52615', 'ad_name' => 'Reel Bici')
+    end
+  end
+
   it 'keeps all new recording disabled by default' do
     setting = Arroyo::Setting.for(account)
     setting.merge_config(agent_panel: { funnel_enabled: false })

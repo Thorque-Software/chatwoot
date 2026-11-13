@@ -58,6 +58,19 @@ module Arroyo::FunnelBoardConfig
     'funnel_board.window_nudge.skip_labels' => [:text_list]
   }.freeze
 
+  # Resultado comercial de las etiquetas que se agregaron a una conversación (won, lost o nil).
+  def label_outcome(added)
+    return 'won' if added.include?(section(:post_sale)['trigger_label'])
+
+    'lost' if added.intersect?(lost_labels)
+  end
+
+  # venta-perdida es la etiqueta histórica; con el embudo del panel prendido también cuenta la configurada.
+  def lost_labels
+    board = section(:funnel_board)
+    board['enabled'] ? ['venta-perdida', board['lost_label']] : ['venta-perdida']
+  end
+
   private
 
   # El embudo lee las oportunidades del CRM: necesita el embudo comercial prendido.
