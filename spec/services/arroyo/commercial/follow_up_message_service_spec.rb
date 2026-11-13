@@ -122,7 +122,12 @@ RSpec.describe Arroyo::Commercial::FollowUpMessageService do
   end
 
   context 'with the seller aliases' do
-    let(:seller) { create(:user, account: account, role: :administrator, name: 'Julieta Peralta') }
+    # The factory fills display_name with a random first name (and builds the email from it), but the
+    # signature looks the alias up by available_name, so the seller needs no display_name, like in prod.
+    let(:seller) do
+      create(:user, account: account, role: :administrator, name: 'Julieta Peralta', display_name: nil,
+                    email: 'julieta.peralta@example.com')
+    end
 
     it 'signs with the alias and uses the commercial wording for the product' do
       message = send_step(1)
