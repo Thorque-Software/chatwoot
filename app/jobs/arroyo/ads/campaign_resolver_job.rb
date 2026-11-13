@@ -15,5 +15,15 @@ class Arroyo::Ads::CampaignResolverJob < ApplicationJob
       Arroyo::Ads::CampaignLookupService.new(token: token, ad_id: ad_id).perform
     end
     conversation.update!(additional_attributes: conversation.additional_attributes.merge(names))
+    complete_opportunity_origins(conversation, ad_id, names)
+  end
+
+  private
+
+  # La consulta guardó el anuncio antes de que llegaran los nombres de Meta: se completan acá.
+  def complete_opportunity_origins(conversation, ad_id, names)
+    Arroyo::Opportunity.where(conversation: conversation).where("origin ->> 'ad_id' = ?", ad_id).find_each do |opportunity|
+      opportunity.update!(origin: opportunity.origin.merge(names.to_h.stringify_keys.slice(*Arroyo::Commercial::Origin::NAME_FIELDS)))
+    end
   end
 end

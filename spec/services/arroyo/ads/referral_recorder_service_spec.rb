@@ -34,6 +34,12 @@ RSpec.describe Arroyo::Ads::ReferralRecorderService do
       )
     end
 
+    it 'stamps when the ad arrived so only the inquiry it opened takes it' do
+      freeze_time do
+        expect(record).to include('ad_referral_at' => Time.current.iso8601)
+      end
+    end
+
     it 'does not store the expiring media urls' do
       expect(record.keys).not_to include('image_url', 'ad_image_url')
     end

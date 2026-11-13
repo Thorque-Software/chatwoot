@@ -18,6 +18,7 @@ class Arroyo::Commercial::Lifecycle
       next unless opportunity
 
       opportunity.with_lock do
+        Arroyo::Commercial::Origin.new(opportunity: opportunity, conversation: conversation).capture if record.incoming?
         record_message(opportunity, record)
         Arroyo::Commercial::FollowUpFailureService.new(opportunity: opportunity, message: record).perform
         refresh_attention(opportunity)
@@ -84,7 +85,7 @@ class Arroyo::Commercial::Lifecycle
     opportunity = current
     return if opportunity.nil? || opportunity.terminal?
 
-    result = label_outcome(Array(change.last) - Array(change.first))
+    result = Arroyo::Setting.for(conversation.account).label_outcome(Array(change.last) - Array(change.first))
     outcome(opportunity, outcome: result, user: actor || conversation.assignee) if result
   end
 
@@ -96,12 +97,6 @@ class Arroyo::Commercial::Lifecycle
 
   def track_message?(record)
     self.class.enabled?(conversation.account) && !record.private? && !record.activity?
-  end
-
-  def label_outcome(added)
-    return 'won' if added.include?(Arroyo::Setting.for(conversation.account).section(:post_sale)['trigger_label'])
-
-    'lost' if added.include?('venta-perdida')
   end
 
   def assignment_attributes(opportunity, at)

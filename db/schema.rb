@@ -11,7 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 # ARROYO: esquema con postventa y oportunidades comerciales independientes.
-ActiveRecord::Schema[7.1].define(version: 2026_10_27_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_13_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -229,6 +229,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_27_120000) do
     t.datetime "outcome_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "origin", default: {}, null: false
     t.index ["account_id", "request_key"], name: "index_arroyo_opportunities_on_account_id_and_request_key", unique: true
     t.index ["account_id", "started_at"], name: "index_arroyo_opportunities_on_account_id_and_started_at"
     t.index ["account_id"], name: "index_arroyo_opportunities_on_account_id"
