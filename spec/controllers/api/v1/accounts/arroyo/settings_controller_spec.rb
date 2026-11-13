@@ -77,6 +77,22 @@ RSpec.describe 'Api::V1::Accounts::Arroyo::SettingsController', type: :request d
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
+    it 'saves the whole funnel board section, including the window nudge' do
+      seller = create(:user, account: account, role: :agent)
+      inbox = create(:channel_whatsapp, account: account, sync_templates: false, validate_provider_config: false).inbox
+      board = { enabled: true, abandon_hours: 36, lost_label: 'perdida', repurchase_label: 'recompra',
+                info_labels: [{ label: 'cuota', enabled: false }], inboxes: [{ id: inbox.id, name: 'Evolution' }],
+                window_nudge: { enabled: true, text: 'Hola {{contact.first_name}}', morning_time: '09:00', evening_time: '18:30',
+                                skip_sundays: false, margin_minutes: 15, skip_labels: %w[seguimiento cuota] } }
+
+      patch url, headers: administrator.create_new_auth_token, as: :json,
+                 params: { config: { agent_panel: { funnel_enabled: true, seller_ids: [seller.id] }, funnel_board: board } }
+
+      expect(response).to have_http_status(:success)
+      saved = Arroyo::Setting.for(account).section(:funnel_board)
+      expect(saved).to eq(board.deep_stringify_keys)
+    end
+
     it 'returns unauthorized for agents' do
       patch url, headers: agent.create_new_auth_token, params: { config: { window_keeper: { enabled: true } } }, as: :json
 

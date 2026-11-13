@@ -4,6 +4,7 @@ class Api::V1::Accounts::Arroyo::FeaturesController < Api::V1::Accounts::BaseCon
     setting = ::Arroyo::Setting.for(Current.account)
     render json: { timezone: setting.config['timezone'], agent_panel: setting.section(:agent_panel),
                    follow_up: { enabled: setting.feature_enabled?(:follow_up) },
+                   funnel_board: setting.section(:funnel_board).slice('enabled', 'abandon_hours', 'info_labels', 'inboxes'),
                    post_sale: { enabled: setting.feature_enabled?(:post_sale),
                                 has_records: ::Arroyo::PostSalePurchase.exists?(account: Current.account) } }
   end

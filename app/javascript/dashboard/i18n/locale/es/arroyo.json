@@ -158,6 +158,48 @@
           "SET": "Ya hay un token guardado. Pegá uno nuevo solo para reemplazarlo.",
           "PLACEHOLDER": "Pegá el token"
         }
+      },
+      "FUNNEL_BOARD": {
+        "TITLE": "Embudo del panel",
+        "DESCRIPTION": "Todo el embudo del panel de vendedores en un solo lugar: consultas abandonadas, etiquetas, números de WhatsApp y el aviso antes de que cierre la ventana. Necesita el embudo comercial prendido.",
+        "ABANDON_HOURS": {
+          "LABEL": "Horas para considerar abandonada",
+          "HELP": "Horas corridas desde el aviso de ventana sin que el vendedor responda."
+        },
+        "LOST_LABEL": {
+          "LABEL": "Etiqueta de venta perdida",
+          "HELP": "Al ponerla, la consulta cuenta como perdida."
+        },
+        "REPURCHASE_LABEL": {
+          "LABEL": "Etiqueta de recompra",
+          "HELP": "Se pone sola cuando un cliente que ya compró vuelve a comprar."
+        },
+        "INFO_LABELS": {
+          "LABEL": "Etiquetas informativas",
+          "HELP": "Se muestran al costado del embudo solo como referencia. Apagá las que no quieras ver.",
+          "NEW": "Nueva etiqueta",
+          "ADD": "Agregar",
+          "REMOVE": "Quitar {label}"
+        },
+        "INBOXES": {
+          "LABEL": "Números de WhatsApp",
+          "HELP": "Elegí qué bandejas aparecen en el filtro por número y con qué nombre. Si no elegís ninguna, se muestran todas.",
+          "NAME": "Nombre en el panel"
+        },
+        "WINDOW_NUDGE": {
+          "TITLE": "Aviso antes de que cierre la ventana",
+          "HELP": "Se manda una sola vez a los clientes que no le contestaron al vendedor, antes de que cierre la ventana de 24 h. Si la ventana dura hasta la mañana siguiente, sale a la hora de la mañana; si no, sale antes del límite de la tarde. No se manda a conversaciones con las etiquetas excluidas.",
+          "ENABLED": "Mandar el aviso",
+          "TEXT": "Mensaje",
+          "VARIABLES": "Variables que podés usar:",
+          "MORNING_TIME": "Hora de la mañana",
+          "EVENING_TIME": "Límite de la tarde",
+          "MARGIN": "Margen antes del cierre (minutos)",
+          "SKIP_SUNDAYS": "No mandar los domingos",
+          "SKIP_LABELS": "Etiquetas excluidas",
+          "SKIP_LABELS_HELP": "Separadas por coma. Ejemplo: seguimiento, cuota"
+        },
+        "INVALID": "Revisá los campos marcados: las horas tienen que ser entre 1 y 720, las etiquetas y el mensaje no pueden quedar vacíos, cada número elegido necesita nombre y la hora de la mañana tiene que ser anterior al límite de la tarde."
       }
     },
     "PANEL": {

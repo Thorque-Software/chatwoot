@@ -39,7 +39,11 @@ class Api::V1::Accounts::Arroyo::SettingsController < Api::V1::Accounts::BaseCon
                     :response_hours, :lookback_days, { seller_ids: [] }],
       follow_up: [:enabled, { aliases: %i[name alias] }],
       email_marketing: %i[enabled max_per_hour max_per_day footer_html],
-      ads_attribution: %i[enabled]
+      ads_attribution: %i[enabled],
+      funnel_board: [:enabled, :abandon_hours, :lost_label, :repurchase_label,
+                     { info_labels: %i[label enabled], inboxes: %i[id name],
+                       window_nudge: [:enabled, :text, :morning_time, :evening_time, :skip_sundays, :margin_minutes,
+                                      { skip_labels: [] }] }]
     )
   end
 end

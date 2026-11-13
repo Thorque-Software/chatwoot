@@ -13,6 +13,7 @@ import AgentPanelSection from './components/AgentPanelSection.vue';
 import CommercialFollowUpSection from './components/CommercialFollowUpSection.vue';
 import EmailMarketingSection from './components/EmailMarketingSection.vue';
 import AdsAttributionSection from './components/AdsAttributionSection.vue';
+import FunnelBoardSection from './components/FunnelBoardSection.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -79,6 +80,11 @@ onMounted(() => {
           :config="config.agent_panel"
           :is-saving="savingSection === 'agent_panel'"
           @save="saveSection('agent_panel', $event)"
+        />
+        <FunnelBoardSection
+          :config="config.funnel_board"
+          :is-saving="savingSection === 'funnel_board'"
+          @save="saveSection('funnel_board', $event)"
         />
         <CommercialFollowUpSection
           :config="config.follow_up"
