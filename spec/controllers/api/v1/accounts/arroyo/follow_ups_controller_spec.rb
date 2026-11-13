@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.describe 'Arroyo commercial follow-ups API', type: :request do
   let(:account) { create(:account) }
   let(:admin) { create(:user, account: account, role: :administrator) }
-  let(:seller) { create(:user, account: account, role: :agent, name: 'Marcos Peralta') }
+  # Without display_name, like in prod: the factory's random one would hide the alias lookup by name.
+  let(:seller) { create(:user, account: account, role: :agent, name: 'Marcos Peralta', display_name: nil, email: 'marcos.peralta@example.com') }
   let(:channel) { create(:channel_whatsapp, account: account, provider: 'whatsapp_cloud', sync_templates: false, validate_provider_config: false) }
   let(:conversation) { create(:conversation, account: account, inbox: channel.inbox, assignee: seller) }
   let(:base) { "/api/v1/accounts/#{account.id}/arroyo/commercial/follow_ups" }
