@@ -10,6 +10,7 @@ import CommercialAPI from '../../api/commercial';
 import BoardAPI from '../../api/board';
 import ConversationListItem from './ConversationListItem.vue';
 import { useCommercialLabels } from '../useCommercialLabels';
+import { useBoardLabels } from './board/useBoardLabels';
 
 const props = defineProps({ selection: { type: Object, required: true } });
 const emit = defineEmits(['close', 'updated']);
@@ -29,7 +30,11 @@ const requestKeys = new Map();
 let requestSequence = 0;
 let previousFocus;
 const metricLabels = useCommercialLabels();
+const { stages: boardStages } = useBoardLabels();
 const label = state => metricLabels.value[state];
+// Las consultas del embudo del panel traen su estado del embudo (stage) y se nombran con sus textos.
+const itemLabel = item =>
+  item.stage ? boardStages.value[item.stage] : label(item.state);
 
 const fetchPage = async nextPage => {
   requestSequence += 1;
@@ -206,7 +211,7 @@ onBeforeUnmount(() => previousFocus?.focus());
             class="flex flex-wrap items-center gap-2 px-3 py-2 text-label-small text-n-slate-11"
           >
             <span class="rounded bg-n-alpha-2 px-2 py-1 text-n-slate-12">{{
-              label(item.stage || item.state)
+              itemLabel(item)
             }}</span>
             <span
               v-if="item.overdue"
