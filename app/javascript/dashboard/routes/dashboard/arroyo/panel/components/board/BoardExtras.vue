@@ -36,7 +36,7 @@ const statusLabel = status => statusLabels.value[status] || status;
 </script>
 
 <template>
-  <div class="grid min-w-0 gap-5 lg:grid-cols-2">
+  <div class="grid min-w-0 items-start gap-5 lg:grid-cols-2">
     <details
       class="group rounded-xl border border-n-weak bg-n-solid-2 p-4 lg:p-5"
       data-testid="board-repurchases"

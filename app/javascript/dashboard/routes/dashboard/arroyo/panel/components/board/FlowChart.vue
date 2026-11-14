@@ -11,6 +11,7 @@ const props = defineProps({
   sellerIds: { type: Array, default: () => [] },
   nodeLabel: { type: Function, required: true },
   stuck: { type: Array, default: () => ['pending', 'abandoned'] },
+  columnLabels: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['select']);
 const { t } = useI18n();
@@ -131,6 +132,17 @@ const onKey = (event, node) => {
 
 <template>
   <div ref="root" class="w-full min-w-0 overflow-x-auto overscroll-x-contain">
+    <!-- Los títulos van dentro del área que se desplaza para quedar alineados con el gráfico en celular. -->
+    <div
+      v-if="columnLabels.length"
+      class="mb-2 grid grid-cols-3 px-1 text-label-small font-medium uppercase tracking-wide text-n-slate-10"
+      :style="{ width: `${width}px` }"
+      aria-hidden="true"
+    >
+      <span>{{ columnLabels[0] }}</span>
+      <span class="text-center">{{ columnLabels[1] }}</span>
+      <span class="text-end">{{ columnLabels[2] }}</span>
+    </div>
     <svg
       :width="width"
       :height="height"

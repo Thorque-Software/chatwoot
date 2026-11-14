@@ -164,7 +164,7 @@
         "DESCRIPTION": "The whole sales panel funnel in one place: abandoned inquiries, labels, WhatsApp numbers and the reminder before the window closes. Requires the commercial funnel to be on.",
         "ABANDON_HOURS": {
           "LABEL": "Hours to consider an inquiry abandoned",
-          "HELP": "Calendar hours after the window reminder without a reply from the seller."
+          "HELP": "Calendar hours after the window reminder."
         },
         "LOST_LABEL": {
           "LABEL": "Lost sale label",
@@ -172,7 +172,7 @@
         },
         "REPURCHASE_LABEL": {
           "LABEL": "Repurchase label",
-          "HELP": "Added automatically when a customer who already bought buys again."
+          "HELP": "Added on the second purchase."
         },
         "INFO_LABELS": {
           "LABEL": "Informative labels",

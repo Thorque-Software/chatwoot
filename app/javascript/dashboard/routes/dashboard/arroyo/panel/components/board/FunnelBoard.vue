@@ -132,6 +132,12 @@ const levelLabels = computed(() => ({
   ad: t('ARROYO.PANEL.BOARD.FLOW.LEVEL_AD'),
 }));
 
+const columnLabels = computed(() => [
+  t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.ORIGIN'),
+  t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.OWNER'),
+  t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.STAGE'),
+]);
+
 const asOf = computed(() =>
   new Intl.DateTimeFormat(locale.value, {
     timeZone: data.value.timezone,
@@ -301,18 +307,6 @@ defineExpose({ exportCsv, exporting, ready: computed(() => !!data.value) });
               </button>
             </div>
           </div>
-          <div
-            class="grid grid-cols-3 px-1 text-label-small font-medium uppercase tracking-wide text-n-slate-10"
-            aria-hidden="true"
-          >
-            <span>{{ t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.ORIGIN') }}</span>
-            <span class="text-center">{{
-              t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.OWNER')
-            }}</span>
-            <span class="text-end">{{
-              t('ARROYO.PANEL.BOARD.FLOW.COLUMNS.STAGE')
-            }}</span>
-          </div>
           <p
             v-if="!data.flow.nodes.length"
             class="mb-0 rounded-lg bg-n-alpha-1 p-5 text-body-main text-n-slate-11"
@@ -324,6 +318,7 @@ defineExpose({ exportCsv, exporting, ready: computed(() => !!data.value) });
             :flow="data.flow"
             :seller-ids="sellerIds"
             :node-label="nodeLabel"
+            :column-labels="columnLabels"
             @select="onNode"
           />
           <div

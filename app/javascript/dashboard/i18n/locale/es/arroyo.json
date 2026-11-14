@@ -164,7 +164,7 @@
         "DESCRIPTION": "Todo el embudo del panel de vendedores en un solo lugar: consultas abandonadas, etiquetas, números de WhatsApp y el aviso antes de que cierre la ventana. Necesita el embudo comercial prendido.",
         "ABANDON_HOURS": {
           "LABEL": "Horas para considerar abandonada",
-          "HELP": "Horas corridas desde el aviso de ventana sin que el vendedor responda."
+          "HELP": "Horas corridas tras el aviso de ventana."
         },
         "LOST_LABEL": {
           "LABEL": "Etiqueta de venta perdida",
@@ -172,7 +172,7 @@
         },
         "REPURCHASE_LABEL": {
           "LABEL": "Etiqueta de recompra",
-          "HELP": "Se pone sola cuando un cliente que ya compró vuelve a comprar."
+          "HELP": "Se pone sola en la segunda compra."
         },
         "INFO_LABELS": {
           "LABEL": "Etiquetas informativas",
