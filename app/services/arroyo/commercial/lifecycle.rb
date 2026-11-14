@@ -204,9 +204,11 @@ class Arroyo::Commercial::Lifecycle
     unless sold?
       conversation.update!(label_list: conversation.label_list | [Arroyo::Setting.for(conversation.account).section(:post_sale)['trigger_label']])
     end
-    return unless Arroyo::Setting.for(conversation.account).feature_enabled?(:post_sale)
-
-    Arroyo::PostSale::RegisterPurchaseService.new(conversation: conversation, timestamp: opportunity.outcome_at).perform
+    if Arroyo::Setting.for(conversation.account).feature_enabled?(:post_sale)
+      Arroyo::PostSale::RegisterPurchaseService.new(conversation: conversation, timestamp: opportunity.outcome_at).perform
+    end
+    # Al final: recarga la conversación, así no la pisa la etiqueta de venta de arriba.
+    Arroyo::Commercial::RepurchaseLabelService.new(opportunity: opportunity).perform
   end
 
   def sold?
