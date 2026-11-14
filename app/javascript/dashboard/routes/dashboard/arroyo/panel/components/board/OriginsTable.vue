@@ -94,7 +94,7 @@ const select = (item, column) =>
                   />
                   {{ name(item) }}
                   <span class="font-normal text-n-slate-10">
-                    ({{ item.ads.length }})
+                    {{ `(${item.ads.length})` }}
                   </span>
                 </button>
                 <span v-else class="ps-5">{{ name(item) }}</span>
@@ -108,7 +108,9 @@ const select = (item, column) =>
                   {{ item[column] }}
                 </button>
               </td>
-              <td class="px-2 text-end font-semibold tabular-nums text-n-teal-11">
+              <td
+                class="px-2 text-end font-semibold tabular-nums text-n-teal-11"
+              >
                 {{ percent(item.won, item.received) }}
               </td>
             </tr>
@@ -124,7 +126,11 @@ const select = (item, column) =>
                 >
                   {{ ad.name }}
                 </th>
-                <td v-for="column in COLUMNS" :key="column" class="p-1 text-end">
+                <td
+                  v-for="column in COLUMNS"
+                  :key="column"
+                  class="p-1 text-end"
+                >
                   <button
                     type="button"
                     class="w-full rounded-md px-2 py-1 text-end tabular-nums text-n-blue-11 [@media(hover:hover)]:hover:bg-n-alpha-2"

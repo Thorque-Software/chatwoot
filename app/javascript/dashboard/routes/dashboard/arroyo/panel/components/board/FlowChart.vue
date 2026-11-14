@@ -36,11 +36,9 @@ const height = computed(() =>
   Math.max(260, Math.max(...columns.value.map(col => col.length)) * 44)
 );
 const xFor = column =>
-  [
-    SIDE,
-    (width.value - NODE_WIDTH) / 2,
-    width.value - SIDE - NODE_WIDTH,
-  ][column];
+  [SIDE, (width.value - NODE_WIDTH) / 2, width.value - SIDE - NODE_WIDTH][
+    column
+  ];
 
 const layout = computed(() => {
   const inner = height.value - TOP * 2;
@@ -102,6 +100,10 @@ const linkPath = link => {
   return `M${start},${y0} C${middle},${y0} ${middle},${y1} ${x1},${y1}`;
 };
 
+const nodeById = id => layout.value.nodes.find(node => node.id === id);
+const linkTitle = link =>
+  `${props.nodeLabel(nodeById(link.source))} → ${props.nodeLabel(nodeById(link.target))}: ${link.value}`;
+
 const isActive = link =>
   !hovered.value ||
   link.source === hovered.value ||
@@ -148,11 +150,7 @@ const onKey = (event, node) => {
           :stroke-opacity="isActive(link) ? 0.45 : 0.08"
           class="transition-[stroke-opacity] duration-150"
         >
-          <title>
-            {{ nodeLabel(layout.nodes.find(n => n.id === link.source)) }} →
-            {{ nodeLabel(layout.nodes.find(n => n.id === link.target)) }}:
-            {{ link.value }}
-          </title>
+          <title>{{ linkTitle(link) }}</title>
         </path>
       </g>
       <g

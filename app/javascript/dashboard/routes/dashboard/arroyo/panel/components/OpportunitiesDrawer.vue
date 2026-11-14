@@ -167,12 +167,12 @@ onBeforeUnmount(() => previousFocus?.focus());
         {{ t('ARROYO.PANEL.FUNNEL.LIST_COUNT', { count: meta.total }) }}
       </span>
       <Button
+        v-if="selection.source !== 'board'"
         icon="i-lucide-download"
         slate
         ghost
         sm
         :label="t('ARROYO.PANEL.EXPORT')"
-        v-if="selection.source !== 'board'"
         data-testid="opportunities-export"
         :disabled="exporting || loading"
         @click="exportCsv"

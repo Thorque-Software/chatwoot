@@ -272,8 +272,9 @@ watch(inboxes, () => {
           v-for="variable in NUDGE_VARIABLES"
           :key="variable"
           class="rounded bg-n-alpha-2 px-1.5 py-0.5"
-          >{{ variable }}</code
         >
+          {{ variable }}
+        </code>
       </p>
       <div class="grid gap-4 md:grid-cols-3">
         <Input
@@ -305,7 +306,9 @@ watch(inboxes, () => {
       <Input
         v-model="form.window_nudge.skip_labels"
         :label="t('ARROYO.SETTINGS.FUNNEL_BOARD.WINDOW_NUDGE.SKIP_LABELS')"
-        :message="t('ARROYO.SETTINGS.FUNNEL_BOARD.WINDOW_NUDGE.SKIP_LABELS_HELP')"
+        :message="
+          t('ARROYO.SETTINGS.FUNNEL_BOARD.WINDOW_NUDGE.SKIP_LABELS_HELP')
+        "
         data-testid="window-nudge-skip-labels"
       />
     </fieldset>

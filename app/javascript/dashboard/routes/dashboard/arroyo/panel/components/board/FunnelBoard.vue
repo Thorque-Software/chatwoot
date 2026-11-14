@@ -54,8 +54,7 @@ const fetchBoard = async () => {
   }
 };
 
-const percent = (part, total) =>
-  total ? Math.round((part / total) * 100) : 0;
+const percent = (part, total) => (total ? Math.round((part / total) * 100) : 0);
 const totals = computed(() => data.value?.totals || {});
 const stuck = computed(
   () => (totals.value.pending || 0) + (totals.value.abandoned || 0)
@@ -221,7 +220,9 @@ defineExpose({ exportCsv, exporting, ready: computed(() => !!data.value) });
             :data-testid="`board-kpi-${kpi.key}`"
             @click="openDetails(kpi.label, kpi.filter)"
           >
-            <span class="flex items-center gap-2 text-label-small text-n-slate-11">
+            <span
+              class="flex items-center gap-2 text-label-small text-n-slate-11"
+            >
               <span
                 v-if="kpi.color"
                 class="size-2 shrink-0 rounded-full"
