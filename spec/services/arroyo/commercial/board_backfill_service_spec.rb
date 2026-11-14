@@ -49,11 +49,12 @@ RSpec.describe Arroyo::Commercial::BoardBackfillService do
     end
 
     it 'marks lost the open inquiries labelled noquierenada during the inquiry' do
-      opportunity = opportunity_labelled(['noquierenada'], at: 1.day.ago)
+      labelled_at = 1.day.ago.change(usec: 0)
+      opportunity = opportunity_labelled(['noquierenada'], at: labelled_at)
 
       expect(service.perform[:lost]).to eq(1)
       expect(opportunity.reload).to have_attributes(state: 'lost', result_user_id: seller.id)
-      expect(opportunity.outcome_at).to be_within(1.second).of(1.day.ago)
+      expect(opportunity.outcome_at).to be_within(1.second).of(labelled_at)
       expect(opportunity.events.pluck(:kind, :origin)).to include(%w[lost backfill])
     end
 
