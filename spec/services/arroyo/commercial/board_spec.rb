@@ -118,5 +118,6 @@ RSpec.describe Arroyo::Commercial::Board do
     expect(view.build[:totals]['received']).to eq(2)
     expect(view.select({}).map(&:record)).to eq([own])
     expect(view.select('bucket' => juli.id.to_s)).to be_empty
+    expect(board.select('bucket' => 'waiting')).to be_empty
   end
 end
