@@ -10,6 +10,7 @@ import PostSaleAPI from '../../api/postSale';
 import CommercialFollowUpsAPI from '../../api/commercialFollowUps';
 import PostSaleTab from '../components/PostSaleTab.vue';
 import FunnelTab from '../components/FunnelTab.vue';
+import FunnelBoard from '../components/board/FunnelBoard.vue';
 import CommercialFollowUpsTab from '../components/CommercialFollowUpsTab.vue';
 import { useArroyoFeatures } from '../../composables/useArroyoFeatures';
 
@@ -90,7 +91,12 @@ const mountPanel = async (
   const wrapper = mount(Index, {
     global: {
       plugins: [router, store],
-      stubs: { BarChart: true, TabBar: true, FunnelTab: true },
+      stubs: {
+        BarChart: true,
+        TabBar: true,
+        FunnelTab: true,
+        FunnelBoard: true,
+      },
     },
   });
   await flushPromises();
@@ -140,6 +146,29 @@ describe('Arroyo agent panel', () => {
       user_ids: [7],
       inbox_ids: [3],
     });
+  });
+
+  it('shows the unified board instead of the funnel tab and filters by the configured numbers', async () => {
+    ArroyoFeaturesAPI.get.mockResolvedValue({
+      data: {
+        timezone: 'America/Argentina/Buenos_Aires',
+        agent_panel: { enabled: true, funnel_enabled: true, seller_ids: [7] },
+        funnel_board: {
+          enabled: true,
+          inboxes: [{ id: 9, name: 'Evolution' }],
+        },
+      },
+    });
+    const { wrapper } = await mountPanel({ inbox_ids: '9' });
+
+    expect(wrapper.findComponent(FunnelTab).exists()).toBe(false);
+    expect(wrapper.findComponent(FunnelBoard).props()).toMatchObject({
+      params: expect.objectContaining({ inbox_ids: [9] }),
+      sellerIds: [7],
+    });
+    expect(wrapper.findComponent(PanelFilters).props('inboxOptions')).toEqual([
+      { id: 9, name: 'Evolution' },
+    ]);
   });
 
   it('uses the commercial funnel only when enabled and clears shared filters', async () => {
@@ -454,11 +483,7 @@ describe('Arroyo agent panel', () => {
         agent_panel: { enabled: true, funnel_enabled: true },
       },
     });
-    const { wrapper } = await mountPanel(
-      {},
-      'arroyo_follow_ups',
-      'agent'
-    );
+    const { wrapper } = await mountPanel({}, 'arroyo_follow_ups', 'agent');
     expect(wrapper.findComponent(CommercialFollowUpsTab).exists()).toBe(false);
     expect(CommercialFollowUpsAPI.getAll).not.toHaveBeenCalled();
     expect(wrapper.get('h1').text()).not.toBe('Follow-ups');

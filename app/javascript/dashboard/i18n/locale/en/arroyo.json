@@ -426,7 +426,8 @@
           "ASSIGNED": "Assigned",
           "REPEAT_SALES": "Repeat purchases won",
           "POST_SALE_REPLIES": "Returned after post-sale",
-          "POST_SALE_ISSUES": "Post-sale needs intervention"
+          "POST_SALE_ISSUES": "Post-sale needs intervention",
+          "ABANDONED": "Abandoned"
         },
         "CURRENT_STATE": "Current state",
         "AS_OF": "Updated {date}",
@@ -570,6 +571,102 @@
         "RETRY": "Retry",
         "EMPTY": "There are no chats in follow-up yet",
         "EMPTY_FILTER": "No chats have this status"
+      },
+      "BOARD": {
+        "KPI": {
+          "RECEIVED": "Inquiries",
+          "WAITING": "In bot or unassigned",
+          "PENDING": "Not attended",
+          "ATTENDED": "Attended",
+          "WON": "Won",
+          "LOST": "Lost",
+          "ABANDONED": "Abandoned",
+          "FROM_ADS": "{ads} from ads · {organic} organic",
+          "WAITING_NOTE": "{bot} in the bot · {unassigned} unassigned",
+          "PENDING_NOTE": "Assigned and without a seller reply",
+          "ATTENDED_RATE": "{rate}% of the assigned",
+          "WON_RATE": "{rate}% of the inquiries",
+          "LOST_NOTE": "With the lost sale label",
+          "NUDGED": "{count} window reminders sent"
+        },
+        "STUCK_ALERT": "{total} inquiries are stuck: {pending} not attended and {abandoned} abandoned.",
+        "FLOW": {
+          "TITLE": "Inquiry journey",
+          "HELP": "Left to right: where each inquiry came from (campaign, ad or organic), who has it now and where it ended up. Band width is the number of inquiries. Stages where inquiries get stuck (not attended and abandoned) are highlighted. Click any block to see the conversations.",
+          "ARIA": "Inquiry journey from origin to result",
+          "LEVEL": "Group the origin",
+          "LEVEL_CAMPAIGN": "By campaign",
+          "LEVEL_AD": "By ad",
+          "ORGANIC": "Organic (no ad)",
+          "OTHER": "Other ads",
+          "COLUMNS": {
+            "ORIGIN": "Origin",
+            "OWNER": "Who has it",
+            "STAGE": "Where it ended up"
+          }
+        },
+        "STAGES": {
+          "BOT": "In the bot",
+          "UNASSIGNED": "Unassigned",
+          "PENDING": "Not attended",
+          "IN_PROGRESS": "In progress",
+          "INACTIVE": "Customer stopped replying",
+          "ABANDONED": "Abandoned",
+          "LOST": "Lost",
+          "WON": "Won"
+        },
+        "COUNTERS": {
+          "RECEIVED": "Received",
+          "ATTENDED": "Attended",
+          "PENDING": "Not attended",
+          "IN_PROGRESS": "In progress",
+          "INACTIVE": "Inactive",
+          "ABANDONED": "Abandoned",
+          "LOST": "Lost",
+          "WON": "Won"
+        },
+        "INFO_LABELS": "Labels (reference):",
+        "SELLERS": {
+          "TITLE": "By seller",
+          "HELP": "Inquiries received in the period and where they ended up, by seller. A reassigned inquiry counts fully for whoever has it now. Attended = the seller sent at least one message.",
+          "SELLER": "Seller",
+          "RATE_WON": "% won",
+          "TOTAL": "Sellers total"
+        },
+        "DAYS": {
+          "TITLE": "By day",
+          "HELP": "Inquiries received each day and their current status, by seller. Choose what to show and click a number to see the conversations. The total includes bot and unassigned ones.",
+          "METRIC": "Show",
+          "DAY": "Day",
+          "TOTAL": "Day total"
+        },
+        "ORIGINS": {
+          "TITLE": "Sales by ad",
+          "HELP": "Inquiries, attended, won and lost by Meta campaign; open a campaign to see each ad. It comes from the ad the customer tapped, even if they delete the prefilled message.",
+          "NAME": "Campaign / ad",
+          "CONVERSION": "% won",
+          "EMPTY": "No inquiries came from ads in this period."
+        },
+        "EXTRAS": {
+          "REPURCHASE_TITLE": "Repeat purchases",
+          "REPEAT_SALES": "Customers who bought again",
+          "POST_SALE_REPLIES": "Replied to a post-sale message",
+          "ISSUES_TITLE": "Post-sale messages that didn't go out",
+          "ISSUES_EMPTY": "Every post-sale message of the period went out.",
+          "ISSUES_MORE": "And {count} more.",
+          "STATUS": {
+            "FAILED": "Failed",
+            "NOT_EXECUTED": "Not executed",
+            "UNCONFIRMED": "Delivery not confirmed"
+          }
+        },
+        "EMPTY": "No inquiries in this period.",
+        "LOAD_ERROR": "The funnel couldn't be loaded.",
+        "EXPORT_ERROR": "The funnel couldn't be exported.",
+        "RETRY": "Retry",
+        "AS_OF": "Data as of {date}.",
+        "REASSIGN_NOTE": "Reassigned inquiries count fully for the seller who has them now.",
+        "HISTORY_NOTE": "The funnel records inquiries since 10/21/2026."
       }
     },
     "AD_SOURCE": {

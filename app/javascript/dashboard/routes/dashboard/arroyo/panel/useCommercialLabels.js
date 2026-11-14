@@ -15,6 +15,7 @@ export const useCommercialLabels = () => {
     inactive: t('ARROYO.PANEL.FUNNEL.METRICS.INACTIVE'),
     unknown: t('ARROYO.PANEL.FUNNEL.METRICS.UNKNOWN'),
     overdue: t('ARROYO.PANEL.FUNNEL.METRICS.OVERDUE'),
+    abandoned: t('ARROYO.PANEL.FUNNEL.METRICS.ABANDONED'),
     assigned: t('ARROYO.PANEL.FUNNEL.METRICS.ASSIGNED'),
     repeat_sales: t('ARROYO.PANEL.FUNNEL.METRICS.REPEAT_SALES'),
     post_sale_replies: t('ARROYO.PANEL.FUNNEL.METRICS.POST_SALE_REPLIES'),

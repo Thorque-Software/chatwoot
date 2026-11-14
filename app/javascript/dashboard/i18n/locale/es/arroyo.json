@@ -426,7 +426,8 @@
           "ASSIGNED": "Derivadas",
           "REPEAT_SALES": "Recompras exitosas",
           "POST_SALE_REPLIES": "Retomaron contacto tras postventa",
-          "POST_SALE_ISSUES": "Postventas que requieren intervención"
+          "POST_SALE_ISSUES": "Postventas que requieren intervención",
+          "ABANDONED": "Abandonadas"
         },
         "CURRENT_STATE": "Estado actual",
         "AS_OF": "Actualizado {date}",
@@ -570,6 +571,102 @@
         "RETRY": "Reintentar",
         "EMPTY": "Todavía no hay chats en seguimiento",
         "EMPTY_FILTER": "No hay chats con este estado"
+      },
+      "BOARD": {
+        "KPI": {
+          "RECEIVED": "Consultas",
+          "WAITING": "En bot o sin asignar",
+          "PENDING": "Sin atender",
+          "ATTENDED": "Atendidas",
+          "WON": "Ganadas",
+          "LOST": "Perdidas",
+          "ABANDONED": "Abandonadas",
+          "FROM_ADS": "{ads} por anuncio · {organic} orgánicas",
+          "WAITING_NOTE": "{bot} en el bot · {unassigned} sin asignar",
+          "PENDING_NOTE": "Derivadas y sin respuesta del vendedor",
+          "ATTENDED_RATE": "{rate}% de las derivadas",
+          "WON_RATE": "{rate}% de las consultas",
+          "LOST_NOTE": "Con la etiqueta de venta perdida",
+          "NUDGED": "{count} avisos de ventana enviados"
+        },
+        "STUCK_ALERT": "Hay {total} consultas trabadas: {pending} sin atender y {abandoned} abandonadas.",
+        "FLOW": {
+          "TITLE": "Recorrido de las consultas",
+          "HELP": "De izquierda a derecha: de dónde vino cada consulta (campaña, anuncio u orgánica), a quién le toca ahora y en qué quedó. El grosor de cada banda es la cantidad de consultas. Los estados donde se traban las consultas (sin atender y abandonadas) aparecen remarcados. Tocá cualquier bloque para ver las conversaciones.",
+          "ARIA": "Recorrido de las consultas desde su origen hasta el resultado",
+          "LEVEL": "Agrupar el origen",
+          "LEVEL_CAMPAIGN": "Por campaña",
+          "LEVEL_AD": "Por anuncio",
+          "ORGANIC": "Orgánica (sin anuncio)",
+          "OTHER": "Otros anuncios",
+          "COLUMNS": {
+            "ORIGIN": "Origen",
+            "OWNER": "A quién le toca",
+            "STAGE": "En qué quedó"
+          }
+        },
+        "STAGES": {
+          "BOT": "En el bot",
+          "UNASSIGNED": "Sin asignar",
+          "PENDING": "Sin atender",
+          "IN_PROGRESS": "En curso",
+          "INACTIVE": "Cliente dejó de responder",
+          "ABANDONED": "Abandonada",
+          "LOST": "Perdida",
+          "WON": "Ganada"
+        },
+        "COUNTERS": {
+          "RECEIVED": "Recibidas",
+          "ATTENDED": "Atendidas",
+          "PENDING": "Sin atender",
+          "IN_PROGRESS": "En curso",
+          "INACTIVE": "Inactivas",
+          "ABANDONED": "Abandonadas",
+          "LOST": "Perdidas",
+          "WON": "Ganadas"
+        },
+        "INFO_LABELS": "Etiquetas (referencia):",
+        "SELLERS": {
+          "TITLE": "Por vendedor",
+          "HELP": "Consultas que llegaron en el período y en qué quedaron, por vendedor. Una consulta reasignada cuenta completa para quien la tiene ahora. Atendida = el vendedor mandó al menos un mensaje.",
+          "SELLER": "Vendedor",
+          "RATE_WON": "% ganadas",
+          "TOTAL": "Total vendedores"
+        },
+        "DAYS": {
+          "TITLE": "Por día",
+          "HELP": "Consultas que llegaron cada día y su estado actual, por vendedor. Elegí el dato a mostrar y tocá un número para ver las conversaciones. El total incluye las del bot y sin asignar.",
+          "METRIC": "Dato",
+          "DAY": "Día",
+          "TOTAL": "Total del día"
+        },
+        "ORIGINS": {
+          "TITLE": "Ventas por anuncio",
+          "HELP": "Consultas, atendidas, ganadas y perdidas por campaña de Meta; abrí una campaña para ver cada anuncio. Sale del anuncio que tocó el cliente, aunque después borre el mensaje precargado.",
+          "NAME": "Campaña / anuncio",
+          "CONVERSION": "% ganadas",
+          "EMPTY": "No llegaron consultas por anuncios en este período."
+        },
+        "EXTRAS": {
+          "REPURCHASE_TITLE": "Recompras",
+          "REPEAT_SALES": "Clientes que volvieron a comprar",
+          "POST_SALE_REPLIES": "Respondieron a un mensaje de postventa",
+          "ISSUES_TITLE": "Postventa que no salió",
+          "ISSUES_EMPTY": "Todos los mensajes de postventa del período salieron.",
+          "ISSUES_MORE": "Y {count} más.",
+          "STATUS": {
+            "FAILED": "Falló",
+            "NOT_EXECUTED": "No se ejecutó",
+            "UNCONFIRMED": "Sin confirmar entrega"
+          }
+        },
+        "EMPTY": "No llegaron consultas en este período.",
+        "LOAD_ERROR": "No se pudo cargar el embudo.",
+        "EXPORT_ERROR": "No se pudo exportar el embudo.",
+        "RETRY": "Reintentar",
+        "AS_OF": "Datos al {date}.",
+        "REASSIGN_NOTE": "Las consultas reasignadas cuentan completas para el vendedor que las tiene ahora.",
+        "HISTORY_NOTE": "El embudo registra consultas desde el 21/10/2026."
       }
     },
     "AD_SOURCE": {
