@@ -182,8 +182,8 @@ class Arroyo::Commercial::Board
 
   # Un origen se puede pedir como nodo del gráfico (incluye "other"), como campaña o como anuncio.
   MATCHERS = {
-    'origin' => ->(row, value) { [flow.origin_of(row), origins.key(row.record, level), origins.key(row.record, 'ad')].include?(value) },
-    'bucket' => ->(row, value) { row.bucket == value },
+    'origin' => ->(row, value) { [flow.origin_of(row), origins.key(row.record, 'campaign'), origins.key(row.record, 'ad')].include?(value) },
+    'bucket' => ->(row, value) { value == 'waiting' ? !row.seller? : row.bucket == value },
     'stage' => ->(row, value) { row.stage == value },
     'attended' => ->(row, value) { row.attended?.to_s == value },
     'label' => ->(row, value) { row.labels.include?(value) },
