@@ -8,6 +8,12 @@ arroyo_commercial_follow_up_job:
   class: 'Arroyo::Commercial::FollowUpJob'
   queue: scheduled_jobs
 
+# ARROYO: aviso antes de que cierre la ventana de 24 h (apagado por defecto en funnel_board.window_nudge)
+arroyo_window_nudge_job:
+  cron: '*/15 * * * *'
+  class: 'Arroyo::Commercial::WindowNudgeJob'
+  queue: scheduled_jobs
+
 # executed daily at 0000 UTC
 # ARROYO: supervisa entrega y programación; no envía postventa
 arroyo_post_sale_watchdog_job:
