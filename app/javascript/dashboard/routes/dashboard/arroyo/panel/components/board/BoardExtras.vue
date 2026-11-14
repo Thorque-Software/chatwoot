@@ -102,7 +102,10 @@ const statusLabel = status => statusLabels.value[status] || status;
       <p v-if="!issues.count" class="mb-0 mt-3 text-body-main text-n-slate-11">
         {{ t('ARROYO.PANEL.BOARD.EXTRAS.ISSUES_EMPTY') }}
       </p>
-      <ul v-else class="m-0 mt-3 flex list-none flex-col divide-y divide-n-weak p-0">
+      <ul
+        v-else
+        class="m-0 mt-3 flex list-none flex-col divide-y divide-n-weak p-0"
+      >
         <li
           v-for="item in issues.items"
           :key="item.id"
@@ -124,7 +127,12 @@ const statusLabel = status => statusLabels.value[status] || status;
           </span>
           <span class="text-label-small text-n-slate-11">
             {{
-              [item.stage.toUpperCase(), item.product, item.seller, when(item.scheduled_at)]
+              [
+                item.stage.toUpperCase(),
+                item.product,
+                item.seller,
+                when(item.scheduled_at),
+              ]
                 .filter(Boolean)
                 .join(' · ')
             }}
@@ -138,7 +146,11 @@ const statusLabel = status => statusLabels.value[status] || status;
         v-if="issues.count > issues.items.length"
         class="mb-0 text-label-small text-n-slate-10"
       >
-        {{ t('ARROYO.PANEL.BOARD.EXTRAS.ISSUES_MORE', { count: issues.count - issues.items.length }) }}
+        {{
+          t('ARROYO.PANEL.BOARD.EXTRAS.ISSUES_MORE', {
+            count: issues.count - issues.items.length,
+          })
+        }}
       </p>
     </details>
   </div>

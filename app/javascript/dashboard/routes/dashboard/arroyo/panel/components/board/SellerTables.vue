@@ -116,7 +116,9 @@ const select = (seller, counter, date) => {
                 type="button"
                 class="w-full rounded-md px-2 py-1.5 text-end tabular-nums [@media(hover:hover)]:hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-9"
                 :class="
-                  seller[counter] ? 'font-medium text-n-blue-11' : 'text-n-slate-10'
+                  seller[counter]
+                    ? 'font-medium text-n-blue-11'
+                    : 'text-n-slate-10'
                 "
                 :data-testid="`seller-${seller.id}-${counter}`"
                 @click="select(seller, counter)"
@@ -125,8 +127,9 @@ const select = (seller, counter, date) => {
                 <span
                   v-if="counter === 'attended'"
                   class="block text-[11px] font-normal text-n-slate-10"
-                  >{{ percent(seller.attended, seller.received) }}</span
                 >
+                  {{ percent(seller.attended, seller.received) }}
+                </span>
               </button>
             </td>
             <td class="px-2 text-end tabular-nums text-n-teal-11">
