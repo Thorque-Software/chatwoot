@@ -13,6 +13,7 @@ import { useArroyoFeatures } from '../composables/useArroyoFeatures';
 import PanelFilters from './components/PanelFilters.vue';
 import ActivityTab from './components/ActivityTab.vue';
 import FunnelTab from './components/FunnelTab.vue';
+import FunnelBoard from './components/board/FunnelBoard.vue';
 import WindowsTab from './components/WindowsTab.vue';
 import PostSaleTab from './components/PostSaleTab.vue';
 import CommercialFollowUpsTab from './components/CommercialFollowUpsTab.vue';
@@ -42,6 +43,7 @@ const windows = ref(null);
 const isLoading = ref(false);
 const filterResetKey = ref(0);
 const funnelTab = ref(null);
+const funnelBoard = ref(null);
 const drawer = ref({
   open: false,
   title: '',
@@ -53,9 +55,6 @@ const drawer = ref({
 
 const agentOptions = computed(() =>
   agents.value.map(agent => ({ id: agent.id, name: agent.name }))
-);
-const inboxOptions = computed(() =>
-  inboxes.value.map(inbox => ({ id: inbox.id, name: inbox.name }))
 );
 
 const showAgentFilter = computed(
@@ -94,6 +93,18 @@ const showPostSale = computed(() =>
 const showFunnel = computed(() =>
   Boolean(features.value?.agent_panel?.funnel_enabled)
 );
+
+const showBoard = computed(
+  () => showFunnel.value && Boolean(features.value?.funnel_board?.enabled)
+);
+
+const inboxOptions = computed(() => {
+  // Con el embudo del panel, el filtro por número muestra los números configurados y su nombre.
+  const configured = showBoard.value ? features.value.funnel_board.inboxes : [];
+  if (configured?.length)
+    return configured.map(inbox => ({ id: inbox.id, name: inbox.name }));
+  return inboxes.value.map(inbox => ({ id: inbox.id, name: inbox.name }));
+});
 
 const showCommercialFollowUps = computed(
   () => showFunnel.value && currentRole.value === 'administrator'
@@ -264,6 +275,10 @@ const openDrillDown = async ({ metric, userId, period }) => {
 };
 
 const exportCsv = async () => {
+  if (showBoard.value) {
+    await funnelBoard.value?.exportCsv?.();
+    return;
+  }
   if (showFunnel.value) {
     await funnelTab.value?.exportCsv?.();
     return;
@@ -318,7 +333,11 @@ onMounted(async () => {
           sm
           :label="t('ARROYO.PANEL.EXPORT')"
           :aria-label="t('ARROYO.PANEL.EXPORT')"
-          :disabled="showFunnel && (!funnelTab?.ready || funnelTab.exporting)"
+          :disabled="
+            showBoard
+              ? !funnelBoard?.ready || funnelBoard.exporting
+              : showFunnel && (!funnelTab?.ready || funnelTab.exporting)
+          "
           @click="exportCsv"
         >
           <span class="sr-only sm:not-sr-only">{{
@@ -360,8 +379,14 @@ onMounted(async () => {
       />
 
       <template v-if="activeTab === 'activity'">
+        <FunnelBoard
+          v-if="showBoard"
+          ref="funnelBoard"
+          :params="apiParams"
+          :seller-ids="features?.agent_panel?.seller_ids || []"
+        />
         <FunnelTab
-          v-if="showFunnel"
+          v-else-if="showFunnel"
           ref="funnelTab"
           :params="apiParams"
           :show-post-sale="showPostSale"

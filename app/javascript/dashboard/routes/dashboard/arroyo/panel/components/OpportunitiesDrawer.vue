@@ -7,6 +7,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
 import CommercialAPI from '../../api/commercial';
+import BoardAPI from '../../api/board';
 import ConversationListItem from './ConversationListItem.vue';
 import { useCommercialLabels } from '../useCommercialLabels';
 
@@ -37,7 +38,9 @@ const fetchPage = async nextPage => {
   error.value = '';
   confirming.value = null;
   try {
-    const { data } = await CommercialAPI.getOpportunities({
+    // Las selecciones del embudo del panel (source: 'board') se leen de su propio endpoint.
+    const api = props.selection.source === 'board' ? BoardAPI : CommercialAPI;
+    const { data } = await api.getOpportunities({
       ...props.selection.params,
       page: nextPage,
     });
@@ -169,6 +172,7 @@ onBeforeUnmount(() => previousFocus?.focus());
         ghost
         sm
         :label="t('ARROYO.PANEL.EXPORT')"
+        v-if="selection.source !== 'board'"
         data-testid="opportunities-export"
         :disabled="exporting || loading"
         @click="exportCsv"
@@ -202,7 +206,7 @@ onBeforeUnmount(() => previousFocus?.focus());
             class="flex flex-wrap items-center gap-2 px-3 py-2 text-label-small text-n-slate-11"
           >
             <span class="rounded bg-n-alpha-2 px-2 py-1 text-n-slate-12">{{
-              label(item.state)
+              label(item.stage || item.state)
             }}</span>
             <span
               v-if="item.overdue"
