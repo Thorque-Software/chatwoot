@@ -5,6 +5,20 @@ en:
         arroyo/setting:
           invalid_field: 'Invalid value for %{field}'
   arroyo:
+    board:
+      csv:
+        date: 'Date'
+        seller: 'Seller'
+        total: 'Total'
+      counters:
+        received: 'Received'
+        attended: 'Attended'
+        pending: 'Not attended'
+        in_progress: 'In progress'
+        inactive: 'Inactive'
+        abandoned: 'Abandoned'
+        lost: 'Lost'
+        won: 'Won'
     commercial:
       csv:
         reference: 'Reference'
