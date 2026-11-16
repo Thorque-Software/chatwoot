@@ -217,8 +217,9 @@ class Arroyo::Setting < ApplicationRecord
     ids = post_sale['alert_user_ids']
     return unless VALIDATORS[:integer_list].call(ids)
 
+    administrator_ids = account.administrators.pluck(:id)
     invalid = ids.empty? || account.inboxes.where(channel_type: 'Channel::Whatsapp').any? do |inbox|
-      (ids - (account.administrators.pluck(:id) + inbox.members.pluck(:id))).any?
+      !ids.intersect?(administrator_ids + inbox.members.pluck(:id))
     end
     add_invalid_field('post_sale.alert_user_ids') if invalid
   end

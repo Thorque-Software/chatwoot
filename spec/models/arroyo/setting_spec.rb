@@ -140,6 +140,18 @@ RSpec.describe Arroyo::Setting do
       setting.merge_config(post_sale: { alert_user_ids: [administrator.id] })
       expect(setting).to be_valid
     end
+
+    it 'accepts recipients who only cover some numbers as long as every number has one' do
+      first = create(:channel_whatsapp, account: account, sync_templates: false, validate_provider_config: false).inbox
+      second = create(:channel_whatsapp, account: account, sync_templates: false, validate_provider_config: false).inbox
+      everywhere, first_only = create_list(:user, 2, account: account, role: :agent)
+      [everywhere, first_only].each { |user| create(:inbox_member, inbox: first, user: user) }
+      setting.merge_config(post_sale: { enabled: true, alert_user_ids: [everywhere.id, first_only.id] })
+      expect(setting).not_to be_valid
+
+      create(:inbox_member, inbox: second, user: everywhere)
+      expect(setting).to be_valid
+    end
   end
 
   describe 'funnel board' do
