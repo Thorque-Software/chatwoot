@@ -24,7 +24,7 @@ class Arroyo::AgentPanel::Filters
   end
 
   def timezone
-    ActiveSupport::TimeZone[setting.config['timezone']]
+    @timezone ||= ActiveSupport::TimeZone[setting.config['timezone']]
   end
 
   def since_date
