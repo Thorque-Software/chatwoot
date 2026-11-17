@@ -12,7 +12,7 @@ class Arroyo::Commercial::Report
   def build
     metadata.merge(
       totals: totals(records), activity_totals: activity(events), coverage: coverage,
-      series: filters.periods.map { |date| { date: date.iso8601, **activity(events_for(date)) } }, agents: agents
+      series: periods_activity(events_by_period(events)).map { |date, values| { date: date, **values } }, agents: agents
     )
   end
 
@@ -71,8 +71,12 @@ class Arroyo::Commercial::Report
     when 'repeat_sales' then repeat_sale_ids.include?(item.id)
     when 'post_sale_replies' then item.events.any? { |event| event.kind == 'post_sale_reply' }
     when 'post_sale_issues' then issue_opportunity_ids.include?(item.id)
-    else item.effective_state(now) == metric
+    else effective_state(item) == metric
     end
+  end
+
+  def effective_state(item)
+    (@effective_states ||= {})[item.id] ||= item.effective_state(now)
   end
 
   def repeat_sale_ids
@@ -126,17 +130,26 @@ class Arroyo::Commercial::Report
   def agent_summary(user)
     own_events = events_for_user(user)
     { id: user.id, name: user.available_name, totals: totals(records.select { |item| item.assignee_id == user.id }),
-      periods: filters.periods.to_h { |date| [date.iso8601, activity(events_for(date, own_events))] } }
+      periods: periods_activity(events_by_period(own_events)) }
   end
 
   def events_for_user(user)
     events.select { |event| event_user(event) == user.id || (event.kind == 'received' && event.opportunity.assignee_id == user.id) }
   end
 
-  def events_for(date, items = events)
-    items.select do |event|
+  def periods_activity(grouped)
+    filters.periods.to_h { |date| [date.iso8601, activity(grouped.fetch(date, []))] }
+  end
+
+  # Agrupa una sola vez por día/semana local: recorrer todos los eventos por cada período y vendedor tardaba >15 s.
+  def events_by_period(items)
+    items.group_by { |event| event_period(event) }
+  end
+
+  def event_period(event)
+    (@event_periods ||= {})[event.id] ||= begin
       local_date = event.occurred_at.in_time_zone(filters.timezone).to_date
-      (filters.group_by == 'week' ? local_date.beginning_of_week(:monday) : local_date) == date
+      filters.group_by == 'week' ? local_date.beginning_of_week(:monday) : local_date
     end
   end
 end
